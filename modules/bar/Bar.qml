@@ -2,7 +2,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import "../workspaces"
-import "../launcher/"
 import "../theme"
 import "../clock"
 
@@ -25,7 +24,7 @@ PanelWindow {
         anchors.fill: parent
         color: Colors.background
         radius: 0
-        border.color: "#333333"
+        border.color: Colors.outline
         border.width: 0
 
         Workspaces {
@@ -37,7 +36,7 @@ PanelWindow {
         Text {
             visible: Hyprland.workspaces.length === 0
             text: "No workspaces"
-            color: "#ffffff"
+            color: Colors.foreground
             font.pixelSize: 12
         }
     }

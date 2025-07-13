@@ -1,4 +1,5 @@
 import QtQuick
+import "../theme"
 
 Text {
     id: timeDisplay
@@ -6,7 +7,7 @@ Text {
     property string currentTime: ""
 
     text: currentTime
-    color: "#ffffff"
+    color: Colors.foreground
     font.pixelSize: 12
     font.family: "Iosevka Nerd Font"
 
