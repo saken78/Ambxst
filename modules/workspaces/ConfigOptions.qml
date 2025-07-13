@@ -1,7 +1,7 @@
-import QtQuick
-import Quickshell
 pragma Singleton
 pragma ComponentBehavior: Bound
+import QtQuick
+import Quickshell
 
 Singleton {
     property QtObject bar: QtObject {

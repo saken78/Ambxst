@@ -1,5 +1,6 @@
-import QtQuick
 pragma Singleton
+import QtQuick
+import "../theme/"
 
 QtObject {
     readonly property QtObject rounding: QtObject {
@@ -7,7 +8,7 @@ QtObject {
         readonly property real medium: 8
         readonly property real small: 4
     }
-    
+
     readonly property QtObject font: QtObject {
         readonly property QtObject pixelSize: QtObject {
             readonly property real small: 10
@@ -15,18 +16,18 @@ QtObject {
             readonly property real large: 14
         }
     }
-    
+
     readonly property QtObject colors: QtObject {
-        readonly property color colPrimary: "#db4740"
-        readonly property color colOnLayer1Inactive: "#888888"
+        readonly property color colPrimary: Colors.primary
+        readonly property color colOnLayer1Inactive: Colors.surfaceBright
     }
-    
+
     readonly property QtObject m3colors: QtObject {
-        readonly property color m3secondaryContainer: "#333333"
-        readonly property color m3onPrimary: "#ffffff"
-        readonly property color m3onSecondaryContainer: "#cccccc"
+        readonly property color m3secondaryContainer: Colors.outline
+        readonly property color m3onPrimary: Colors.foreground
+        readonly property color m3onSecondaryContainer: Colors.foreground
     }
-    
+
     readonly property QtObject animation: QtObject {
         readonly property QtObject elementMove: QtObject {
             readonly property Component numberAnimation: Component {
