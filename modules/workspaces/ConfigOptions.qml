@@ -10,6 +10,7 @@ Singleton {
         property string topLeftIcon: "spark"
         property bool showBackground: true
         property bool verbose: true
+        property list<string> screenList: []
         property QtObject workspaces: QtObject {
             property int shown: 10
             property bool showAppIcons: true

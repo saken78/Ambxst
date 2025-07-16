@@ -3,13 +3,29 @@ import QtQuick
 import Quickshell
 import "./modules/bar/"
 import "./modules/launcher/"
+import "./modules/workspaces/"
 
 ShellRoot {
     id: root
 
-    Loader {
-        active: true
-        sourceComponent: Bar {}
+    // Multi-monitor support - create bar for each screen
+    Variants {
+        model: {
+            const screens = Quickshell.screens;
+            const list = ConfigOptions.bar.screenList;
+            if (!list || list.length === 0)
+                return screens;
+            return screens.filter(screen => list.includes(screen.name));
+        }
+        
+        Loader {
+            id: barLoader
+            active: true
+            required property ShellScreen modelData
+            sourceComponent: Bar {
+                screen: barLoader.modelData
+            }
+        }
     }
 
     Loader {

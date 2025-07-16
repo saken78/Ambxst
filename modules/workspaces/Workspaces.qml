@@ -11,11 +11,9 @@ import "../theme"
 import "color_utils.js" as ColorUtils
 
 Item {
-    property var bar: QtObject {
-        property var screen: null
-    }
+    required property var bar
     property bool borderless: ConfigOptions.bar.borderless
-    readonly property HyprlandMonitor monitor: Hyprland.monitorFor(bar?.screen || null)
+    readonly property HyprlandMonitor monitor: Hyprland.monitorFor(bar.screen)
     readonly property Toplevel activeWindow: ToplevelManager.activeToplevel
 
     readonly property int workspaceGroup: Math.floor((monitor?.activeWorkspace?.id - 1 || 0) / ConfigOptions.bar.workspaces.shown)
@@ -41,6 +39,14 @@ Item {
     Connections {
         target: Hyprland.workspaces
         function onValuesChanged() {
+            updateWorkspaceOccupied();
+        }
+    }
+
+    // Monitor changes for this specific monitor
+    Connections {
+        target: monitor
+        function onActiveWorkspaceChanged() {
             updateWorkspaceOccupied();
         }
     }
