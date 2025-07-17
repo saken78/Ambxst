@@ -1,2 +1,2 @@
-singleton Colors ColorsWrapper.qml
+singleton Colors Colors.qml
 StyledContainer 1.0 StyledContainer.qml

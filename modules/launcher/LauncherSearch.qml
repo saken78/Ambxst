@@ -29,14 +29,14 @@ Rectangle {
         id: mainLayout
         anchors.fill: parent
         anchors.margins: 8
-        spacing: 0
+        spacing: 8
 
         // Search input
         Rectangle {
             id: searchInputContainer
             Layout.fillWidth: true
             implicitHeight: 48
-            color: Colors.surface
+            color: Colors.surfaceContainerLowest
             radius: 16
             border.color: searchInput.activeFocus ? Colors.primary : Colors.outline
             border.width: 0
@@ -88,7 +88,7 @@ Rectangle {
         ListView {
             id: resultsList
             Layout.fillWidth: true
-            Layout.preferredHeight: 3 * 48
+            Layout.preferredHeight: 5 * 48
             visible: true
             clip: true
 
