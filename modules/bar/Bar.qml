@@ -26,6 +26,7 @@ PanelWindow {
     WlrLayershell.keyboardFocus: GlobalStates.launcherOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     exclusiveZone: 40
+    implicitHeight: 44
 
     // Default view component - user@host text
     Component {
@@ -123,7 +124,7 @@ PanelWindow {
             id: notchContainer
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
-            
+
             defaultViewComponent: defaultViewComponent
             launcherViewComponent: launcherViewComponent
         }
