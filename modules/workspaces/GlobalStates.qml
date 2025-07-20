@@ -1,9 +1,8 @@
+pragma Singleton
+pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Io
-pragma Singleton
-pragma ComponentBehavior: Bound
 
 Singleton {
     id: root
@@ -15,8 +14,8 @@ Singleton {
     property bool workspaceShowNumbers: false
     property bool superReleaseMightTrigger: true
 
-    onSuperReleaseMightTriggerChanged: { 
-        workspaceShowNumbersTimer.stop()
+    onSuperReleaseMightTriggerChanged: {
+        workspaceShowNumbersTimer.stop();
     }
 
     Timer {
@@ -24,7 +23,7 @@ Singleton {
         interval: 300 // ConfigOptions.bar.workspaces.showNumberDelay
         repeat: false
         onTriggered: {
-            workspaceShowNumbers = true
+            workspaceShowNumbers = true;
         }
     }
 
@@ -33,11 +32,11 @@ Singleton {
         description: qsTr("Hold to show workspace numbers, release to show icons")
 
         onPressed: {
-            workspaceShowNumbersTimer.start()
+            workspaceShowNumbersTimer.start();
         }
         onReleased: {
-            workspaceShowNumbersTimer.stop()
-            workspaceShowNumbers = false
+            workspaceShowNumbersTimer.stop();
+            workspaceShowNumbers = false;
         }
     }
 
@@ -46,7 +45,7 @@ Singleton {
         description: qsTr("Toggle dashboard")
 
         onPressed: {
-            dashboardOpen = !dashboardOpen
+            dashboardOpen = !dashboardOpen;
         }
     }
 }

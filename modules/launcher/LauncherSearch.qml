@@ -233,7 +233,8 @@ Rectangle {
                         text: modelData.name
                         color: Colors.foreground
                         font.family: Styling.defaultFont
-                        font.pixelSize: 14
+                        font.pointSize: 11
+                        font.weight: Font.Bold
                         elide: Text.ElideRight
                     }
                 }

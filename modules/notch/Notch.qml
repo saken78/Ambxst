@@ -1,9 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
-import Quickshell
+import "../workspaces"
 import "../theme"
-import "../launcher"
 
 Rectangle {
     id: notchContainer
@@ -14,8 +13,10 @@ Rectangle {
     property var stackView: stackViewInternal
     property bool isExpanded: stackViewInternal.currentItem !== stackViewInternal.initialItem
 
-    implicitWidth: Math.max(stackContainer.width, 250)
-    implicitHeight: Math.max(stackContainer.height, 40)
+    // implicitWidth: Math.max(stackContainer.width, 250)
+    implicitWidth: GlobalStates.launcherOpen ? Math.max(stackContainer.width, 250) : 250
+    // implicitHeight: Math.max(stackContainer.height, 40)
+    implicitHeight: GlobalStates.launcherOpen ? Math.max(stackContainer.height, 40) : 40
 
     color: Colors.surface
     topLeftRadius: 0
