@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
-import "../theme"
+import qs.modules.theme
 
 MouseArea {
     id: root

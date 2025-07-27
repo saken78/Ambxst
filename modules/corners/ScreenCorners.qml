@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import "."
-import "../globals"
+import qs.modules.globals
 
 PanelWindow {
     id: screenCorners

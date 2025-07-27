@@ -1,7 +1,7 @@
 import QtQuick
 import Qt5Compat.GraphicalEffects
-import "../theme"
-import "../globals"
+import qs.modules.theme
+import qs.modules.globals
 
 Rectangle {
     color: Colors.background

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import Quickshell.Services.Notifications
-import "../theme"
+import qs.modules.theme
 
 Button {
     id: root

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import "../theme"
+import qs.modules.theme
 
 StyledContainer {
     id: clockContainer

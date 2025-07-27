@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import "../globals"
 import "../theme"
-import "../corners"
+import qs.modules.corners
 
 Item {
     id: notchContainer

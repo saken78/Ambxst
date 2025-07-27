@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../theme"
-import "../services"
+import qs.modules.theme
+import qs.modules.services
 
 Rectangle {
     id: root

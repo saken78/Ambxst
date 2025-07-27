@@ -15,7 +15,7 @@ ShellRoot {
     // Multi-monitor support - create corners for each screen
     Variants {
         model: Quickshell.screens
-        
+
         Loader {
             id: cornersLoader
             active: true
@@ -29,7 +29,7 @@ ShellRoot {
     // Wallpaper for all screens
     Variants {
         model: Quickshell.screens
-        
+
         Loader {
             id: wallpaperLoader
             active: true
@@ -49,7 +49,7 @@ ShellRoot {
                 return screens;
             return screens.filter(screen => list.includes(screen.name));
         }
-        
+
         Loader {
             id: barLoader
             active: true
@@ -69,7 +69,7 @@ ShellRoot {
                 return screens;
             return screens.filter(screen => list.includes(screen.name));
         }
-        
+
         Loader {
             id: notchLoader
             active: true

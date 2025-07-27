@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import "../theme"
+import qs.modules.theme
 
 Item {
     property alias text: textItem.text

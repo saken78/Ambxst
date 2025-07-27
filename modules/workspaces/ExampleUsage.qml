@@ -1,6 +1,6 @@
 // Ejemplo de uso del módulo de workspaces avanzado
 import QtQuick
-import "../theme"
+import qs.modules.theme
 
 Rectangle {
     width: 800

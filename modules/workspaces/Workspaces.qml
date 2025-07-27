@@ -7,9 +7,9 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Widgets
 import Qt5Compat.GraphicalEffects
-import "../theme"
+import qs.modules.theme
 import "../services"
-import "../globals"
+import qs.modules.globals
 import "../utils/color_utils.js" as ColorUtils
 
 Item {

@@ -5,9 +5,9 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import "../workspaces"
-import "../theme"
-import "../clock"
-import "../systray"
+import qs.modules.theme
+import qs.modules.clock
+import qs.modules.systray
 import "../launcher"
 
 PanelWindow {

@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../theme"
-import "../globals"
+import qs.modules.theme
+import qs.modules.globals
 
 Item {
     id: root

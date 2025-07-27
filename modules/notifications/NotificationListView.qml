@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
-import "../services"
+import qs.modules.services
 
 ListView {
     id: root

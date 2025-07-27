@@ -3,8 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Notifications
-import "../theme"
-import "../services"
+import qs.modules.theme
+import qs.modules.services
 import "./notification_utils.js" as NotificationUtils
 
 Item {

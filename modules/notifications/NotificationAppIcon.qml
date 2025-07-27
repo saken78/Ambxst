@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Notifications
-import "../theme"
+import qs.modules.theme
 import "./notification_utils.js" as NotificationUtils
 
 Rectangle {

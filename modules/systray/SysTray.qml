@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.SystemTray
-import "../theme"
+import qs.modules.theme
 
 StyledContainer {
     id: root

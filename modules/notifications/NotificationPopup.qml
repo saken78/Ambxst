@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
-import "../services"
+import qs.modules.services
 
 Scope {
     id: notificationPopup

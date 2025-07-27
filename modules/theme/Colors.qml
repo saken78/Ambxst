@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import qs.modules.globals
 
 QtObject {
     property color background: GlobalStates.oledMode ? "#000000" : "#121414"

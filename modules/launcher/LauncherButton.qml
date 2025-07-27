@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import Quickshell
 import Quickshell.Hyprland
-import "../theme"
-import "../globals"
+import qs.modules.theme
+import qs.modules.globals
 
 Button {
     id: root
