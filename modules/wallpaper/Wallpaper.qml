@@ -25,9 +25,21 @@ PanelWindow {
     property list<string> wallpaperPaths: []
     property int currentIndex: 0
     property string currentWallpaper: ""
+    property string previousWallpaper: ""
+    property bool bufferToggle: false
 
     function setWallpaper(path) {
+        console.log("setWallpaper called with:", path);
+        console.log("Current bufferToggle:", bufferToggle);
+        
+        previousWallpaper = currentWallpaper;
         currentWallpaper = path;
+        bufferToggle = !bufferToggle;
+        
+        console.log("New bufferToggle:", bufferToggle);
+        console.log("Previous wallpaper:", previousWallpaper);
+        console.log("Current wallpaper:", currentWallpaper);
+        
         const process = Qt.createQmlObject(`
             import Quickshell.Io
             Process {
@@ -108,15 +120,21 @@ PanelWindow {
     WallpaperImage {
         id: wallpaper1
         anchors.fill: parent
-        source: "file://" + Quickshell.env("HOME") + "/.current.wall"
-        active: currentIndex % 2 === 0
+        source: bufferToggle ? 
+            (currentWallpaper ? "file://" + currentWallpaper : "file://" + Quickshell.env("HOME") + "/.current.wall") :
+            (previousWallpaper ? "file://" + previousWallpaper : "file://" + Quickshell.env("HOME") + "/.current.wall")
+        active: bufferToggle
+        z: bufferToggle ? 1 : 0
     }
 
     WallpaperImage {
         id: wallpaper2
         anchors.fill: parent
-        source: "file://" + Quickshell.env("HOME") + "/.current.wall"
-        active: currentIndex % 2 === 1
+        source: !bufferToggle ? 
+            (currentWallpaper ? "file://" + currentWallpaper : "file://" + Quickshell.env("HOME") + "/.current.wall") :
+            (previousWallpaper ? "file://" + previousWallpaper : "file://" + Quickshell.env("HOME") + "/.current.wall")
+        active: !bufferToggle
+        z: !bufferToggle ? 1 : 0
     }
 
     Rectangle {
@@ -160,7 +178,13 @@ PanelWindow {
             onStatusChanged: {
                 if (status === Image.Error) {
                     console.warn("Wallpaper: Failed to load image from", source);
+                } else if (status === Image.Ready) {
+                    console.log("Wallpaper: Successfully loaded", source);
                 }
+            }
+
+            onSourceChanged: {
+                console.log("Wallpaper: Source changed to", source);
             }
         }
     }
