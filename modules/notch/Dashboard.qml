@@ -23,7 +23,7 @@ Item {
 
     Behavior on scale {
         NumberAnimation {
-            duration: Configuration.animDuration - 50
+            duration: Configuration.animDuration
             easing.type: Easing.OutBack
             easing.overshoot: 1.2
         }
@@ -31,7 +31,7 @@ Item {
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Configuration.animDuration - 50
+            duration: Configuration.animDuration
             easing.type: Easing.OutQuart
         }
     }
@@ -65,7 +65,7 @@ Item {
 
                         Behavior on color {
                             ColorAnimation {
-                                duration: Configuration.animDuration - 100
+                                duration: Configuration.animDuration
                                 easing.type: Easing.OutCubic
                             }
                         }
@@ -82,7 +82,7 @@ Item {
 
                         Behavior on color {
                             ColorAnimation {
-                                duration: Configuration.animDuration - 100
+                                duration: Configuration.animDuration
                                 easing.type: Easing.OutCubic
                             }
                         }
@@ -170,7 +170,7 @@ Item {
 
     Behavior on animatedWidth {
         NumberAnimation {
-            duration: Configuration.animDuration + 100
+            duration: Configuration.animDuration
             easing.type: Easing.OutBack
             easing.overshoot: 1.1
         }
@@ -178,7 +178,7 @@ Item {
 
     Behavior on animatedHeight {
         NumberAnimation {
-            duration: Configuration.animDuration + 100
+            duration: Configuration.animDuration
             easing.type: Easing.OutBack
             easing.overshoot: 1.1
         }
@@ -303,7 +303,7 @@ Item {
 
                         Behavior on border.color {
                             ColorAnimation {
-                                duration: Configuration.animDuration - 100
+                                duration: Configuration.animDuration
                                 easing.type: Easing.OutCubic
                             }
                         }
