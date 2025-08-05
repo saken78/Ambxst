@@ -46,9 +46,6 @@ PanelWindow {
     Component {
         id: defaultViewComponent
         Item {
-            width: userHostText.implicitWidth + 24
-            height: 28
-
             Process {
                 id: hostnameProcess
                 command: ["hostname"]

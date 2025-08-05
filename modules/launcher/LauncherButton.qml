@@ -3,10 +3,10 @@ import qs.modules.globals
 import qs.config
 
 ToggleButton {
-    buttonIcon: Configuration.launcherIcon
+    buttonIcon: Configuration.bar.launcherIcon
     tooltipText: "Open Application Launcher"
-    
-    onToggle: function() {
+
+    onToggle: function () {
         if (GlobalStates.launcherOpen) {
             GlobalStates.launcherOpen = false;
         } else {

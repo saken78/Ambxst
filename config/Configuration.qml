@@ -18,7 +18,6 @@ Singleton {
             property JsonObject theme: JsonObject {
                 property bool oledMode: false
                 property int roundness: 16
-                property string iconFont: "nerd"
                 property string defaultFont: "Roboto Condensed"
                 property int animDuration: 300
             }
@@ -26,13 +25,9 @@ Singleton {
             property JsonObject bar: JsonObject {
                 property bool bottom: false
                 property bool borderless: false
-                property string launcherNerdIcon: ""
-                property string launcherTablerIcon: "&#xec2c;"
-                property string launcherPhosphorIcon: ""
-                property string overviewNerdIcon: ""
-                property string overviewTablerIcon: "&#xefe6;"
-                property string overviewPhosphorIcon: ""
-                property bool showBackground: true
+                property string launcherIcon: ""
+                property string overviewIcon: ""
+                property bool showBackground: false
                 property bool verbose: true
                 property list<string> screenList: []
             }
@@ -47,7 +42,7 @@ Singleton {
             property JsonObject overview: JsonObject {
                 property int rows: 2
                 property int columns: 5
-                property real scale: 0.15
+                property real scale: 0.1
                 property real workspaceSpacing: 8
             }
         }
@@ -56,14 +51,11 @@ Singleton {
     // Theme configuration
     property bool oledMode: loader.adapter.theme.oledMode
     property int roundness: loader.adapter.theme.roundness
-    property string iconFont: loader.adapter.theme.iconFont
     property string defaultFont: loader.adapter.theme.defaultFont
     property int animDuration: loader.adapter.theme.animDuration
 
     // Bar configuration
     property QtObject bar: loader.adapter.bar
-    property string launcherIcon: iconFont === "nerd" ? loader.adapter.bar.launcherNerdIcon : iconFont === "tabler" ? loader.adapter.bar.launcherTablerIcon : iconFont === "phosphor" ? loader.adapter.bar.launcherPhosphorIcon : loader.adapter.bar.launcherIcon
-    property string overviewIcon: iconFont === "nerd" ? loader.adapter.bar.overviewNerdIcon : iconFont === "tabler" ? loader.adapter.bar.overviewTablerIcon : iconFont === "phosphor" ? loader.adapter.bar.overviewPhosphorIcon : "󰕰"
 
     // Workspace configuration
     property QtObject workspaces: loader.adapter.workspaces

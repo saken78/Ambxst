@@ -2,16 +2,14 @@
   "theme": {
     "oledMode": false,
     "roundness": 16,
-    "iconFont": "phosphor",
     "defaultFont": "Roboto Condensed",
     "animDuration": 300
   },
   "bar": {
     "bottom": false,
     "borderless": false,
-    "launcherNerdIcon": "",
-    "launcherTablerIcon": "&#xec2c;",
-    "launcherPhosphorIcon": "",
+    "launcherIcon": "",
+    "overviewIcon": "",
     "showBackground": false,
     "verbose": true,
     "screenList": []
@@ -21,5 +19,11 @@
     "showAppIcons": true,
     "showNumbers": false,
     "alwaysShowNumbers": false
+  },
+  "overview": {
+    "rows": 2,
+    "columns": 5,
+    "scale": 0.15,
+    "workspaceSpacing": 4
   }
 }

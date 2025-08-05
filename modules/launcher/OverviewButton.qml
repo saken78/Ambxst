@@ -3,10 +3,10 @@ import qs.modules.globals
 import qs.config
 
 ToggleButton {
-    buttonIcon: Configuration.overviewIcon
+    buttonIcon: Configuration.bar.overviewIcon
     tooltipText: "Open Window Overview"
-    
-    onToggle: function() {
+
+    onToggle: function () {
         if (GlobalStates.overviewOpen) {
             GlobalStates.overviewOpen = false;
         } else {
