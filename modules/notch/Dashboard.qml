@@ -26,67 +26,85 @@ NotchAnimationBehavior {
         spacing: 8
 
         // Tab buttons
-        Row {
-            id: tabs
-
+        Item {
+            id: tabsContainer
             width: parent.width
-            spacing: 8
+            height: 32
 
-            Repeater {
-                model: ["Widgets", "Pins", "Kanban", "Wallpapers"]
+            // Background highlight que se desplaza
+            Rectangle {
+                id: tabHighlight
+                width: (parent.width - tabs.spacing * 3) / 4
+                height: parent.height
+                x: root.state.currentTab * (width + tabs.spacing)
+                y: 0
+                color: Qt.rgba(Colors.surfaceContainer.r, Colors.surfaceContainer.g, Colors.surfaceContainer.b, Config.opacity)
+                radius: Config.roundness > 0 ? Config.roundness + 4 : 0
+                z: 0
 
-                Button {
-                    required property int index
-                    required property string modelData
+                Behavior on x {
+                    NumberAnimation {
+                        duration: Config.animDuration
+                        easing.type: Easing.OutQuart
+                    }
+                }
+            }
 
-                    text: modelData
-                    flat: true
-                    implicitWidth: (tabs.width - tabs.spacing * 3) / 4
+            Row {
+                id: tabs
+                anchors.fill: parent
+                spacing: 8
 
-                    background: Rectangle {
-                        color: root.state.currentTab === index ? Qt.rgba(Colors.surfaceContainer.r, Colors.surfaceContainer.g, Colors.surfaceContainer.b, Config.opacity) : "transparent"
-                        radius: Config.roundness > 0 ? Config.roundness + 4 : 0
+                Repeater {
+                    model: ["Widgets", "Pins", "Kanban", "Wallpapers"]
 
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: Config.animDuration
+                    Button {
+                        required property int index
+                        required property string modelData
+
+                        text: modelData
+                        flat: true
+                        implicitWidth: (tabsContainer.width - tabs.spacing * 3) / 4
+                        height: tabsContainer.height
+
+                        background: Rectangle {
+                            color: "transparent"
+                            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
+                        }
+
+                        contentItem: Text {
+                            text: parent.text
+                            color: root.state.currentTab === index ? Colors.adapter.primary : Colors.adapter.overBackground
+                            font.family: Styling.defaultFont
+                            font.pixelSize: 14
+                            font.weight: Font.Medium
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Config.animDuration
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+                        }
+
+                        onClicked: root.state.currentTab = index
+
+                        Behavior on scale {
+                            NumberAnimation {
+                                duration: Config.animDuration / 3
                                 easing.type: Easing.OutCubic
                             }
                         }
-                    }
 
-                    contentItem: Text {
-                        text: parent.text
-                        color: root.state.currentTab === index ? Colors.adapter.primary : Colors.adapter.overBackground
-                        font.family: Styling.defaultFont
-                        font.pixelSize: 14
-                        font.weight: Font.Medium
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: Config.animDuration
-                                easing.type: Easing.OutCubic
+                        states: State {
+                            name: "pressed"
+                            when: parent.pressed
+                            PropertyChanges {
+                                target: parent
+                                scale: 0.95
                             }
-                        }
-                    }
-
-                    onClicked: root.state.currentTab = index
-
-                    Behavior on scale {
-                        NumberAnimation {
-                            duration: Config.animDuration / 3
-                            easing.type: Easing.OutCubic
-                        }
-                    }
-
-                    states: State {
-                        name: "pressed"
-                        when: parent.pressed
-                        PropertyChanges {
-                            target: parent
-                            scale: 0.95
                         }
                     }
                 }
