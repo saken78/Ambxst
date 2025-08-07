@@ -126,9 +126,6 @@ NotchAnimationBehavior {
             radius: Config.roundness > 0 ? Config.roundness + 4 : 0
             clip: true
 
-            layer.enabled: false
-            layer.samples: 4
-
             SwipeView {
                 id: view
 
@@ -271,8 +268,7 @@ NotchAnimationBehavior {
 
     component WallpapersTab: Rectangle {
         color: "transparent"
-        implicitWidth: 400
-        implicitHeight: 300
+        anchors.fill: parent
 
         property string searchText: ""
         readonly property int gridColumns: 3
@@ -291,14 +287,14 @@ NotchAnimationBehavior {
 
         Row {
             anchors.fill: parent
-            anchors.margins: 16
-            spacing: 16
+            anchors.margins: 8
+            spacing: 8
 
             // Sidebar izquierdo con search y opciones
             Column {
-                width: parent.width - wallpaperGridContainer.width - 16  // Expandir para llenar el espacio restante
-                height: parent.height
-                spacing: 12
+                width: parent.width - wallpaperGridContainer.width - 8  // Expandir para llenar el espacio restante
+                height: parent.height + 4
+                spacing: 8
 
                 // Barra de búsqueda
                 Rectangle {
@@ -378,13 +374,8 @@ NotchAnimationBehavior {
                 readonly property int wallpaperWidth: wallpaperHeight  // Mantener cuadrados
 
                 ScrollView {
+                    id: scrollView
                     anchors.fill: parent
-
-                    layer.enabled: true
-                    layer.effect: MultiEffect {
-                        maskEnabled: true
-                        maskSource: parent
-                    }
 
                     GridView {
                         id: wallpaperGrid
