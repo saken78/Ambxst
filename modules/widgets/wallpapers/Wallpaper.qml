@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import qs.modules.globals
+import qs.config
 
 PanelWindow {
     id: wallpaper
@@ -297,41 +298,62 @@ PanelWindow {
     Rectangle {
         id: background
         anchors.fill: parent
-        color: "#000000"
+        color: "black"
 
         WallpaperImage {
-            id: wallpaper1
+            id: wallImage
             anchors.fill: parent
             source: wallpaper.currentWallpaper
-            active: wallpaper.currentIndex % 2 === 0
-        }
-
-        WallpaperImage {
-            id: wallpaper2
-            anchors.fill: parent
-            source: wallpaper.currentWallpaper
-            active: wallpaper.currentIndex % 2 === 1
         }
     }
 
     component WallpaperImage: Item {
         property string source
-        property bool active: false
+        property string previousSource
 
-        opacity: active ? 1.0 : 0.0
-        scale: active ? 1.0 : 0.95
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 500
-                easing.type: Easing.OutCubic
+        // Trigger animation when source changes
+        onSourceChanged: {
+            if (previousSource !== "" && source !== previousSource) {
+                transitionAnimation.restart();
             }
+            previousSource = source;
         }
 
-        Behavior on scale {
-            NumberAnimation {
-                duration: 500
-                easing.type: Easing.OutCubic
+        SequentialAnimation {
+            id: transitionAnimation
+
+            ParallelAnimation {
+                NumberAnimation {
+                    target: wallImage
+                    property: "scale"
+                    to: 1.05
+                    duration: Config.animDuration
+                    easing.type: Easing.OutCubic
+                }
+                NumberAnimation {
+                    target: wallImage
+                    property: "opacity"
+                    to: 0.5
+                    duration: Config.animDuration
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            ParallelAnimation {
+                NumberAnimation {
+                    target: wallImage
+                    property: "scale"
+                    to: 1.0
+                    duration: Config.animDuration
+                    easing.type: Easing.OutCubic
+                }
+                NumberAnimation {
+                    target: wallImage
+                    property: "opacity"
+                    to: 1.0
+                    duration: Config.animDuration
+                    easing.type: Easing.OutCubic
+                }
             }
         }
 
@@ -370,7 +392,7 @@ PanelWindow {
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 smooth: true
-                playing: parent.parent.active
+                playing: true
             }
         }
     }
