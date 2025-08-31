@@ -133,7 +133,7 @@ Item {
 
         color: (expanded && !onlyNotification) ? (notificationObject.urgency == NotificationUrgency.Critical) ? Colors.adapter.error : Colors.surfaceContainerLow : "transparent"
 
-        implicitHeight: expanded ? (contentColumn.implicitHeight + padding * 2) : summaryRow.implicitHeight
+        implicitHeight: expanded ? (contentColumn.implicitHeight + padding * 2) : (summaryRow.implicitHeight + padding * 2)
 
         Behavior on implicitHeight {
             NumberAnimation {
@@ -158,7 +158,11 @@ Item {
                 id: summaryRow
                 visible: !root.onlyNotification || !root.expanded
                 Layout.fillWidth: true
-                implicitHeight: summaryText.implicitHeight
+                Layout.leftMargin: expanded ? 0 : root.padding
+                Layout.rightMargin: expanded ? 0 : root.padding
+                Layout.topMargin: expanded ? 0 : root.padding
+                Layout.bottomMargin: expanded ? 0 : root.padding
+                implicitHeight: summaryText.implicitHeight + (expanded ? 0 : root.padding * 2)
 
                 Text {
                     id: summaryText
