@@ -65,10 +65,10 @@ Rectangle {
             anchors.fill: parent
             clip: true
 
-            Rectangle {
+            ClippingRectangle {
                 anchors.fill: parent
-                radius: root.radius
-                clip: true
+                radius: 16
+                color: "transparent"
 
                 Image {
                     id: notifImage
