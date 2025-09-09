@@ -83,12 +83,14 @@ Rectangle {
         
         console.log("DEBUG: newFilteredSessions after filter:", newFilteredSessions.length);
         
-        // Siempre agregar el botón "Create new session" al final
-        newFilteredSessions.push({
-            name: "Create new session",
-            isCreateButton: true,
-            icon: "terminal"
-        });
+        // Solo agregar el botón "Create new session" cuando NO hay texto de búsqueda
+        if (searchText.length === 0) {
+            newFilteredSessions.push({
+                name: "Create new session",
+                isCreateButton: true,
+                icon: "terminal"
+            });
+        }
         
         console.log("DEBUG: newFilteredSessions after adding create button:", newFilteredSessions.length);
         
@@ -112,10 +114,15 @@ Rectangle {
     }
 
     function createTmuxSession(sessionName) {
-        let name = sessionName || "session_" + Date.now();
-        // Crear la sesión y abrirla directamente con kitty
-        createProcess.command = ["bash", "-c", `kitty -e tmux new -s "${name}" & disown`];
+        if (sessionName) {
+            // Crear la sesión con nombre específico
+            createProcess.command = ["bash", "-c", `kitty -e tmux new -s "${sessionName}" & disown`];
+        } else {
+            // Crear sesión sin nombre (tmux se encarga del nombre automático)
+            createProcess.command = ["bash", "-c", `kitty -e tmux & disown`];
+        }
         createProcess.running = true;
+        root.itemSelected(); // Cerrar el notch
     }
 
     function attachToSession(sessionName) {
