@@ -6,7 +6,6 @@ import Quickshell.Io
 import qs.modules.theme
 import qs.modules.components
 import qs.modules.globals
-import qs.modules.services
 import qs.config
 
 Rectangle {
@@ -17,9 +16,12 @@ Rectangle {
     property bool showResults: searchText.length > 0
     property int selectedIndex: -1
     property int selectedImageIndex: -1
+    property var clipboardItems: []
     property var imageItems: []
     property var textItems: []
     property bool isImageSectionFocused: false
+    property string cacheDir: "/tmp/ambyst_clipboard_cache"
+    property var pendingImageProcesses: []
 
     signal itemSelected
 
@@ -50,9 +52,9 @@ Rectangle {
         var newImageItems = [];
         var newTextItems = [];
 
-        for (var i = 0; i < ClipboardService.items.length; i++) {
-            var item = ClipboardService.items[i];
-            var content = item.preview || "";
+        for (var i = 0; i < clipboardItems.length; i++) {
+            var item = clipboardItems[i];
+            var content = item.content || "";
             
             if (searchText.length === 0 || content.toLowerCase().includes(searchText.toLowerCase())) {
                 if (item.isImage) {
@@ -76,13 +78,51 @@ Rectangle {
         }
     }
 
+    function isImageData(content) {
+        return content.includes("[[ binary data") && 
+               (content.includes("png") || content.includes("jpg") || content.includes("jpeg") || 
+                content.includes("gif") || content.includes("bmp") || content.includes("webp"));
+    }
+
     function refreshClipboardHistory() {
-        ClipboardService.list();
+        cliphist.running = true;
     }
 
     function copyToClipboard(itemId) {
-        copyProcess.command = ["bash", "-c", "cliphist decode \"" + itemId + "\" | wl-copy"];
+        copyProcess.command = ["bash", "-c", `cliphist decode "${itemId}" | wl-copy`];
         copyProcess.running = true;
+    }
+
+    function generateImageCache(itemId, isFirst = false) {
+        var imagePath = cacheDir + "/img_" + itemId + ".png";
+        
+        // Evitar procesar la misma imagen múltiples veces
+        if (pendingImageProcesses.indexOf(itemId) !== -1) {
+            return imagePath;
+        }
+        
+        pendingImageProcesses.push(itemId);
+        
+        // Para el primer elemento, añadir un pequeño delay para evitar problemas de timing
+        if (isFirst) {
+            Qt.callLater(() => {
+                if (!imageDecodeProcess.running) {
+                    imageDecodeProcess.command = ["bash", "-c", `mkdir -p "${cacheDir}" && cliphist decode "${itemId}" > "${imagePath}" && echo "Image cached: ${imagePath}"`];
+                    imageDecodeProcess.itemId = itemId;
+                    imageDecodeProcess.imagePath = imagePath;
+                    imageDecodeProcess.running = true;
+                }
+            });
+        } else {
+            if (!imageDecodeProcess.running) {
+                imageDecodeProcess.command = ["bash", "-c", `mkdir -p "${cacheDir}" && cliphist decode "${itemId}" > "${imagePath}"`];
+                imageDecodeProcess.itemId = itemId;
+                imageDecodeProcess.imagePath = imagePath;
+                imageDecodeProcess.running = true;
+            }
+        }
+        
+        return imagePath;
     }
 
     implicitWidth: 400
@@ -96,11 +136,59 @@ Rectangle {
         }
     }
 
-    // Conexiones al servicio
-    Connections {
-        target: ClipboardService
-        function onListCompleted() {
-            updateFilteredItems();
+    // Proceso para obtener lista del clipboard
+    Process {
+        id: cliphist
+        command: ["cliphist", "list"]
+        running: false
+
+        stdout: StdioCollector {
+            id: cliphistCollector
+            waitForEnd: true
+
+            onStreamFinished: {
+                var items = [];
+                var lines = text.trim().split('\n');
+                
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i].trim();
+                    if (line.length === 0) continue;
+                    
+                    var parts = line.split('\t');
+                    if (parts.length < 2) continue;
+                    
+                    var id = parts[0];
+                    var content = parts.slice(1).join('\t');
+                    
+                    // Filtrar contenido HTML problemático
+                    if (content.includes("<meta http-equiv")) continue;
+                    
+                    var isImage = root.isImageData(content);
+                    var imagePath = "";
+                    
+                    if (isImage) {
+                        imagePath = root.generateImageCache(id, i === 0);
+                    }
+                    
+                    items.push({
+                        id: id,
+                        content: content,
+                        isImage: isImage,
+                        imagePath: imagePath,
+                        displayText: isImage ? "[Image]" : (content.length > 100 ? content.substring(0, 97) + "..." : content)
+                    });
+                }
+                
+                root.clipboardItems = items;
+                root.updateFilteredItems();
+            }
+        }
+
+        onExited: function (exitCode) {
+            if (exitCode !== 0) {
+                root.clipboardItems = [];
+                root.updateFilteredItems();
+            }
         }
     }
 
@@ -112,6 +200,36 @@ Rectangle {
         onExited: function (code) {
             if (code === 0) {
                 root.itemSelected();
+            }
+        }
+    }
+
+    // Proceso para decodificar imágenes
+    Process {
+        id: imageDecodeProcess
+        property string itemId: ""
+        property string imagePath: ""
+        running: false
+
+        onExited: function (code) {
+            if (code === 0 && imagePath) {
+                // Actualizar el item correspondiente con la ruta de imagen
+                for (var i = 0; i < root.clipboardItems.length; i++) {
+                    if (root.clipboardItems[i].id === itemId) {
+                        root.clipboardItems[i].imagePath = imagePath;
+                        break;
+                    }
+                }
+                // Forzar actualización de la vista
+                Qt.callLater(() => {
+                    root.updateFilteredItems();
+                });
+            }
+            
+            // Remover del array de procesos pendientes
+            var index = pendingImageProcesses.indexOf(itemId);
+            if (index !== -1) {
+                pendingImageProcesses.splice(index, 1);
             }
         }
     }
@@ -276,23 +394,12 @@ Rectangle {
                                         anchors.fill: parent
                                         fillMode: Image.PreserveAspectCrop
                                         visible: status === Image.Ready
-                                        source: {
-                                            // Forzar re-evaluación cuando el cache cambia
-                                            ClipboardService.revision;
-                                            return ClipboardService.getImageData(modelData.id);
-                                        }
+                                        source: modelData.imagePath ? "file://" + modelData.imagePath : ""
                                         clip: true
-                                        
-                                        Component.onCompleted: {
-                                            // Cargar imagen on-demand si no está en cache
-                                            if (!ClipboardService.getImageData(modelData.id)) {
-                                                ClipboardService.decodeToDataUrl(modelData.id, modelData.mime);
-                                            }
-                                        }
                                         
                                         onStatusChanged: {
                                             if (status === Image.Error) {
-                                                console.log("Error loading image for ID:", modelData.id);
+                                                console.log("Error loading image:", source);
                                             }
                                         }
                                     }
@@ -435,7 +542,7 @@ Rectangle {
 
                     Text {
                         Layout.fillWidth: true
-                        text: modelData.preview
+                        text: modelData.displayText
                         color: root.selectedIndex === index && !root.isImageSectionFocused ? 
                                Colors.adapter.overPrimary : Colors.adapter.overBackground
                         font.family: Config.theme.font
@@ -467,7 +574,7 @@ Rectangle {
         Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 200
-            visible: ClipboardService.items.length === 0
+            visible: root.clipboardItems.length === 0
 
             Column {
                 anchors.centerIn: parent

@@ -41,7 +41,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
 
     // Altura implícita incluye espacio extra para animaciones / futuros elementos.
-    implicitHeight: 44 + Config.roundness + 64
+    implicitHeight: Screen.height
 
     // La máscara sigue a la barra principal para mantener correcta interacción en ambas posiciones.
     mask: Region {
