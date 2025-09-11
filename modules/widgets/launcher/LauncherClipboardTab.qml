@@ -35,6 +35,12 @@ Rectangle {
     property int originalSelectedIndex: -1
     property int deleteButtonIndex: 0 // 0 = cancel, 1 = confirm
 
+    // Image delete mode state
+    property bool imageDeleteMode: false
+    property string imageToDelete: ""
+    property int originalSelectedImageIndex: -1
+    property int imageDeleteButtonIndex: 0 // 0 = cancel, 1 = trash
+
     property int imgSize: 78
 
     signal itemSelected
@@ -70,6 +76,10 @@ Rectangle {
             console.log("DEBUG: Canceling delete mode from external source (tab change)");
             cancelDeleteMode();
         }
+        if (imageDeleteMode) {
+            console.log("DEBUG: Canceling image delete mode from external source (tab change)");
+            cancelImageDeleteMode();
+        }
     }
 
     function enterDeleteMode(itemId) {
@@ -78,6 +88,16 @@ Rectangle {
         deleteMode = true;
         itemToDelete = itemId;
         deleteButtonIndex = 0; // Start with cancel button selected
+        // Quitar focus del SearchInput para que el componente root pueda capturar teclas
+        root.forceActiveFocus();
+    }
+
+    function enterImageDeleteMode(imageId) {
+        console.log("DEBUG: Entering image delete mode for image:", imageId);
+        originalSelectedImageIndex = selectedImageIndex; // Store the current index
+        imageDeleteMode = true;
+        imageToDelete = imageId;
+        imageDeleteButtonIndex = 0; // Start with cancel button selected
         // Quitar focus del SearchInput para que el componente root pueda capturar teclas
         root.forceActiveFocus();
     }
@@ -96,10 +116,31 @@ Rectangle {
         originalSelectedIndex = -1;
     }
 
+    function cancelImageDeleteMode() {
+        console.log("DEBUG: Canceling image delete mode");
+        imageDeleteMode = false;
+        imageToDelete = "";
+        imageDeleteButtonIndex = 0;
+        // Devolver focus al SearchInput
+        searchInput.focusInput();
+        updateFilteredItems();
+        // Restore the original selectedImageIndex
+        selectedImageIndex = originalSelectedImageIndex;
+        imageResultsList.currentIndex = originalSelectedImageIndex;
+        originalSelectedImageIndex = -1;
+    }
+
     function confirmDeleteItem() {
         console.log("DEBUG: Confirming delete for item:", itemToDelete);
         ClipboardService.deleteItem(itemToDelete);
         cancelDeleteMode();
+        refreshClipboardHistory();
+    }
+
+    function confirmDeleteImage() {
+        console.log("DEBUG: Confirming delete for image:", imageToDelete);
+        ClipboardService.deleteItem(imageToDelete);
+        cancelImageDeleteMode();
         refreshClipboardHistory();
     }
 
@@ -274,80 +315,89 @@ Rectangle {
             Layout.fillWidth: true
             spacing: 8
 
-        SearchInput {
-            id: searchInput
-            Layout.fillWidth: true
-            text: root.searchText
-            placeholderText: "Search clipboard history..."
+            SearchInput {
+                id: searchInput
+                Layout.fillWidth: true
+                text: root.searchText
+                placeholderText: "Search clipboard history..."
 
-            onSearchTextChanged: text => {
-                root.searchText = text;
-            }
+                onSearchTextChanged: text => {
+                    root.searchText = text;
+                }
 
-            onAccepted: {
-                if (root.deleteMode) {
-                    // En modo eliminar, Enter equivale a cancelar
-                    console.log("DEBUG: Enter in delete mode - canceling");
-                    root.cancelDeleteMode();
-                } else {
-                    console.log("DEBUG: Enter pressed! searchText:", root.searchText, "selectedIndex:", root.selectedIndex);
-
-                    if (root.selectedIndex >= 0 && root.selectedIndex < root.textItems.length) {
-                        let selectedItem = root.textItems[root.selectedIndex];
-                        console.log("DEBUG: Selected item:", selectedItem);
-                        if (selectedItem && !root.deleteMode) {
-                            root.copyToClipboard(selectedItem.id);
-                        }
-                    } else if (root.isImageSectionFocused && root.selectedImageIndex >= 0 && root.selectedImageIndex < root.imageItems.length) {
-                        let selectedImage = root.imageItems[root.selectedImageIndex];
-                        console.log("DEBUG: Selected image:", selectedImage);
-                        if (selectedImage && !root.deleteMode) {
-                            root.copyToClipboard(selectedImage.id);
-                        }
+                onAccepted: {
+                    if (root.deleteMode) {
+                        // En modo eliminar, Enter equivale a cancelar
+                        console.log("DEBUG: Enter in delete mode - canceling");
+                        root.cancelDeleteMode();
                     } else {
-                        console.log("DEBUG: No action taken - selectedIndex:", root.selectedIndex, "count:", root.textItems.length);
+                        console.log("DEBUG: Enter pressed! searchText:", root.searchText, "selectedIndex:", root.selectedIndex);
+
+                        if (root.selectedIndex >= 0 && root.selectedIndex < root.textItems.length) {
+                            let selectedItem = root.textItems[root.selectedIndex];
+                            console.log("DEBUG: Selected item:", selectedItem);
+                            if (selectedItem && !root.deleteMode) {
+                                root.copyToClipboard(selectedItem.id);
+                            }
+                        } else if (root.isImageSectionFocused && root.selectedImageIndex >= 0 && root.selectedImageIndex < root.imageItems.length) {
+                            let selectedImage = root.imageItems[root.selectedImageIndex];
+                            console.log("DEBUG: Selected image:", selectedImage);
+                            if (selectedImage && !root.deleteMode) {
+                                root.copyToClipboard(selectedImage.id);
+                            }
+                        } else {
+                            console.log("DEBUG: No action taken - selectedIndex:", root.selectedIndex, "count:", root.textItems.length);
+                        }
                     }
                 }
-            }
 
-            onShiftAccepted: {
-                console.log("DEBUG: Shift+Enter pressed! selectedIndex:", root.selectedIndex, "deleteMode:", root.deleteMode);
+                onShiftAccepted: {
+                    console.log("DEBUG: Shift+Enter pressed! selectedIndex:", root.selectedIndex, "selectedImageIndex:", root.selectedImageIndex, "deleteMode:", root.deleteMode, "imageDeleteMode:", root.imageDeleteMode);
 
-                if (!root.deleteMode && root.selectedIndex >= 0 && root.selectedIndex < root.textItems.length) {
-                    let selectedItem = root.textItems[root.selectedIndex];
-                    console.log("DEBUG: Selected item for deletion:", selectedItem);
-                    if (selectedItem) {
-                        // Activar modo delete para el item seleccionado
-                        root.enterDeleteMode(selectedItem.id);
+                    if (!root.deleteMode && !root.imageDeleteMode) {
+                        if (root.isImageSectionFocused && root.selectedImageIndex >= 0 && root.selectedImageIndex < root.imageItems.length) {
+                            let selectedImage = root.imageItems[root.selectedImageIndex];
+                            console.log("DEBUG: Selected image for deletion:", selectedImage);
+                            if (selectedImage) {
+                                // Activar modo delete para la imagen seleccionada
+                                root.enterImageDeleteMode(selectedImage.id);
+                            }
+                        } else if (!root.isImageSectionFocused && root.selectedIndex >= 0 && root.selectedIndex < root.textItems.length) {
+                            let selectedItem = root.textItems[root.selectedIndex];
+                            console.log("DEBUG: Selected item for deletion:", selectedItem);
+                            if (selectedItem) {
+                                // Activar modo delete para el item seleccionado
+                                root.enterDeleteMode(selectedItem.id);
+                            }
+                        }
                     }
                 }
-            }
 
-            onEscapePressed: {
-                if (!root.deleteMode) {
-                    // Solo cerrar el notch si NO estamos en modo eliminar
-                    root.itemSelected();
+                onEscapePressed: {
+                    if (!root.deleteMode && !root.imageDeleteMode) {
+                        // Solo cerrar el notch si NO estamos en modo eliminar
+                        root.itemSelected();
+                    }
+                    // Si estamos en modo eliminar, no hacer nada aquí
+                    // El handler global del root se encargará
                 }
-                // Si estamos en modo eliminar, no hacer nada aquí
-                // El handler global del root se encargará
-            }
 
-            onDownPressed: {
-                root.onDownPressed();
-            }
+                onDownPressed: {
+                    root.onDownPressed();
+                }
 
-            onUpPressed: {
-                root.onUpPressed();
-            }
+                onUpPressed: {
+                    root.onUpPressed();
+                }
 
-            onLeftPressed: {
-                root.onLeftPressed();
-            }
+                onLeftPressed: {
+                    root.onLeftPressed();
+                }
 
-            onRightPressed: {
-                root.onRightPressed();
+                onRightPressed: {
+                    root.onRightPressed();
+                }
             }
-        }
 
             // Botón de limpiar historial
             Rectangle {
@@ -515,7 +565,15 @@ Rectangle {
 
                             width: root.imgSize
                             height: width
-                            color: root.isImageSectionFocused && root.selectedImageIndex === index ? Colors.adapter.primary : Colors.adapter.surface
+                            color: {
+                                if (root.imageDeleteMode && modelData.id === root.imageToDelete) {
+                                    return Colors.adapter.overError;
+                                } else if (root.isImageSectionFocused && root.selectedImageIndex === index) {
+                                    return Colors.adapter.primary;
+                                } else {
+                                    return Colors.adapter.surface;
+                                }
+                            }
                             radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                             Behavior on color {
@@ -526,28 +584,122 @@ Rectangle {
                             }
 
                             MouseArea {
+                                id: imageMouseArea
                                 anchors.fill: parent
                                 hoverEnabled: true
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                                // Variables para gestos táctiles y long press
+                                property real startX: 0
+                                property real startY: 0
+                                property bool isDragging: false
+                                property bool longPressTriggered: false
+
+                                property bool isInImageDeleteMode: root.imageDeleteMode && modelData.id === root.imageToDelete
 
                                 onEntered: {
-                                    if (!root.isImageSectionFocused) {
-                                        root.isImageSectionFocused = true;
-                                        root.selectedIndex = -1;
-                                        textResultsList.currentIndex = -1;
+                                    // Solo cambiar la selección si no estamos en modo delete
+                                    if (!root.imageDeleteMode) {
+                                        if (!root.isImageSectionFocused) {
+                                            root.isImageSectionFocused = true;
+                                            root.selectedIndex = -1;
+                                            textResultsList.currentIndex = -1;
+                                        }
+                                        root.selectedImageIndex = index;
+                                        imageResultsList.currentIndex = index;
                                     }
-                                    root.selectedImageIndex = index;
-                                    imageResultsList.currentIndex = index;
                                 }
 
-                                onClicked: {
-                                    root.copyToClipboard(modelData.id);
+                                onClicked: mouse => {
+                                    if (mouse.button === Qt.LeftButton && !imageMouseArea.isInImageDeleteMode) {
+                                        // Solo copiar si NO estamos en modo delete
+                                        root.copyToClipboard(modelData.id);
+                                    } else if (mouse.button === Qt.RightButton) {
+                                        // Click derecho - mostrar menú contextual
+                                        console.log("DEBUG: Right click detected on image, showing context menu");
+                                        imageContextMenu.popup(mouse.x, mouse.y);
+                                    }
+                                }
+
+                                onPressed: mouse => {
+                                    startX = mouse.x;
+                                    startY = mouse.y;
+                                    isDragging = false;
+                                    longPressTriggered = false;
+
+                                    // Solo iniciar el timer para long press si no es click derecho
+                                    if (mouse.button !== Qt.RightButton) {
+                                        imageLongPressTimer.start();
+                                    }
+                                }
+
+                                onPositionChanged: mouse => {
+                                    if (pressed && mouse.button !== Qt.RightButton) {
+                                        let deltaX = mouse.x - startX;
+                                        let deltaY = mouse.y - startY;
+                                        let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                                        // Si se mueve más de 10 píxeles, considerar como arrastre
+                                        if (distance > 10) {
+                                            isDragging = true;
+                                            imageLongPressTimer.stop();
+                                        }
+                                    }
+                                }
+
+                                onReleased: mouse => {
+                                    imageLongPressTimer.stop();
+                                    isDragging = false;
+                                    longPressTriggered = false;
+                                }
+
+                                // Timer para long press
+                                Timer {
+                                    id: imageLongPressTimer
+                                    interval: 800 // 800ms para activar long press
+                                    repeat: false
+                                    onTriggered: {
+                                        // Long press activado - entrar en modo delete
+                                        if (!imageMouseArea.isDragging) {
+                                            root.enterImageDeleteMode(modelData.id);
+                                            imageMouseArea.longPressTriggered = true;
+                                        }
+                                    }
+                                }
+
+                                // Menú contextual para imágenes
+                                OptionsMenu {
+                                    id: imageContextMenu
+
+                                    items: [
+                                        {
+                                            text: "Copy",
+                                            icon: Icons.copy,
+                                            highlightColor: Colors.adapter.primary,
+                                            textColor: Colors.adapter.overPrimary,
+                                            onTriggered: function () {
+                                                console.log("DEBUG: Copy clicked from Image ContextMenu");
+                                                root.copyToClipboard(modelData.id);
+                                            }
+                                        },
+                                        {
+                                            text: "Delete",
+                                            icon: Icons.trash,
+                                            highlightColor: Colors.adapter.overError,
+                                            textColor: Colors.adapter.error,
+                                            onTriggered: function () {
+                                                console.log("DEBUG: Delete clicked from Image ContextMenu");
+                                                root.enterImageDeleteMode(modelData.id);
+                                            }
+                                        }
+                                    ]
                                 }
                             }
 
                             // Preview de imagen real o placeholder
                             Item {
                                 anchors.centerIn: parent
-                                width: root.imgSize
+                                width: root.imgSize // Reducir para dar espacio al menu
                                 height: width
 
                                 // Imagen real si está disponible
@@ -611,6 +763,168 @@ Rectangle {
                                 }
                             }
 
+                            // Botones de acción que aparecen desde abajo - MOVIDO FUERA DEL MOUSEAREA
+                            Rectangle {
+                                id: imageActionContainer
+                                anchors.bottom: parent.bottom
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.bottomMargin: 4
+                                width: 68 // 32 + 4 + 32
+                                height: 32
+                                color: "transparent"
+                                opacity: (root.imageDeleteMode && modelData.id === root.imageToDelete) ? 1.0 : 0.0
+                                visible: opacity > 0
+                                z: 10 // Asegurar que esté por encima
+
+                                transform: Translate {
+                                    y: (root.imageDeleteMode && modelData.id === root.imageToDelete) ? 0 : 40
+
+                                    Behavior on y {
+                                        NumberAnimation {
+                                            duration: Config.animDuration
+                                            easing.type: Easing.OutQuart
+                                        }
+                                    }
+                                }
+
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: Config.animDuration / 2
+                                        easing.type: Easing.OutQuart
+                                    }
+                                }
+
+                                // Fondo del menu
+                                Rectangle {
+                                    anchors.fill: parent
+                                    anchors.margins: -4
+                                    anchors.topMargin: 0
+                                    color: Colors.adapter.error
+                                }
+
+                                // Highlight elástico que se estira entre botones
+                                Rectangle {
+                                    id: imageDeleteHighlight
+                                    color: Colors.adapter.overError
+                                    radius: Config.roundness > 0 ? Config.roundness - 4 : 0
+                                    visible: (root.imageDeleteMode && modelData.id === root.imageToDelete)
+
+                                    property real activeButtonMargin: 2
+                                    property real idx1X: root.imageDeleteButtonIndex
+                                    property real idx2X: root.imageDeleteButtonIndex
+
+                                    // Posición y tamaño con efecto elástico
+                                    x: {
+                                        let minX = Math.min(idx1X, idx2X) * 36 + activeButtonMargin; // 32 + 4 spacing
+                                        return minX;
+                                    }
+
+                                    y: activeButtonMargin
+
+                                    width: {
+                                        let stretchX = Math.abs(idx1X - idx2X) * 36 + 32 - activeButtonMargin * 2; // 32 + 4 spacing
+                                        return stretchX;
+                                    }
+
+                                    height: 32 - activeButtonMargin * 2
+
+                                    Behavior on idx1X {
+                                        NumberAnimation {
+                                            duration: Config.animDuration / 3
+                                            easing.type: Easing.OutSine
+                                        }
+                                    }
+                                    Behavior on idx2X {
+                                        NumberAnimation {
+                                            duration: Config.animDuration
+                                            easing.type: Easing.OutSine
+                                        }
+                                    }
+                                }
+
+                                Row {
+                                    id: imageActionButtons
+                                    anchors.fill: parent
+                                    spacing: 4
+
+                                    // Botón cancelar (cruz)
+                                    Rectangle {
+                                        id: imageCancelButton
+                                        width: 32
+                                        height: 32
+                                        color: "transparent"
+                                        radius: Config.roundness
+                                        border.width: 0
+                                        border.color: Colors.adapter.outline
+                                        z: 10
+
+                                        property bool isHighlighted: root.imageDeleteButtonIndex === 0
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            onClicked: root.cancelImageDeleteMode()
+                                            onEntered: {
+                                                root.imageDeleteButtonIndex = 0;
+                                            }
+                                            onExited: parent.color = "transparent"
+                                        }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: Icons.cancel
+                                            color: imageCancelButton.isHighlighted ? Colors.adapter.error : Colors.adapter.overError
+                                            font.pixelSize: 16
+                                            font.family: Icons.font
+
+                                            Behavior on color {
+                                                ColorAnimation {
+                                                    duration: Config.animDuration / 2
+                                                    easing.type: Easing.OutQuart
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Botón confirmar (trash)
+                                    Rectangle {
+                                        id: imageConfirmButton
+                                        width: 32
+                                        height: 32
+                                        color: "transparent"
+                                        radius: Config.roundness
+                                        z: 10
+
+                                        property bool isHighlighted: root.imageDeleteButtonIndex === 1
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            onClicked: root.confirmDeleteImage()
+                                            onEntered: {
+                                                root.imageDeleteButtonIndex = 1;
+                                            }
+                                            onExited: parent.color = "transparent"
+                                        }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: Icons.trash
+                                            color: imageConfirmButton.isHighlighted ? Colors.adapter.error : Colors.adapter.overError
+                                            font.pixelSize: 16
+                                            font.family: Icons.font
+
+                                            Behavior on color {
+                                                ColorAnimation {
+                                                    duration: Config.animDuration / 2
+                                                    easing.type: Easing.OutQuart
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             // Highlight cuando está seleccionado
                             Rectangle {
                                 anchors.fill: parent
@@ -631,10 +945,17 @@ Rectangle {
                         highlight: Rectangle {
                             color: "transparent"
                             z: 100
-                            border.color: Colors.adapter.primary
+                            border.color: root.imageDeleteMode ? Colors.adapter.error : Colors.adapter.primary
                             border.width: 4
                             radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                             visible: root.isImageSectionFocused
+
+                            Behavior on border.color {
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutQuart
+                                }
+                            }
                         }
 
                         highlightMoveDuration: Config.animDuration / 2
@@ -761,7 +1082,7 @@ Rectangle {
                                         isDragging = true;
                                         longPressTimer.stop();
 
-                                         // Detectar swipe hacia la izquierda para delete
+                                        // Detectar swipe hacia la izquierda para delete
                                         if (deltaX < -50 && Math.abs(deltaY) < 30) {
                                             if (!longPressTriggered) {
                                                 root.enterDeleteMode(modelData.id);
@@ -772,161 +1093,161 @@ Rectangle {
                                 }
                             }
 
-                        // Botones de acción que aparecen desde la derecha
-                        Rectangle {
-                            id: actionContainer
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.rightMargin: 8
-                            width: 68 // 32 + 4 + 32
-                            height: 32
-                            color: "transparent"
-                            opacity: mouseArea.isInDeleteMode ? 1.0 : 0.0
-                            visible: opacity > 0
+                            // Botones de acción que aparecen desde la derecha
+                            Rectangle {
+                                id: actionContainer
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.rightMargin: 8
+                                width: 68 // 32 + 4 + 32
+                                height: 32
+                                color: "transparent"
+                                opacity: mouseArea.isInDeleteMode ? 1.0 : 0.0
+                                visible: opacity > 0
 
-                            transform: Translate {
-                                x: mouseArea.isInDeleteMode ? 0 : 80
+                                transform: Translate {
+                                    x: mouseArea.isInDeleteMode ? 0 : 80
 
-                                Behavior on x {
+                                    Behavior on x {
+                                        NumberAnimation {
+                                            duration: Config.animDuration
+                                            easing.type: Easing.OutQuart
+                                        }
+                                    }
+                                }
+
+                                Behavior on opacity {
                                     NumberAnimation {
-                                        duration: Config.animDuration
+                                        duration: Config.animDuration / 2
                                         easing.type: Easing.OutQuart
                                     }
                                 }
-                            }
 
-                            Behavior on opacity {
-                                NumberAnimation {
-                                    duration: Config.animDuration / 2
-                                    easing.type: Easing.OutQuart
-                                }
-                            }
-
-                            // Highlight elástico que se estira entre botones
-                            Rectangle {
-                                id: deleteHighlight
-                                color: Colors.adapter.overError
-                                radius: Config.roundness > 4 ? Config.roundness - 4 : 0
-                                visible: mouseArea.isInDeleteMode
-                                z: 0
-
-                                property real activeButtonMargin: 2
-                                property real idx1X: root.deleteButtonIndex
-                                property real idx2X: root.deleteButtonIndex
-
-                                // Posición y tamaño con efecto elástico
-                                x: {
-                                    let minX = Math.min(idx1X, idx2X) * 36 + activeButtonMargin; // 32 + 4 spacing
-                                    return minX;
-                                }
-
-                                y: activeButtonMargin
-
-                                width: {
-                                    let stretchX = Math.abs(idx1X - idx2X) * 36 + 32 - activeButtonMargin * 2; // 32 + 4 spacing
-                                    return stretchX;
-                                }
-
-                                height: 32 - activeButtonMargin * 2
-
-                                Behavior on idx1X {
-                                    NumberAnimation {
-                                        duration: Config.animDuration / 3
-                                        easing.type: Easing.OutSine
-                                    }
-                                }
-                                Behavior on idx2X {
-                                    NumberAnimation {
-                                        duration: Config.animDuration
-                                        easing.type: Easing.OutSine
-                                    }
-                                }
-                            }
-
-                            Row {
-                                id: actionButtons
-                                anchors.fill: parent
-                                spacing: 4
-
-                                // Botón cancelar (cruz)
+                                // Highlight elástico que se estira entre botones
                                 Rectangle {
-                                    id: cancelButton
-                                    width: 32
-                                    height: 32
-                                    color: "transparent"
-                                    radius: 6
-                                    border.width: 0
-                                    border.color: Colors.adapter.outline
-                                    z: 1
+                                    id: deleteHighlight
+                                    color: Colors.adapter.overError
+                                    radius: Config.roundness > 4 ? Config.roundness - 4 : 0
+                                    visible: mouseArea.isInDeleteMode
+                                    z: 0
 
-                                    property bool isHighlighted: root.deleteButtonIndex === 0
+                                    property real activeButtonMargin: 2
+                                    property real idx1X: root.deleteButtonIndex
+                                    property real idx2X: root.deleteButtonIndex
 
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        onClicked: root.cancelDeleteMode()
-                                        onEntered: {
-                                            root.deleteButtonIndex = 0;
-                                        }
-                                        onExited: parent.color = "transparent"
+                                    // Posición y tamaño con efecto elástico
+                                    x: {
+                                        let minX = Math.min(idx1X, idx2X) * 36 + activeButtonMargin; // 32 + 4 spacing
+                                        return minX;
                                     }
 
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: Icons.cancel
-                                        color: cancelButton.isHighlighted ? Colors.adapter.error : Colors.adapter.overError
-                                        font.pixelSize: 14
-                                        font.family: Icons.font
+                                    y: activeButtonMargin
 
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: Config.animDuration / 2
-                                                easing.type: Easing.OutQuart
+                                    width: {
+                                        let stretchX = Math.abs(idx1X - idx2X) * 36 + 32 - activeButtonMargin * 2; // 32 + 4 spacing
+                                        return stretchX;
+                                    }
+
+                                    height: 32 - activeButtonMargin * 2
+
+                                    Behavior on idx1X {
+                                        NumberAnimation {
+                                            duration: Config.animDuration / 3
+                                            easing.type: Easing.OutSine
+                                        }
+                                    }
+                                    Behavior on idx2X {
+                                        NumberAnimation {
+                                            duration: Config.animDuration
+                                            easing.type: Easing.OutSine
+                                        }
+                                    }
+                                }
+
+                                Row {
+                                    id: actionButtons
+                                    anchors.fill: parent
+                                    spacing: 4
+
+                                    // Botón cancelar (cruz)
+                                    Rectangle {
+                                        id: cancelButton
+                                        width: 32
+                                        height: 32
+                                        color: "transparent"
+                                        radius: 6
+                                        border.width: 0
+                                        border.color: Colors.adapter.outline
+                                        z: 1
+
+                                        property bool isHighlighted: root.deleteButtonIndex === 0
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            onClicked: root.cancelDeleteMode()
+                                            onEntered: {
+                                                root.deleteButtonIndex = 0;
+                                            }
+                                            onExited: parent.color = "transparent"
+                                        }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: Icons.cancel
+                                            color: cancelButton.isHighlighted ? Colors.adapter.error : Colors.adapter.overError
+                                            font.pixelSize: 14
+                                            font.family: Icons.font
+
+                                            Behavior on color {
+                                                ColorAnimation {
+                                                    duration: Config.animDuration / 2
+                                                    easing.type: Easing.OutQuart
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                // Botón confirmar (check)
-                                Rectangle {
-                                    id: confirmButton
-                                    width: 32
-                                    height: 32
-                                    color: "transparent"
-                                    radius: 6
-                                    z: 1
+                                    // Botón confirmar (check)
+                                    Rectangle {
+                                        id: confirmButton
+                                        width: 32
+                                        height: 32
+                                        color: "transparent"
+                                        radius: 6
+                                        z: 1
 
-                                    property bool isHighlighted: root.deleteButtonIndex === 1
+                                        property bool isHighlighted: root.deleteButtonIndex === 1
 
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        onClicked: root.confirmDeleteItem()
-                                        onEntered: {
-                                            root.deleteButtonIndex = 1;
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            onClicked: root.confirmDeleteItem()
+                                            onEntered: {
+                                                root.deleteButtonIndex = 1;
+                                            }
+                                            onExited: parent.color = "transparent"
                                         }
-                                        onExited: parent.color = "transparent"
-                                    }
 
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: Icons.accept
-                                        color: confirmButton.isHighlighted ? Colors.adapter.error : Colors.adapter.overError
-                                        font.pixelSize: 14
-                                        font.family: Icons.font
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: Icons.accept
+                                            color: confirmButton.isHighlighted ? Colors.adapter.error : Colors.adapter.overError
+                                            font.pixelSize: 14
+                                            font.family: Icons.font
 
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: Config.animDuration / 2
-                                                easing.type: Easing.OutQuart
+                                            Behavior on color {
+                                                ColorAnimation {
+                                                    duration: Config.animDuration / 2
+                                                    easing.type: Easing.OutQuart
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        onReleased: mouse => {
+                            onReleased: mouse => {
                                 longPressTimer.stop();
                                 isDragging = false;
                                 longPressTriggered = false;
@@ -965,7 +1286,7 @@ Rectangle {
                                 {
                                     text: "Delete",
                                     icon: Icons.trash,
-                                    highlightColor: Colors.adapter.errorContainer,
+                                    highlightColor: Colors.adapter.overError,
                                     textColor: Colors.adapter.error,
                                     onTriggered: function () {
                                         console.log("DEBUG: Delete clicked from ContextMenu");
@@ -1136,6 +1457,28 @@ Rectangle {
                 root.cancelDeleteMode();
                 event.accepted = true;
             }
+        } else if (root.imageDeleteMode) {
+            if (event.key === Qt.Key_Left) {
+                root.imageDeleteButtonIndex = 0; // Cancelar (cruz)
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Right) {
+                root.imageDeleteButtonIndex = 1; // Confirmar (trash)
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Space) {
+                // Ejecutar acción del botón seleccionado
+                if (root.imageDeleteButtonIndex === 0) {
+                    console.log("DEBUG: Enter/Space pressed - canceling image delete");
+                    root.cancelImageDeleteMode();
+                } else {
+                    console.log("DEBUG: Enter/Space pressed - confirming image delete");
+                    root.confirmDeleteImage();
+                }
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Escape) {
+                console.log("DEBUG: Escape pressed in image delete mode - canceling without closing notch");
+                root.cancelImageDeleteMode();
+                event.accepted = true;
+            }
         }
     }
 
@@ -1143,6 +1486,13 @@ Rectangle {
     onDeleteModeChanged: {
         if (!deleteMode) {
             console.log("DEBUG: Delete mode ended");
+        }
+    }
+
+    // Monitor cambios en imageDeleteMode
+    onImageDeleteModeChanged: {
+        if (!imageDeleteMode) {
+            console.log("DEBUG: Image delete mode ended");
         }
     }
 
