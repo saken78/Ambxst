@@ -142,15 +142,37 @@ Rectangle {
     function confirmDeleteItem() {
         console.log("DEBUG: Confirming delete for item:", itemToDelete);
         ClipboardService.deleteItem(itemToDelete);
-        cancelDeleteMode();
+
+        // Resetear estados y enviar foco al search
+        deleteMode = false;
+        itemToDelete = "";
+        deleteButtonIndex = 0;
+        originalSelectedIndex = -1;
+        selectedIndex = -1;
+        selectedImageIndex = -1;
+        isImageSectionFocused = false;
+        hasNavigatedFromSearch = false;
+
         refreshClipboardHistory();
+        searchInput.focusInput();
     }
 
     function confirmDeleteImage() {
         console.log("DEBUG: Confirming delete for image:", imageToDelete);
         ClipboardService.deleteItem(imageToDelete);
-        cancelImageDeleteMode();
+
+        // Resetear estados y enviar foco al search
+        imageDeleteMode = false;
+        imageToDelete = "";
+        imageDeleteButtonIndex = 0;
+        originalSelectedImageIndex = -1;
+        selectedIndex = -1;
+        selectedImageIndex = -1;
+        isImageSectionFocused = false;
+        hasNavigatedFromSearch = false;
+
         refreshClipboardHistory();
+        searchInput.focusInput();
     }
 
     function clearClipboardHistory() {
@@ -411,7 +433,7 @@ Rectangle {
             // Botón de limpiar historial
             Rectangle {
                 id: clearButton
-                Layout.preferredWidth: root.clearButtonConfirmState ? 130 : 48
+                Layout.preferredWidth: root.clearButtonConfirmState ? clearButtonContent.implicitWidth + 32 : 48
                 Layout.preferredHeight: 48
                 radius: searchInput.radius
                 color: {
@@ -464,6 +486,7 @@ Rectangle {
                 }
 
                 RowLayout {
+                    id: clearButtonContent
                     anchors.fill: parent
                     anchors.margins: 8
                     spacing: 8
@@ -797,12 +820,12 @@ Rectangle {
 
                             Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: -32
-                                anchors.bottomMargin: root.imageDeleteMode ? 0 : -32
+                                anchors.margins: -36
+                                anchors.bottomMargin: root.imageDeleteMode ? 0 : -36
                                 color: "transparent"
                                 border.color: root.imageDeleteMode ? Colors.adapter.error : Colors.adapter.primary
-                                border.width: 36
-                                radius: Config.roundness > 0 ? Config.roundness + 36 : 0
+                                border.width: 40
+                                radius: Config.roundness > 0 ? Config.roundness + 40 : 0
 
                                 Behavior on anchors.bottomMargin {
                                     NumberAnimation {
