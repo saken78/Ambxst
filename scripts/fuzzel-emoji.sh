@@ -1886,3 +1886,4 @@ AH↗️HA↘️HA↗️HA↘️ pekora arrows hahaha rabbit
 𝕏  twitter x logo
 👉👈 etou ughhhhhhh shy
 👉👌 put it in imagination perv
+‼️🗣️🔥 ax-shell mentioned fire in the hole speak exclamation shout
