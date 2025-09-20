@@ -14,6 +14,7 @@ import qs.modules.widgets.powermenu
 import qs.modules.services
 import qs.modules.components
 import qs.config
+import "./NotchNotificationView.qml"
 
 PanelWindow {
     id: notchPanel
@@ -100,6 +101,12 @@ PanelWindow {
         PowerMenuView {}
     }
 
+    // Notification view component
+    Component {
+        id: notificationViewComponent
+        NotchNotificationView {}
+    }
+
     // Center notch
     Notch {
         id: notchContainer
@@ -116,6 +123,7 @@ PanelWindow {
         dashboardViewComponent: dashboardViewComponent
         overviewViewComponent: overviewViewComponent
         powermenuViewComponent: powermenuViewComponent
+        notificationViewComponent: notificationViewComponent
         visibilities: screenVisibilities
 
         // Handle global keyboard events

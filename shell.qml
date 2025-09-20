@@ -82,10 +82,11 @@ ShellRoot {
         }
     }
 
-    Loader {
-        active: true
-        sourceComponent: NotificationPopup {}
-    }
+    // Comentado - Las notificaciones ahora se muestran en el notch
+    // Loader {
+    //     active: true
+    //     sourceComponent: NotificationPopup {}
+    // }
 
     // Global shortcuts service
     GlobalShortcuts {

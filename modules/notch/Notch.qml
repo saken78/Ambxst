@@ -5,6 +5,7 @@ import qs.modules.globals
 import qs.modules.theme
 import qs.modules.components
 import qs.modules.corners
+import qs.modules.services
 import qs.config
 
 Item {
@@ -17,17 +18,19 @@ Item {
     property Component dashboardViewComponent
     property Component overviewViewComponent
     property Component powermenuViewComponent
+    property Component notificationViewComponent
     property var stackView: stackViewInternal
     property bool isExpanded: stackViewInternal.currentItem && stackViewInternal.initialItem && stackViewInternal.currentItem !== stackViewInternal.initialItem
 
     // Screen-specific visibility properties passed from parent
     property var visibilities
     readonly property bool screenNotchOpen: visibilities ? (visibilities.launcher || visibilities.dashboard || visibilities.overview || visibilities.powermenu) : false
+    readonly property bool hasActiveNotifications: Notifications.popupList.length > 0
 
-    property int defaultHeight: Config.bar.showBackground ? (screenNotchOpen ? Math.max(stackContainer.height, 44) : 44) : (screenNotchOpen ? Math.max(stackContainer.height, 40) : 40)
-    property int islandHeight: Config.bar.showBackground ? (screenNotchOpen ? Math.max(stackContainer.height, 36) : 36) : (screenNotchOpen ? Math.max(stackContainer.height, 36) : 36)
+    property int defaultHeight: Config.bar.showBackground ? (screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.height, 44) : 44) : (screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.height, 40) : 40)
+    property int islandHeight: Config.bar.showBackground ? (screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.height, 36) : 36) : (screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.height, 36) : 36)
 
-    implicitWidth: screenNotchOpen ? Math.max(stackContainer.width + 40, 290) : 290
+    implicitWidth: screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.width + 40, 290) : 290
     implicitHeight: Config.notchTheme === "default" ? defaultHeight : (Config.notchTheme === "island" ? islandHeight : defaultHeight)
 
     Behavior on implicitWidth {
@@ -64,8 +67,8 @@ Item {
         layer.enabled: false
         radius: 0
 
-        property int defaultRadius: Config.roundness > 0 ? (screenNotchOpen ? Config.roundness + 20 : Config.roundness + 4) : 0
-        property int islandRadius: Config.roundness > 0 ? (screenNotchOpen ? Config.roundness + 20 : Config.roundness) : 0
+        property int defaultRadius: Config.roundness > 0 ? (screenNotchOpen || hasActiveNotifications ? Config.roundness + 20 : Config.roundness + 4) : 0
+        property int islandRadius: Config.roundness > 0 ? (screenNotchOpen || hasActiveNotifications ? Config.roundness + 20 : Config.roundness) : 0
 
         topLeftRadius: Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? islandRadius : 0)
         topRightRadius: Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? islandRadius : 0)
@@ -76,8 +79,8 @@ Item {
         Behavior on radius {
             NumberAnimation {
                 duration: Config.animDuration
-                easing.type: screenNotchOpen ? Easing.OutBack : Easing.OutQuart
-                easing.overshoot: screenNotchOpen ? 1.2 : 1.0
+                easing.type: screenNotchOpen || hasActiveNotifications ? Easing.OutBack : Easing.OutQuart
+                easing.overshoot: screenNotchOpen || hasActiveNotifications ? 1.2 : 1.0
             }
         }
 
@@ -114,7 +117,7 @@ Item {
                 id: stackViewInternal
                 anchors.fill: parent
                 anchors.margins: 16
-                initialItem: defaultViewComponent
+                initialItem: hasActiveNotifications ? notificationViewComponent : defaultViewComponent
 
                 // Activar blur al inicio de transición y animarlo a nítido
                 onBusyChanged: {
@@ -192,7 +195,58 @@ Item {
                         easing.type: Easing.OutQuart
                     }
                 }
+
+                replaceEnter: Transition {
+                    PropertyAnimation {
+                        property: "opacity"
+                        from: 0
+                        to: 1
+                        duration: Config.animDuration
+                        easing.type: Easing.OutQuart
+                    }
+                    PropertyAnimation {
+                        property: "scale"
+                        from: 0.8
+                        to: 1
+                        duration: Config.animDuration
+                        easing.type: Easing.OutBack
+                        easing.overshoot: 1.2
+                    }
+                }
+
+                replaceExit: Transition {
+                    PropertyAnimation {
+                        property: "opacity"
+                        from: 1
+                        to: 0
+                        duration: Config.animDuration
+                        easing.type: Easing.OutQuart
+                    }
+                    PropertyAnimation {
+                        property: "scale"
+                        from: 1
+                        to: 1.05
+                        duration: Config.animDuration
+                        easing.type: Easing.OutQuart
+                    }
+                }
+    }
+
+    // Conexión para cambiar automáticamente entre vistas según las notificaciones
+    Connections {
+        target: Notifications
+        function onPopupListChanged() {
+            if (hasActiveNotifications && !screenNotchOpen) {
+                if (stackViewInternal.depth === 1 && stackViewInternal.currentItem !== notificationViewComponent) {
+                    stackViewInternal.replace(notificationViewComponent)
+                }
+            } else if (!hasActiveNotifications && !screenNotchOpen) {
+                if (stackViewInternal.depth === 1 && stackViewInternal.currentItem !== defaultViewComponent) {
+                    stackViewInternal.replace(defaultViewComponent)
+                }
             }
+        }
+    }
         }
     }
 
