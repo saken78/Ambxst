@@ -13,37 +13,8 @@ import qs.config
 Item {
     id: root
 
-    implicitWidth: hovered ? 420 : 320
+    implicitWidth: hovered ? 420 : 290
     implicitHeight: mainColumn.implicitHeight - (hovered ? 16 : 0)
-    // implicitHeight: {
-    //     let compactHeight = 24;
-    //     let expandedHeight = 0;
-    //
-    //     // Fila superior (controles)
-    //     if (hovered) {
-    //         expandedHeight += 24;
-    //     }
-    //
-    //     // Fila media (contenido principal) - siempre presente
-    //     expandedHeight += hovered ? 32 : 24;
-    //
-    //     // Fila inferior (botones de acción)
-    //     if (hovered && currentNotification && currentNotification.actions.length > 0) {
-    //         expandedHeight += 24;
-    //     }
-    //
-    //     // Spacing entre filas
-    //     if (hovered) {
-    //         let visibleRows = 1; // Fila media siempre visible
-    //         visibleRows += 1; // Fila superior
-    //         if (currentNotification && currentNotification.actions.length > 0) {
-    //             visibleRows += 1; // Fila inferior
-    //         }
-    //         expandedHeight += (visibleRows - 1) * 4; // Spacing entre filas
-    //     }
-    //
-    //     return hovered ? expandedHeight : compactHeight;
-    // }
 
     property var currentNotification: Notifications.popupList.length > 0 ? Notifications.popupList[0] : null
     property bool notchHovered: false
@@ -144,14 +115,14 @@ Item {
         RowLayout {
             id: mainContentRow
             width: parent.width
-            height: hovered ? 48 : 32
+            height: Math.max(hovered ? 48 : 32, textColumn.implicitHeight)
             spacing: 8
-
             // App icon
             NotificationAppIcon {
                 id: appIcon
                 Layout.preferredWidth: hovered ? 48 : 32
                 Layout.preferredHeight: hovered ? 48 : 32
+                Layout.alignment: Qt.AlignTop
                 size: hovered ? 48 : 32
                 radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                 visible: currentNotification && (currentNotification.appIcon !== "" || currentNotification.image !== "")
@@ -163,6 +134,7 @@ Item {
 
             // Textos de la notificación
             Column {
+                id: textColumn
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
                 spacing: hovered ? 4 : 0
@@ -170,7 +142,7 @@ Item {
                 // Fila del summary y app name
                 Row {
                     width: parent.width
-                    spacing: 8
+                    spacing: 4
 
                     Text {
                         id: summaryText
@@ -187,13 +159,23 @@ Item {
                     }
 
                     Text {
+                        text: "•"
+                        font.family: Config.theme.font
+                        font.pixelSize: Config.theme.fontSize
+                        font.weight: Font.Bold
+                        color: Colors.adapter.outline
+                        verticalAlignment: Text.AlignVCenter
+                        visible: currentNotification && currentNotification.appName !== "" && summaryText.text !== ""
+                    }
+
+                    Text {
                         id: appNameText
                         width: Math.min(implicitWidth, Math.max(80, parent.width * 0.3))
                         text: currentNotification ? currentNotification.appName : ""
                         font.family: Config.theme.font
-                        font.pixelSize: Config.theme.fontSize - 1
-                        font.weight: Font.Normal
-                        color: Colors.adapter.surfaceBright
+                        font.pixelSize: Config.theme.fontSize
+                        font.weight: Font.Bold
+                        color: Colors.adapter.outline
                         elide: Text.ElideRight
                         maximumLineCount: 1
                         wrapMode: Text.NoWrap
@@ -210,24 +192,16 @@ Item {
                     font.weight: Font.Bold
                     color: Colors.adapter.overBackground
                     wrapMode: hovered ? Text.Wrap : Text.NoWrap
-                    maximumLineCount: hovered ? 2 : 1
+                    maximumLineCount: hovered ? 3 : 1
                     elide: Text.ElideRight
                     visible: hovered || text !== ""
-                    opacity: hovered ? 1.0 : 0.8
-
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: Config.animDuration / 2
-                            easing.type: Easing.OutQuart
-                        }
-                    }
                 }
             }
 
             // Columna de botones (solo visible con hover)
             Column {
                 Layout.preferredWidth: hovered ? 32 : 0
-                Layout.alignment: Qt.AlignVCenter
+                Layout.alignment: Qt.AlignTop
                 spacing: 4
                 visible: hovered
                 clip: true
@@ -361,6 +335,7 @@ Item {
             }
         }
 
-        return processedBody.replace(/\n/g, " ");
+        // No reemplazar saltos de línea con espacios
+        return processedBody;
     }
 }
