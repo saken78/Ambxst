@@ -173,23 +173,23 @@ Item {
             width: parent.width
             implicitHeight: notificationStack.implicitHeight
             height: implicitHeight
-            spacing: 4
+            spacing: 8
 
             // ScrollBar (solo visible con múltiples notificaciones)
             Rectangle {
                 id: scrollBarContainer
-                Layout.preferredWidth: (Notifications.popupList.length > 1) ? 4 : 0
+                Layout.preferredWidth: (Notifications.popupList.length > 1) ? 8 : 0
                 Layout.fillHeight: true
-                color: "transparent"
+                radius: Config.theme.roundness
+                color: Colors.surface
                 visible: Notifications.popupList.length > 1
 
                 Rectangle {
                     id: scrollBar
-                    width: 4
+                    width: 8
                     height: parent.height / Math.max(1, Notifications.popupList.length) // altura proporcional al número de notificaciones
-                    color: Colors.adapter.outline
-                    radius: 2
-                    opacity: 0.6
+                    color: Colors.adapter.primary
+                    radius: Config.theme.roundness
 
                     // Posición del scroll basada en la notificación actual
                     y: {
@@ -295,20 +295,20 @@ Item {
                             // Determinar si una notificación fue eliminada y calcular la dirección apropiada
                             const newNotification = Notifications.popupList[root.currentIndex];
                             let forceDirection = null;
-                            
+
                             // Si la notificación actual cambió, significa que se eliminó una
                             if (currentNotificationId && newNotification && currentNotificationId !== newNotification.id) {
                                 // Si estábamos viendo una notificación posterior y ahora vemos una anterior,
                                 // significa que se eliminó una notificación antes de la actual -> transición hacia abajo
                                 if (oldIndex > 0 && root.currentIndex < oldIndex) {
                                     forceDirection = StackView.PopTransition; // Aparece desde arriba (hacia abajo)
-                                }
+                                } else
                                 // Si se eliminó la notificación actual y vamos a la siguiente
-                                else if (root.currentIndex === oldIndex) {
+                                if (root.currentIndex === oldIndex) {
                                     forceDirection = StackView.PushTransition; // Aparece desde abajo (hacia arriba)
                                 }
                             }
-                            
+
                             // Navegar a la notificación actual con la dirección calculada
                             notificationStack.navigateToNotification(root.currentIndex, forceDirection);
                         }
