@@ -15,17 +15,14 @@ Item {
     id: root
 
     implicitWidth: hovered ? 420 : 290
-    implicitHeight: mainColumn.implicitHeight
+    implicitHeight: hovered ? mainColumn.implicitHeight - 16 : mainColumn.implicitHeight
 
     property var currentNotification: {
-        return (Notifications.popupList.length > currentIndex && currentIndex >= 0) ? 
-               Notifications.popupList[currentIndex] : 
-               (Notifications.popupList.length > 0 ? Notifications.popupList[0] : null);
+        return (Notifications.popupList.length > currentIndex && currentIndex >= 0) ? Notifications.popupList[currentIndex] : (Notifications.popupList.length > 0 ? Notifications.popupList[0] : null);
     }
     property bool notchHovered: false
-    property bool hovered: notchHovered || mouseArea.containsMouse || anyButtonHovered
-    property bool anyButtonHovered: false
-    
+    property bool hovered: notchHovered || mouseArea.containsMouse
+
     // Índice actual para navegación
     property int currentIndex: 0
 
@@ -50,8 +47,8 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.NoButton
-        z: -1
-        
+        z: 1000  // Poner encima de todos los elementos
+
         // Navegación con rueda del ratón cuando hay múltiples notificaciones
         onWheel: {
             if (Notifications.popupList.length > 1) {
@@ -65,7 +62,7 @@ Item {
             }
         }
     }
-    
+
     // Funciones de navegación
     function navigateToNext() {
         if (Notifications.popupList.length > 1) {
@@ -73,14 +70,14 @@ Item {
             notificationStack.navigateToNotification(nextIndex);
         }
     }
-    
+
     function navigateToPrevious() {
         if (Notifications.popupList.length > 1) {
             const prevIndex = currentIndex > 0 ? currentIndex - 1 : Notifications.popupList.length - 1;
             notificationStack.navigateToNotification(prevIndex);
         }
     }
-    
+
     function updateNotificationStack() {
         if (Notifications.popupList.length > 0 && notificationStack) {
             notificationStack.navigateToNotification(currentIndex);
@@ -131,7 +128,7 @@ Item {
 
                     Behavior on color {
                         ColorAnimation {
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                         }
                     }
 
@@ -141,9 +138,7 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
 
-                        onHoveredChanged: {
-                            root.anyButtonHovered = containsMouse;
-                        }
+                        // Ya no necesita gestionar anyButtonHovered porque mouseArea principal maneja el hover
 
                         onClicked: {
                             GlobalStates.dashboardCurrentTab = 0;
@@ -160,7 +155,7 @@ Item {
 
                         Behavior on color {
                             ColorAnimation {
-                                duration: Config.animDuration / 2
+                                duration: Config.animDuration
                             }
                         }
                     }
@@ -172,17 +167,8 @@ Item {
         RowLayout {
             id: contentWithScrollArea
             width: parent.width
-            height: {
-                // Altura base para el contenido principal
-                let baseHeight = Math.max(hovered ? 48 : 32, 48); // mínimo para iconos y texto
-                
-                // Si estamos en hover y la notificación actual tiene acciones, añadir espacio para botones
-                if (hovered && currentNotification && currentNotification.actions.length > 0) {
-                    baseHeight += 32 + 8; // altura de botones + spacing
-                }
-                
-                return baseHeight;
-            }
+            implicitHeight: notificationStack.implicitHeight
+            height: implicitHeight
             spacing: 4
 
             // ScrollBar (solo visible con múltiples notificaciones)
@@ -200,24 +186,25 @@ Item {
                     color: Colors.adapter.outline
                     radius: 2
                     opacity: 0.6
-                    
+
                     // Posición del scroll basada en la notificación actual
                     y: {
-                        if (Notifications.popupList.length <= 1) return 0;
+                        if (Notifications.popupList.length <= 1)
+                            return 0;
                         const maxY = parent.height - height;
                         return (root.currentIndex / Math.max(1, Notifications.popupList.length - 1)) * maxY;
                     }
 
                     Behavior on y {
                         NumberAnimation {
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                             easing.type: Easing.OutCubic
                         }
                     }
 
                     Behavior on height {
                         NumberAnimation {
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                         }
                     }
                 }
@@ -227,40 +214,47 @@ Item {
             Item {
                 id: notificationArea
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                
+                Layout.preferredHeight: notificationStack.implicitHeight
+
                 StackView {
                     id: notificationStack
-                    anchors.fill: parent
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    implicitHeight: currentItem ? currentItem.implicitHeight : 0
+                    height: implicitHeight
                     clip: true
-                    
+
                     // Crear componente inicial
                     Component.onCompleted: {
                         if (Notifications.popupList.length > 0) {
-                            push(notificationComponent, {"notification": Notifications.popupList[0]});
+                            push(notificationComponent, {
+                                "notification": Notifications.popupList[0]
+                            });
                         }
                     }
-                    
+
                     // Función para navegar a una notificación específica
                     function navigateToNotification(index) {
                         if (index >= 0 && index < Notifications.popupList.length) {
                             const newNotification = Notifications.popupList[index];
                             const currentItem = notificationStack.currentItem;
-                            
-                            if (!currentItem || !currentItem.notification || 
-                                currentItem.notification.id !== newNotification.id) {
-                                
+
+                            if (!currentItem || !currentItem.notification || currentItem.notification.id !== newNotification.id) {
+
                                 // Determinar dirección de la transición
                                 let direction = index > root.currentIndex ? StackView.PushTransition : StackView.PopTransition;
-                                
+
                                 // Usar replace para evitar acumulación en el stack
-                                replace(notificationComponent, {"notification": newNotification}, direction);
-                                
+                                replace(notificationComponent, {
+                                    "notification": newNotification
+                                }, direction);
+
                                 root.currentIndex = index;
                             }
                         }
                     }
-                    
+
                     // Actualizar cuando cambie la lista de notificaciones
                     Connections {
                         target: Notifications
@@ -270,13 +264,15 @@ Item {
                                 root.currentIndex = 0;
                                 return;
                             }
-                            
+
                             // Si no hay items en el stack, añadir el primero
                             if (notificationStack.depth === 0) {
-                                notificationStack.push(notificationComponent, {"notification": Notifications.popupList[0]});
+                                notificationStack.push(notificationComponent, {
+                                    "notification": Notifications.popupList[0]
+                                });
                                 root.currentIndex = 0;
                             }
-                            
+
                             // Ajustar el índice si es necesario
                             if (root.currentIndex >= Notifications.popupList.length) {
                                 root.currentIndex = Math.max(0, Notifications.popupList.length - 1);
@@ -284,21 +280,21 @@ Item {
                             }
                         }
                     }
-                    
+
                     // Transiciones verticales - igual que el launcher
                     pushEnter: Transition {
                         PropertyAnimation {
                             property: "y"
                             from: notificationStack.height
                             to: 0
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                             easing.type: Easing.OutCubic
                         }
                         PropertyAnimation {
                             property: "opacity"
                             from: 0
                             to: 1
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                             easing.type: Easing.OutQuart
                         }
                     }
@@ -308,14 +304,14 @@ Item {
                             property: "y"
                             from: 0
                             to: -notificationStack.height
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                             easing.type: Easing.OutCubic
                         }
                         PropertyAnimation {
                             property: "opacity"
                             from: 1
                             to: 0
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                             easing.type: Easing.OutQuart
                         }
                     }
@@ -325,14 +321,14 @@ Item {
                             property: "y"
                             from: -notificationStack.height
                             to: 0
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                             easing.type: Easing.OutCubic
                         }
                         PropertyAnimation {
                             property: "opacity"
                             from: 0
                             to: 1
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                             easing.type: Easing.OutQuart
                         }
                     }
@@ -342,40 +338,42 @@ Item {
                             property: "y"
                             from: 0
                             to: notificationStack.height
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                             easing.type: Easing.OutCubic
                         }
                         PropertyAnimation {
                             property: "opacity"
                             from: 1
                             to: 0
-                            duration: Config.animDuration / 2
+                            duration: Config.animDuration
                             easing.type: Easing.OutQuart
                         }
                     }
                 }
-                
+
                 // Componente de notificación reutilizable
                 Component {
                     id: notificationComponent
-                    
+
                     Item {
                         width: notificationStack.width
-                        height: notificationStack.height
-                        
+                        implicitHeight: notificationContent.implicitHeight
+
                         property var notification
-                        
+
                         Column {
-                            anchors.fill: parent
+                            id: notificationContent
+                            width: parent.width
                             spacing: hovered ? 8 : 0
-                            
+
                             // Contenido principal de la notificación
                             RowLayout {
                                 id: mainContentRow
                                 width: parent.width
-                                height: Math.max(hovered ? 48 : 32, textColumn.implicitHeight)
+                                implicitHeight: Math.max(hovered ? 48 : 32, textColumn.implicitHeight)
+                                height: implicitHeight
                                 spacing: 8
-                                
+
                                 // App icon
                                 NotificationAppIcon {
                                     id: appIcon
@@ -480,9 +478,7 @@ Item {
                                         height: 32
                                         hoverEnabled: true
 
-                                        onHoveredChanged: {
-                                            root.anyButtonHovered = hovered;
-                                        }
+                                        // Ya no necesita gestionar anyButtonHovered porque mouseArea principal maneja el hover
 
                                         background: Rectangle {
                                             color: parent.pressed ? Colors.adapter.error : (parent.hovered ? Colors.surfaceBright : Colors.surface)
@@ -490,7 +486,7 @@ Item {
 
                                             Behavior on color {
                                                 ColorAnimation {
-                                                    duration: Config.animDuration / 2
+                                                    duration: Config.animDuration
                                                 }
                                             }
                                         }
@@ -505,7 +501,7 @@ Item {
 
                                             Behavior on color {
                                                 ColorAnimation {
-                                                    duration: Config.animDuration / 2
+                                                    duration: Config.animDuration
                                                 }
                                             }
                                         }
@@ -518,12 +514,13 @@ Item {
                                     }
                                 }
                             }
-                            
+
                             // Botones de acción (solo visible con hover)
                             Item {
                                 id: actionButtonsRow
                                 width: parent.width
-                                height: (hovered && notification && notification.actions.length > 0) ? 32 : 0
+                                implicitHeight: (hovered && notification && notification.actions.length > 0) ? 32 : 0
+                                height: implicitHeight
                                 clip: true
 
                                 RowLayout {
@@ -543,9 +540,7 @@ Item {
                                             font.weight: Font.Bold
                                             hoverEnabled: true
 
-                                            onHoveredChanged: {
-                                                root.anyButtonHovered = hovered;
-                                            }
+                                            // Ya no necesita gestionar anyButtonHovered porque mouseArea principal maneja el hover
 
                                             background: Rectangle {
                                                 color: parent.pressed ? Colors.adapter.primary : (parent.hovered ? Colors.surfaceBright : Colors.surface)
@@ -553,7 +548,7 @@ Item {
 
                                                 Behavior on color {
                                                     ColorAnimation {
-                                                        duration: Config.animDuration / 2
+                                                        duration: Config.animDuration
                                                     }
                                                 }
                                             }
@@ -568,7 +563,7 @@ Item {
 
                                                 Behavior on color {
                                                     ColorAnimation {
-                                                        duration: Config.animDuration / 2
+                                                        duration: Config.animDuration
                                                     }
                                                 }
                                             }
