@@ -306,7 +306,6 @@ Rectangle {
 
         onExited: function (code) {
             if (code !== 0) {
-                console.log("Emoji loading failed with code:", code);
             }
         }
     }
@@ -330,7 +329,6 @@ Rectangle {
 
         onExited: function (code) {
             if (code !== 0) {
-                console.log("Recent emojis loading failed with code:", code);
             }
         }
     }

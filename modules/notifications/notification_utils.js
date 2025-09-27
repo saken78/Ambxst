@@ -1,7 +1,3 @@
-/**
- * @param { number | string | Date } timestamp 
- * @returns { string }
- */
 const getFriendlyNotifTimeString = (timestamp) => {
     if (!timestamp) return '';
     const messageTime = new Date(timestamp);

@@ -13,7 +13,6 @@ ActionGrid {
     iconSize: 20
     spacing: 8
 
-    // Forzar foco al abrir
     Component.onCompleted: {
         root.forceActiveFocus();
     }
@@ -47,7 +46,6 @@ ActionGrid {
     ]
 
     onActionTriggered: action => {
-        console.log("Executing power action:", action.command);
         root.itemSelected();
     }
 }

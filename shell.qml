@@ -14,7 +14,6 @@ import qs.config
 ShellRoot {
     id: root
 
-    // Wallpaper for all screens
     Variants {
         model: Quickshell.screens
 
@@ -28,7 +27,6 @@ ShellRoot {
         }
     }
 
-    // Multi-monitor support - create bar for each screen
     Variants {
         model: {
             const screens = Quickshell.screens;
@@ -48,7 +46,6 @@ ShellRoot {
         }
     }
 
-    // Multi-monitor support - create notch for each screen
     Variants {
         model: {
             const screens = Quickshell.screens;
@@ -68,7 +65,6 @@ ShellRoot {
         }
     }
 
-    // Multi-monitor support - create corners for each screen
     Variants {
         model: Quickshell.screens
 
@@ -82,18 +78,10 @@ ShellRoot {
         }
     }
 
-    // Comentado - Las notificaciones ahora se muestran en el notch
-    // Loader {
-    //     active: true
-    //     sourceComponent: NotificationPopup {}
-    // }
-
-    // Global shortcuts service
     GlobalShortcuts {
         id: globalShortcuts
     }
 
-    // Hyprland configuration service
     HyprlandConfig {
         id: hyprlandConfig
     }

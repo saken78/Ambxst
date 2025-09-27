@@ -6,10 +6,6 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Notifications
 
-/**
- * Notification service for Ambyst
- * Provides popup notifications with timeout and grouping by app
- */
 Singleton {
     id: root
 
@@ -40,12 +36,6 @@ Singleton {
                 image = notification.image ?? "";
                 summary = notification.summary ?? "";
                 urgency = notification.urgency.toString() ?? "normal";
-                console.log("[NOTIF-DEBUG] Valores capturados:", {
-                    id: id,
-                    appName: appName,
-                    summary: summary,
-                    body: body
-                });
             }
         }
     }
@@ -145,28 +135,14 @@ Singleton {
     }
 
     function groupsForList(list) {
-        console.log("[NOTIF-DEBUG] Agrupando lista de notificaciones, tamaño:", list.length);
         const groups = {};
         list.forEach((notif, index) => {
-            console.log("[NOTIF-DEBUG] Procesando notificación", index, ":", {
-                id: notif?.id,
-                appName: notif?.appName,
-                summary: notif?.summary,
-                body: notif?.body,
-                notificationObject: notif?.notification ? "exists" : "null",
-                notificationSummary: notif?.notification?.summary,
-                notificationBody: notif?.notification?.body,
-                isValid: !!(notif && notif.appName && (notif.summary || notif.body))
-            });
-            
             // Verificar que la notificación es válida antes de agruparla
             if (!notif || !notif.appName || (!notif.summary && !notif.body)) {
-                console.log("[NOTIF-DEBUG] Notificación inválida en agrupamiento, saltando");
                 return;
             }
             
             if (!groups[notif.appName]) {
-                console.log("[NOTIF-DEBUG] Creando nuevo grupo para", notif.appName);
                 groups[notif.appName] = {
                     appName: notif.appName,
                     appIcon: notif.appIcon,
@@ -177,14 +153,8 @@ Singleton {
             groups[notif.appName].notifications.push(notif);
             // Always set to the latest time in the group
             groups[notif.appName].time = latestTimeForApp[notif.appName] || notif.time;
-            console.log("[NOTIF-DEBUG] Agregado a grupo", notif.appName, "total en grupo:", groups[notif.appName].notifications.length);
         });
-        
-        console.log("[NOTIF-DEBUG] Grupos creados:", Object.keys(groups).map(key => ({
-            appName: key,
-            count: groups[key].notifications.length
-        })));
-        
+
         return groups;
     }
 
@@ -214,17 +184,8 @@ Singleton {
         persistenceSupported: true
 
         onNotification: notification => {
-            console.log("[NOTIF-DEBUG] Nueva notificación recibida:", {
-                id: notification.id,
-                appName: notification.appName,
-                summary: notification.summary,
-                body: notification.body,
-                hasContent: !!(notification.summary || notification.body)
-            });
-            
             // Verificar que la notificación tiene contenido válido antes de procesarla
             if (!notification || (!notification.summary && !notification.body)) {
-                console.warn("[NOTIF-DEBUG] Notificación inválida, saltando:", notification);
                 return;
             }
             
@@ -234,22 +195,10 @@ Singleton {
                 "notification": notification,
                 "time": Date.now()
             });
-            
-            console.log("[NOTIF-DEBUG] Objeto de notificación creado:", {
-                id: newNotifObject.id,
-                appName: newNotifObject.appName,
-                summary: newNotifObject.summary,
-                body: newNotifObject.body,
-                notificationRef: newNotifObject.notification ? "exists" : "null",
-                notificationSummary: newNotifObject.notification?.summary,
-                notificationBody: newNotifObject.notification?.body
-            });
-            
+
             // Usar Qt.callLater para evitar race conditions al actualizar la lista
             Qt.callLater(() => {
-                console.log("[NOTIF-DEBUG] Agregando a lista, tamaño anterior:", root.list.length);
                 root.list = [...root.list, newNotifObject];
-                console.log("[NOTIF-DEBUG] Lista actualizada, nuevo tamaño:", root.list.length);
             });
 
             // Popup - ahora se muestra en el notch en lugar de popup window
@@ -327,7 +276,6 @@ Singleton {
             const action = notifServerNotif.actions.find(action => action.identifier === notifIdentifier);
             action.invoke();
         } else {
-            console.log("Notification not found in server: " + id);
         }
         root.discardNotification(id);
     }

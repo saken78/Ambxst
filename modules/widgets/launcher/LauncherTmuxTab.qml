@@ -40,14 +40,12 @@ Rectangle {
 
     signal itemSelected
 
-    // Model para hacer la lista observable
     QtObject {
         id: listModel
         property var sessions: []
 
         function updateSessions(newSessions) {
             sessions = newSessions;
-            console.log("DEBUG: listModel updated with", sessions.length, "sessions");
         }
     }
 
@@ -84,11 +82,8 @@ Rectangle {
     }
 
     function updateFilteredSessions() {
-        console.log("DEBUG: updateFilteredSessions called. searchText:", searchText, "tmuxSessions.length:", tmuxSessions.length);
-
         var newFilteredSessions = [];
 
-        // Filtrar sesiones que coincidan con el texto de búsqueda (sin considerar deleteMode aquí)
         if (searchText.length === 0) {
             newFilteredSessions = tmuxSessions.slice(); // Copia del array
         } else {
@@ -96,12 +91,10 @@ Rectangle {
                 return session.name.toLowerCase().includes(searchText.toLowerCase());
             });
 
-            // Verificar si existe una sesión con el nombre exacto
             let exactMatch = tmuxSessions.find(function (session) {
                 return session.name.toLowerCase() === searchText.toLowerCase();
             });
 
-            // Si no hay coincidencia exacta y hay texto de búsqueda, agregar opción para crear la sesión específica
             if (!exactMatch && searchText.length > 0) {
                 newFilteredSessions.push({
                     name: `Create session "${searchText}"`,
@@ -112,9 +105,6 @@ Rectangle {
             }
         }
 
-        console.log("DEBUG: newFilteredSessions after filter:", newFilteredSessions.length);
-
-        // Solo agregar el botón "Create new session" cuando NO hay texto de búsqueda y NO estamos en modo eliminar o renombrar
         if (searchText.length === 0 && !deleteMode && !renameMode) {
             newFilteredSessions.push({
                 name: "Create new session",
@@ -123,12 +113,8 @@ Rectangle {
             });
         }
 
-        console.log("DEBUG: newFilteredSessions after adding create button:", newFilteredSessions.length);
-
-        // Actualizar el modelo
         listModel.updateSessions(newFilteredSessions);
 
-        // Auto-highlight first item when text is entered, pero NO en modo eliminar o renombrar
         if (!deleteMode && !renameMode) {
             if (searchText.length > 0 && newFilteredSessions.length > 0) {
                 selectedIndex = 0;
@@ -139,104 +125,78 @@ Rectangle {
             }
         }
 
-        console.log("DEBUG: Final selectedIndex:", selectedIndex, "resultsList will have count:", newFilteredSessions.length);
-
-        // Check if we need to select a pending renamed session
         if (pendingRenamedSession !== "") {
-            console.log("DEBUG: Looking for pending renamed session:", pendingRenamedSession);
             for (let i = 0; i < newFilteredSessions.length; i++) {
                 if (newFilteredSessions[i].name === pendingRenamedSession) {
-                    console.log("DEBUG: Found renamed session at index:", i);
                     selectedIndex = i;
                     resultsList.currentIndex = i;
-                    pendingRenamedSession = ""; // Clear the pending selection
+                    pendingRenamedSession = "";
                     break;
                 }
             }
-            // If we didn't find it, clear the pending selection anyway
             if (pendingRenamedSession !== "") {
-                console.log("DEBUG: Renamed session not found, clearing pending selection");
                 pendingRenamedSession = "";
             }
         }
     }
 
     function enterDeleteMode(sessionName) {
-        console.log("DEBUG: Entering delete mode for session:", sessionName);
-        originalSelectedIndex = selectedIndex; // Store the current index
+        originalSelectedIndex = selectedIndex;
         deleteMode = true;
         sessionToDelete = sessionName;
-        deleteButtonIndex = 0; // Start with cancel button selected
-        // Quitar focus del SearchInput para que el componente root pueda capturar teclas
+        deleteButtonIndex = 0;
         root.forceActiveFocus();
-    // No necesito llamar updateFilteredSessions porque el delegate se actualiza automáticamente
     }
 
     function cancelDeleteMode() {
-        console.log("DEBUG: Canceling delete mode");
         deleteMode = false;
         sessionToDelete = "";
         deleteButtonIndex = 0;
-        // Devolver focus al SearchInput
         searchInput.focusInput();
         updateFilteredSessions();
-        // Restore the original selectedIndex
         selectedIndex = originalSelectedIndex;
         resultsList.currentIndex = originalSelectedIndex;
         originalSelectedIndex = -1;
     }
 
     function confirmDeleteSession() {
-        console.log("DEBUG: Confirming delete for session:", sessionToDelete);
         killProcess.command = ["tmux", "kill-session", "-t", sessionToDelete];
         killProcess.running = true;
         cancelDeleteMode();
     }
 
     function enterRenameMode(sessionName) {
-        console.log("DEBUG: Entering rename mode for session:", sessionName);
-        renameSelectedIndex = selectedIndex; // Store the current index
+        renameSelectedIndex = selectedIndex;
         renameMode = true;
         sessionToRename = sessionName;
-        newSessionName = sessionName; // Start with the current name
-        renameButtonIndex = 1; // Start with accept button selected
-        // Quitar focus del SearchInput para que el componente root pueda capturar teclas
+        newSessionName = sessionName;
+        renameButtonIndex = 1;
         root.forceActiveFocus();
-        // Force focus to the TextInput after the loader switches components
         Qt.callLater(() => {
-            console.log("DEBUG: Attempting to find and focus rename TextInput");
-        // The TextInput's Component.onCompleted will handle the actual focusing
         });
     }
 
     function cancelRenameMode() {
-        console.log("DEBUG: Canceling rename mode");
         renameMode = false;
         sessionToRename = "";
         newSessionName = "";
         renameButtonIndex = 1;
-        // Only clear pending selection if we're not waiting for a rename result
         if (pendingRenamedSession === "") {
-            // Devolver focus al SearchInput
             searchInput.focusInput();
             updateFilteredSessions();
-            // Restore the original selectedIndex
             selectedIndex = renameSelectedIndex;
             resultsList.currentIndex = renameSelectedIndex;
         } else {
-            // If we have a pending renamed session, just restore focus but don't update selection
             searchInput.focusInput();
         }
         renameSelectedIndex = -1;
     }
 
     function confirmRenameSession() {
-        console.log("DEBUG: Confirming rename for session:", sessionToRename, "to:", newSessionName);
         if (newSessionName.trim() !== "" && newSessionName !== sessionToRename) {
             renameProcess.command = ["tmux", "rename-session", "-t", sessionToRename, newSessionName.trim()];
             renameProcess.running = true;
         } else {
-            // Si no hay cambios, solo cancelar
             cancelRenameMode();
         }
     }
@@ -247,10 +207,8 @@ Rectangle {
 
     function createTmuxSession(sessionName) {
         if (sessionName) {
-            // Crear la sesión con nombre específico en el directorio home
             createProcess.command = ["bash", "-c", `cd "$HOME" && setsid kitty -e tmux new -s "${sessionName}" < /dev/null > /dev/null 2>&1 &`];
         } else {
-            // Crear sesión sin nombre en el directorio home
             createProcess.command = ["bash", "-c", `cd "$HOME" && setsid kitty -e tmux < /dev/null > /dev/null 2>&1 &`];
         }
         createProcess.running = true;
@@ -258,7 +216,6 @@ Rectangle {
     }
 
     function attachToSession(sessionName) {
-        // Ejecutar terminal con tmux attach de forma independiente (detached) desde home
         attachProcess.command = ["bash", "-c", `cd "$HOME" && setsid kitty -e tmux attach-session -t "${sessionName}" < /dev/null > /dev/null 2>&1 &`];
         attachProcess.running = true;
     }
@@ -267,18 +224,15 @@ Rectangle {
     implicitHeight: mainLayout.implicitHeight
     color: "transparent"
 
-    // MouseArea global para detectar clicks en cualquier espacio vacío
     MouseArea {
         anchors.fill: parent
         enabled: root.deleteMode || root.renameMode
-        z: -10 // Muy por debajo para que no interfiera con otros componentes
+        z: -10
 
         onClicked: {
             if (root.deleteMode) {
-                console.log("DEBUG: Clicked on empty space globally - canceling delete mode");
                 root.cancelDeleteMode();
             } else if (root.renameMode) {
-                console.log("DEBUG: Clicked on empty space globally - canceling rename mode");
                 root.cancelRenameMode();
             }
         }
@@ -291,7 +245,6 @@ Rectangle {
         }
     }
 
-    // Proceso para obtener lista de sesiones de tmux
     Process {
         id: tmuxProcess
         command: ["tmux", "list-sessions", "-F", "#{session_name}"]
@@ -320,27 +273,23 @@ Rectangle {
 
         onExited: function (exitCode) {
             if (exitCode !== 0) {
-                // No hay sesiones o tmux no está disponible
                 root.tmuxSessions = [];
                 root.updateFilteredSessions();
             }
         }
     }
 
-    // Proceso para crear nuevas sesiones
     Process {
         id: createProcess
         running: false
 
         onExited: function (code) {
             if (code === 0) {
-                // Sesión creada exitosamente, refrescar la lista
                 root.refreshTmuxSessions();
             }
         }
     }
 
-    // Proceso para abrir terminal con tmux attach
     Process {
         id: attachProcess
         running: false
@@ -350,13 +299,11 @@ Rectangle {
         }
     }
 
-    // Proceso para eliminar sesiones de tmux
     Process {
         id: killProcess
         running: false
 
         onExited: function (code) {
-            console.log("DEBUG: Kill session completed with code:", code);
             if (code === 0) {
                 // Sesión eliminada exitosamente, refrescar la lista
                 root.refreshTmuxSessions();
@@ -364,13 +311,11 @@ Rectangle {
         }
     }
 
-    // Proceso para renombrar sesiones de tmux
     Process {
         id: renameProcess
         running: false
 
         onExited: function (code) {
-            console.log("DEBUG: Rename session completed with code:", code);
             if (code === 0) {
                 // Sesión renombrada exitosamente, marcar para seleccionar después del refresh
                 root.pendingRenamedSession = root.newSessionName;
@@ -399,24 +344,16 @@ Rectangle {
 
             onAccepted: {
                 if (root.deleteMode) {
-                    // En modo eliminar, Enter equivale a "N" (no eliminar)
-                    console.log("DEBUG: Enter in delete mode - canceling");
                     root.cancelDeleteMode();
                 } else {
-                    console.log("DEBUG: Enter pressed! searchText:", root.searchText, "selectedIndex:", root.selectedIndex, "resultsList.count:", resultsList.count);
-
                     if (root.selectedIndex >= 0 && root.selectedIndex < resultsList.count) {
                         let selectedSession = root.filteredSessions[root.selectedIndex];
-                        console.log("DEBUG: Selected session:", selectedSession);
                         if (selectedSession) {
                             if (selectedSession.isCreateSpecificButton) {
-                                console.log("DEBUG: Creating specific session:", selectedSession.sessionNameToCreate);
                                 root.createTmuxSession(selectedSession.sessionNameToCreate);
                             } else if (selectedSession.isCreateButton) {
-                                console.log("DEBUG: Creating new session via create button");
                                 root.createTmuxSession();
                             } else {
-                                console.log("DEBUG: Attaching to existing session:", selectedSession.name);
                                 root.attachToSession(selectedSession.name);
                             }
                         }
@@ -427,26 +364,18 @@ Rectangle {
             }
 
             onShiftAccepted: {
-                console.log("DEBUG: Shift+Enter pressed! selectedIndex:", root.selectedIndex, "deleteMode:", root.deleteMode);
-
                 if (!root.deleteMode && root.selectedIndex >= 0 && root.selectedIndex < resultsList.count) {
                     let selectedSession = root.filteredSessions[root.selectedIndex];
-                    console.log("DEBUG: Selected session for deletion:", selectedSession);
                     if (selectedSession && !selectedSession.isCreateButton && !selectedSession.isCreateSpecificButton) {
-                        // Solo permitir eliminar sesiones reales, no botones de crear
                         root.enterDeleteMode(selectedSession.name);
                     }
                 }
             }
 
             onCtrlRPressed: {
-                console.log("DEBUG: Ctrl+R pressed! selectedIndex:", root.selectedIndex, "deleteMode:", root.deleteMode, "renameMode:", root.renameMode);
-
                 if (!root.deleteMode && !root.renameMode && root.selectedIndex >= 0 && root.selectedIndex < resultsList.count) {
                     let selectedSession = root.filteredSessions[root.selectedIndex];
-                    console.log("DEBUG: Selected session for renaming:", selectedSession);
                     if (selectedSession && !selectedSession.isCreateButton && !selectedSession.isCreateSpecificButton) {
-                        // Solo permitir renombrar sesiones reales, no botones de crear
                         root.enterRenameMode(selectedSession.name);
                     }
                 }
@@ -454,7 +383,6 @@ Rectangle {
 
             onEscapePressed: {
                 if (!root.deleteMode && !root.renameMode) {
-                    // Solo cerrar el notch si NO estamos en modo eliminar o renombrar
                     root.itemSelected();
                 }
                 // Si estamos en modo eliminar o renombrar, no hacer nada aquí
@@ -524,7 +452,6 @@ Rectangle {
             }
         }
 
-        // Results list
         ListView {
             id: resultsList
             Layout.fillWidth: true
@@ -536,7 +463,6 @@ Rectangle {
             model: root.filteredSessions
             currentIndex: root.selectedIndex
 
-            // Sync currentIndex with selectedIndex
             onCurrentIndexChanged: {
                 if (currentIndex !== root.selectedIndex) {
                     root.selectedIndex = currentIndex;
@@ -556,7 +482,6 @@ Rectangle {
                 property bool isInDeleteMode: root.deleteMode && modelData.name === root.sessionToDelete
                 property bool isInRenameMode: root.renameMode && modelData.name === root.sessionToRename
 
-                // Gestos táctiles y mouse
                 MouseArea {
                     id: mouseArea
                     anchors.fill: parent
@@ -564,14 +489,12 @@ Rectangle {
                     enabled: !isInDeleteMode && !isInRenameMode && !root.optionsMenuOpen
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-                    // Variables para gestos táctiles
                     property real startX: 0
                     property real startY: 0
                     property bool isDragging: false
                     property bool longPressTriggered: false
 
                     onEntered: {
-                        // Solo cambiar la selección si no estamos en modo delete, rename o con menú abierto
                         if (!root.deleteMode && !root.renameMode && !root.optionsMenuOpen) {
                             root.selectedIndex = index;
                             resultsList.currentIndex = index;
@@ -580,20 +503,14 @@ Rectangle {
 
                     onClicked: mouse => {
                         if (mouse.button === Qt.LeftButton) {
-                            // Verificar si hay algún modo activo y este no es el item en modo activo
                             if (root.deleteMode && modelData.name !== root.sessionToDelete) {
-                                // Cancelar modo delete y no ejecutar acción
-                                console.log("DEBUG: Clicking outside delete mode - canceling");
                                 root.cancelDeleteMode();
                                 return;
                             } else if (root.renameMode && modelData.name !== root.sessionToRename) {
-                                // Cancelar modo rename y no ejecutar acción
-                                console.log("DEBUG: Clicking outside rename mode - canceling");
                                 root.cancelRenameMode();
                                 return;
                             }
 
-                            // Si no hay modos activos o este es el item activo, ejecutar acción normal
                             if (!root.deleteMode && !root.renameMode) {
                                 if (modelData.isCreateSpecificButton) {
                                     root.createTmuxSession(modelData.sessionNameToCreate);
@@ -604,22 +521,16 @@ Rectangle {
                                 }
                             }
                         } else if (mouse.button === Qt.RightButton) {
-                            // Click derecho - primero verificar si hay modos activos
                             if (root.deleteMode || root.renameMode) {
-                                // Si hay un modo activo, cancelarlo y no mostrar menú
                                 if (root.deleteMode) {
-                                    console.log("DEBUG: Right click while in delete mode - canceling");
                                     root.cancelDeleteMode();
                                 } else if (root.renameMode) {
-                                    console.log("DEBUG: Right click while in rename mode - canceling");
                                     root.cancelRenameMode();
                                 }
                                 return;
                             }
 
-                            // Click derecho - mostrar menú contextual (solo para sesiones reales)
                             if (!modelData.isCreateButton && !modelData.isCreateSpecificButton) {
-                                console.log("DEBUG: Right click detected, showing context menu");
                                 root.menuItemIndex = index;
                                 root.optionsMenuOpen = true;
                                 contextMenu.popup(mouse.x, mouse.y);
@@ -633,7 +544,6 @@ Rectangle {
                         isDragging = false;
                         longPressTriggered = false;
 
-                        // Solo iniciar el timer para long press si no es click derecho
                         if (mouse.button !== Qt.RightButton) {
                             longPressTimer.start();
                         }
@@ -650,7 +560,6 @@ Rectangle {
                                 isDragging = true;
                                 longPressTimer.stop();
 
-                                // Detectar swipe hacia la izquierda para quit (solo sesiones reales)
                                 if (deltaX < -50 && Math.abs(deltaY) < 30 && !modelData.isCreateButton && !modelData.isCreateSpecificButton) {
                                     if (!longPressTriggered) {
                                         root.enterDeleteMode(modelData.name);
@@ -667,23 +576,20 @@ Rectangle {
                         longPressTriggered = false;
                     }
 
-                    // Timer para long press
                     Timer {
                         id: longPressTimer
-                        interval: 800 // 800ms para activar long press
+                        interval: 800
                         repeat: false
                         onTriggered: {
-                            // Long press activado - entrar en modo rename (solo sesiones reales)
                             if (!mouseArea.isDragging && !modelData.isCreateButton && !modelData.isCreateSpecificButton) {
                                 root.enterRenameMode(modelData.name);
                                 mouseArea.longPressTriggered = true;
                             }
                         }
+                        }
                     }
-                }
 
-                // Menú contextual usando el componente reutilizable
-                OptionsMenu {
+                    OptionsMenu {
                     id: contextMenu
 
                     onClosed: {
@@ -698,7 +604,6 @@ Rectangle {
                             highlightColor: Colors.adapter.secondary,
                             textColor: Colors.adapter.overSecondary,
                             onTriggered: function () {
-                                console.log("DEBUG: Rename clicked from ContextMenu");
                                 root.enterRenameMode(modelData.name);
                             }
                         },
@@ -708,21 +613,19 @@ Rectangle {
                             highlightColor: Colors.adapter.errorContainer,
                             textColor: Colors.adapter.error,
                             onTriggered: function () {
-                                console.log("DEBUG: Quit clicked from ContextMenu");
                                 root.enterDeleteMode(modelData.name);
                             }
                         }
                     ]
-                }
+                    }
 
-                // Botones de acción para rename que aparecen desde la derecha
-                Rectangle {
-                    id: renameActionContainer
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.rightMargin: 8
-                    width: 68 // 32 + 4 + 32
-                    height: 32
+                    Rectangle {
+                        id: renameActionContainer
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.rightMargin: 8
+                        width: 68
+                        height: 32
                     color: "transparent"
                     opacity: isInRenameMode ? 1.0 : 0.0
                     visible: opacity > 0
@@ -743,10 +646,9 @@ Rectangle {
                             duration: Config.animDuration / 2
                             easing.type: Easing.OutQuart
                         }
-                    }
+                        }
 
-                    // Highlight elástico que se estira entre botones para rename
-                    Rectangle {
+                        Rectangle {
                         id: renameHighlight
                         color: Colors.adapter.overSecondary
                         radius: Config.roundness > 4 ? Config.roundness - 4 : 0
@@ -757,7 +659,6 @@ Rectangle {
                         property real idx1X: root.renameButtonIndex
                         property real idx2X: root.renameButtonIndex
 
-                        // Posición y tamaño con efecto elástico
                         x: {
                             let minX = Math.min(idx1X, idx2X) * 36 + activeButtonMargin; // 32 + 4 spacing
                             return minX;
@@ -830,7 +731,6 @@ Rectangle {
                             }
                         }
 
-                        // Botón confirmar (check) para rename
                         Rectangle {
                             id: renameConfirmButton
                             width: 32
@@ -867,25 +767,23 @@ Rectangle {
                             }
                         }
                     }
-                }
-
-                // Contenido principal que permanece fijo
-                RowLayout {
-                    id: mainContent
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    anchors.rightMargin: isInRenameMode ? 84 : 8 // 68 (ancho botones) + 16 (padding extra)
-                    spacing: 8
-
-                    Behavior on anchors.rightMargin {
-                        NumberAnimation {
-                            duration: Config.animDuration
-                            easing.type: Easing.OutQuart
-                        }
                     }
 
-                    // Icono
-                    Rectangle {
+                    RowLayout {
+                        id: mainContent
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        anchors.rightMargin: isInRenameMode ? 84 : 8
+                        spacing: 8
+
+                        Behavior on anchors.rightMargin {
+                            NumberAnimation {
+                                duration: Config.animDuration
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+
+                        Rectangle {
                         Layout.preferredWidth: 32
                         Layout.preferredHeight: 32
                         color: {
@@ -946,14 +844,12 @@ Rectangle {
                                 }
                             }
                         }
-                    }
+                        }
 
-                    // Texto
-                    ColumnLayout {
+                        ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 2
 
-                        // Texto principal - Alternar entre Text y TextInput basado en modo renombrar
                         Loader {
                             Layout.fillWidth: true
                             sourceComponent: {
@@ -965,7 +861,6 @@ Rectangle {
                             }
                         }
 
-                        // Componente para texto normal
                         Component {
                             id: normalText
                             Text {
@@ -991,7 +886,6 @@ Rectangle {
                             }
                         }
 
-                        // Componente para campo de renombrar
                         Component {
                             id: renameTextInput
                             TextField {
@@ -1013,7 +907,6 @@ Rectangle {
                                 }
 
                                 Component.onCompleted: {
-                                    // Use Qt.callLater to ensure the component is fully loaded before focusing
                                     Qt.callLater(() => {
                                         forceActiveFocus();
                                         selectAll();
@@ -1032,16 +925,15 @@ Rectangle {
                             }
                         }
                     }
-                }
+                    }
 
-                // Botones de acción que aparecen desde la derecha
-                Rectangle {
-                    id: actionContainer
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.rightMargin: 8
-                    width: 68 // 32 + 4 + 32
-                    height: 32
+                    Rectangle {
+                        id: actionContainer
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.rightMargin: 8
+                        width: 68
+                        height: 32
                     color: "transparent"
                     opacity: isInDeleteMode ? 1.0 : 0.0
                     visible: opacity > 0
@@ -1062,10 +954,9 @@ Rectangle {
                             duration: Config.animDuration / 2
                             easing.type: Easing.OutQuart
                         }
-                    }
+                        }
 
-                    // Highlight elástico que se estira entre botones
-                    Rectangle {
+                        Rectangle {
                         id: deleteHighlight
                         color: Colors.adapter.overError
                         radius: Config.roundness > 4 ? Config.roundness - 4 : 0
@@ -1076,7 +967,6 @@ Rectangle {
                         property real idx1X: root.deleteButtonIndex
                         property real idx2X: root.deleteButtonIndex
 
-                        // Posición y tamaño con efecto elástico
                         x: {
                             let minX = Math.min(idx1X, idx2X) * 36 + activeButtonMargin; // 32 + 4 spacing
                             return minX;
@@ -1149,7 +1039,6 @@ Rectangle {
                             }
                         }
 
-                        // Botón confirmar (check)
                         Rectangle {
                             id: confirmButton
                             width: 32
@@ -1220,94 +1109,76 @@ Rectangle {
             highlightMoveDuration: Config.animDuration / 2
             highlightMoveVelocity: -1
         }
-    }
-
-    // MouseArea para detectar clicks en espacios vacíos y cancelar modos
-    MouseArea {
-        anchors.fill: resultsList
-        enabled: root.deleteMode || root.renameMode
-        z: -1 // Debajo de los items para que no interfiera con sus MouseAreas
-
-        onClicked: {
-            if (root.deleteMode) {
-                console.log("DEBUG: Clicked on empty space - canceling delete mode");
-                root.cancelDeleteMode();
-            } else if (root.renameMode) {
-                console.log("DEBUG: Clicked on empty space - canceling rename mode");
-                root.cancelRenameMode();
             }
+
+            MouseArea {
+                anchors.fill: resultsList
+                enabled: root.deleteMode || root.renameMode
+                z: -1
+
+                onClicked: {
+                    if (root.deleteMode) {
+                        root.cancelDeleteMode();
+                    } else if (root.renameMode) {
+                        root.cancelRenameMode();
+                    }
         }
-    }
+            }
 
-    Component.onCompleted: {
-        // Cargar sesiones de tmux al inicializar
-        refreshTmuxSessions();
-        Qt.callLater(() => {
-            focusSearchInput();
-        });
-    }
+            Component.onCompleted: {
+                refreshTmuxSessions();
+                Qt.callLater(() => {
+                    focusSearchInput();
+                });
+            }
 
-    // Handler de teclas global para manejar navegación en modo eliminar y renombrar
-    Keys.onPressed: event => {
-        if (root.deleteMode) {
-            if (event.key === Qt.Key_Left) {
-                root.deleteButtonIndex = 0; // Cancelar (cruz)
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Right) {
-                root.deleteButtonIndex = 1; // Confirmar (check)
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Space) {
-                // Ejecutar acción del botón seleccionado
-                if (root.deleteButtonIndex === 0) {
-                    console.log("DEBUG: Enter/Space pressed - canceling delete");
-                    root.cancelDeleteMode();
-                } else {
-                    console.log("DEBUG: Enter/Space pressed - confirming delete");
-                    root.confirmDeleteSession();
+            Keys.onPressed: event => {
+                if (root.deleteMode) {
+                    if (event.key === Qt.Key_Left) {
+                        root.deleteButtonIndex = 0;
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Right) {
+                        root.deleteButtonIndex = 1;
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Space) {
+                        if (root.deleteButtonIndex === 0) {
+                            root.cancelDeleteMode();
+                        } else {
+                            root.confirmDeleteSession();
+                        }
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Escape) {
+                        root.cancelDeleteMode();
+                        event.accepted = true;
+                    }
+                } else if (root.renameMode) {
+                    if (event.key === Qt.Key_Left) {
+                        root.renameButtonIndex = 0;
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Right) {
+                        root.renameButtonIndex = 1;
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Space) {
+                        if (root.renameButtonIndex === 0) {
+                            root.cancelRenameMode();
+                        } else {
+                            root.confirmRenameSession();
+                        }
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Escape) {
+                        root.cancelRenameMode();
+                        event.accepted = true;
+                    }
                 }
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Escape) {
-                console.log("DEBUG: Escape pressed in delete mode - canceling without closing notch");
-                root.cancelDeleteMode();
-                event.accepted = true;
             }
-        } else if (root.renameMode) {
-            // En modo renombrar, manejar navegación entre botones y acciones
-            if (event.key === Qt.Key_Left) {
-                root.renameButtonIndex = 0; // Cancelar (cruz)
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Right) {
-                root.renameButtonIndex = 1; // Confirmar (check)
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Space) {
-                // Ejecutar acción del botón seleccionado
-                if (root.renameButtonIndex === 0) {
-                    console.log("DEBUG: Enter/Space pressed - canceling rename");
-                    root.cancelRenameMode();
-                } else {
-                    console.log("DEBUG: Enter/Space pressed - confirming rename");
-                    root.confirmRenameSession();
+
+            onDeleteModeChanged: {
+                if (!deleteMode) {
                 }
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Escape) {
-                console.log("DEBUG: Escape pressed in rename mode - canceling rename");
-                root.cancelRenameMode();
-                event.accepted = true;
             }
-        }
-    }
 
-    // Monitor cambios en deleteMode para cancelar al cambiar tabs
-    onDeleteModeChanged: {
-        if (!deleteMode) {
-            console.log("DEBUG: Delete mode ended");
-        }
-    }
-
-    // Monitor cambios en renameMode
-    onRenameModeChanged: {
-        if (!renameMode) {
-            console.log("DEBUG: Rename mode ended");
-        }
-    }
+            onRenameModeChanged: {
+                if (!renameMode) {
+                }
+            }
 }
