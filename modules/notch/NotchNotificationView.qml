@@ -480,8 +480,8 @@ Item {
 
                                     // Botón de descartar
                                     Button {
-                                        width: 32
-                                        height: 32
+                                        width: 24
+                                        height: 24
                                         hoverEnabled: true
 
                                         // Ya no necesita gestionar anyButtonHovered porque mouseArea principal maneja el hover
@@ -500,7 +500,7 @@ Item {
                                         contentItem: Text {
                                             text: Icons.cancel
                                             font.family: Icons.font
-                                            font.pixelSize: 16
+                                            font.pixelSize: 14
                                             color: parent.pressed ? Colors.adapter.overError : (parent.hovered ? Colors.adapter.overBackground : Colors.adapter.error)
                                             horizontalAlignment: Text.AlignHCenter
                                             verticalAlignment: Text.AlignVCenter
