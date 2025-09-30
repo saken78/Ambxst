@@ -26,7 +26,7 @@ PanelWindow {
     property string fallbackDir: Qt.resolvedUrl("../../../../assets/wallpapers_example").toString().replace("file://", "")
     property list<string> wallpaperPaths: []
     property int currentIndex: 0
-    property string currentWallpaper: wallpaperPaths.length > 0 ? wallpaperPaths[currentIndex] : ""
+    property string currentWallpaper: initialLoadCompleted && !usingFallback && wallpaperPaths.length > 0 ? wallpaperPaths[currentIndex] : ""
     property bool initialLoadCompleted: false
     property bool usingFallback: false
 
@@ -99,22 +99,7 @@ PanelWindow {
     }
 
     onCurrentWallpaperChanged: {
-        if (currentWallpaper && initialLoadCompleted) {
-            console.log("Wallpaper changed to:", currentWallpaper);
-
-            var fileType = getFileType(currentWallpaper);
-            var matugenSource = getColorSource(currentWallpaper);
-
-            console.log("Using source for matugen:", matugenSource, "(type:", fileType + ")");
-
-            // Ejecutar matugen con configuración específica
-            var command = ["matugen", "image", matugenSource, "-c", Qt.resolvedUrl("../../../../assets/matugen/config.toml").toString().replace("file://", "")];
-            if (Config.theme.lightMode) {
-                command.push("-m", "light");
-            }
-            matugenProcessWithConfig.command = command;
-            matugenProcessWithConfig.running = true;
-        }
+        // Matugen se ejecuta manualmente en las funciones de cambio
     }
 
     function setWallpaper(path) {
@@ -124,6 +109,7 @@ PanelWindow {
         if (pathIndex !== -1) {
             currentIndex = pathIndex;
             wallpaperConfig.adapter.currentWall = path;
+            runMatugenForCurrentWallpaper();
         } else {
             console.warn("Wallpaper path not found in current list:", path);
         }
@@ -136,6 +122,7 @@ PanelWindow {
         currentIndex = (currentIndex + 1) % wallpaperPaths.length;
         currentWallpaper = wallpaperPaths[currentIndex];
         wallpaperConfig.adapter.currentWall = wallpaperPaths[currentIndex];
+        runMatugenForCurrentWallpaper();
     }
 
     function previousWallpaper() {
@@ -145,6 +132,7 @@ PanelWindow {
         currentIndex = currentIndex === 0 ? wallpaperPaths.length - 1 : currentIndex - 1;
         currentWallpaper = wallpaperPaths[currentIndex];
         wallpaperConfig.adapter.currentWall = wallpaperPaths[currentIndex];
+        runMatugenForCurrentWallpaper();
     }
 
     function setWallpaperByIndex(index) {
@@ -153,6 +141,7 @@ PanelWindow {
             currentIndex = index;
             currentWallpaper = wallpaperPaths[currentIndex];
             wallpaperConfig.adapter.currentWall = wallpaperPaths[currentIndex];
+            runMatugenForCurrentWallpaper();
         }
     }
 
@@ -393,13 +382,13 @@ PanelWindow {
                                 currentIndex = 0;
                             }
 
-                            if (!initialLoadCompleted) {
-                                if (!wallpaperConfig.adapter.currentWall) {
-                                    wallpaperConfig.adapter.currentWall = wallpaperPaths[0];
-                                }
-                                console.log("DEBUG: Setting initialLoadCompleted to true");
-                                initialLoadCompleted = true;
+                        if (!initialLoadCompleted) {
+                            if (!wallpaperConfig.adapter.currentWall) {
+                                wallpaperConfig.adapter.currentWall = wallpaperPaths[0];
                             }
+                            console.log("DEBUG: Setting initialLoadCompleted to true");
+                            initialLoadCompleted = true;
+                        }
                         }
                     }
                 }
