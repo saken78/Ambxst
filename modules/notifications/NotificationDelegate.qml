@@ -407,7 +407,8 @@ Item {
                         hoverEnabled: true
 
                         background: Rectangle {
-                            color: latestNotification && latestNotification.urgency == NotificationUrgency.Critical ? Colors.criticalRed : (parent.pressed ? Colors.primary : (parent.hovered ? Colors.surfaceBright : Colors.surface))
+                            property bool isCritical: latestNotification && latestNotification.urgency == NotificationUrgency.Critical
+                            color: isCritical ? (parent.hovered ? Qt.lighter(Colors.criticalRed, 1.3) : Colors.criticalRed) : (parent.pressed ? Colors.primary : (parent.hovered ? Colors.surfaceBright : Colors.surface))
                             radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                             Behavior on color {

@@ -22,7 +22,7 @@ Item {
         return (Notifications.popupList.length > currentIndex && currentIndex >= 0) ? Notifications.popupList[currentIndex] : (Notifications.popupList.length > 0 ? Notifications.popupList[0] : null);
     }
     property bool notchHovered: false
-    property bool hovered: notchHovered || mouseArea.containsMouse
+    property bool hovered: notchHovered
 
     // Índice actual para navegación
     property int currentIndex: 0
@@ -44,13 +44,13 @@ Item {
         }
     }
 
-    // MouseArea para detectar hover en toda el área y navegación con scroll
+    // MouseArea para scroll solamente
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        hoverEnabled: true
+        hoverEnabled: false
         acceptedButtons: Qt.NoButton
-        z: 1000  // Poner encima de todos los elementos
+        z: 50
 
         // Navegación con rueda del ratón cuando hay múltiples notificaciones
         onWheel: {
@@ -126,6 +126,7 @@ Item {
                     topRightRadius: 0
                     bottomLeftRadius: Config.roundness
                     bottomRightRadius: Config.roundness
+                    z: 200
 
                     Behavior on color {
                         ColorAnimation {
@@ -138,8 +139,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-
-                        // Ya no necesita gestionar anyButtonHovered porque mouseArea principal maneja el hover
+                        z: 200
 
                         onClicked: {
                             GlobalStates.dashboardCurrentTab = 0;
@@ -542,6 +542,7 @@ Item {
                                         Layout.preferredWidth: hovered ? 24 : 0
                                         Layout.preferredHeight: hovered ? 24 : 0
                                         Layout.alignment: Qt.AlignTop
+                                        z: 200
 
                                         Loader {
                                             anchors.fill: parent
@@ -551,9 +552,11 @@ Item {
                                                 id: dismissButton
                                                 anchors.fill: parent
                                                 hoverEnabled: true
+                                                z: 200
 
                                                 background: Rectangle {
-                                                    color: notification && notification.urgency == NotificationUrgency.Critical ? Colors.criticalRed : (parent.pressed ? Colors.error : (parent.hovered ? Colors.surfaceBright : Colors.surface))
+                                                    property bool isCritical: notification && notification.urgency == NotificationUrgency.Critical
+                                                    color: isCritical ? (parent.hovered ? Qt.lighter(Colors.criticalRed, 1.3) : Colors.criticalRed) : (parent.pressed ? Colors.error : (parent.hovered ? Colors.surfaceBright : Colors.surface))
                                                     radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                                                     Behavior on color {
@@ -596,6 +599,7 @@ Item {
                                 implicitHeight: (hovered && notification && notification.actions.length > 0 && !notification.isCached) ? 32 : 0
                                 height: implicitHeight
                                 clip: true
+                                z: 200
 
                                 RowLayout {
                                     anchors.fill: parent
@@ -607,6 +611,7 @@ Item {
                                         Button {
                                             Layout.fillWidth: true
                                             Layout.preferredHeight: 32
+                                            z: 200
 
                                             text: modelData.text
                                             font.family: Config.theme.font
@@ -614,10 +619,9 @@ Item {
                                             font.weight: Font.Bold
                                             hoverEnabled: true
 
-                                            // Ya no necesita gestionar anyButtonHovered porque mouseArea principal maneja el hover
-
                                             background: Rectangle {
-                                                color: notification && notification.urgency == NotificationUrgency.Critical ? Colors.criticalRed : (parent.pressed ? Colors.primary : (parent.hovered ? Colors.surfaceBright : Colors.surface))
+                                                property bool isCritical: notification && notification.urgency == NotificationUrgency.Critical
+                                                color: isCritical ? (parent.hovered ? Qt.lighter(Colors.criticalRed, 1.3) : Colors.criticalRed) : (parent.pressed ? Colors.primary : (parent.hovered ? Colors.surfaceBright : Colors.surface))
                                                 radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                                                 Behavior on color {

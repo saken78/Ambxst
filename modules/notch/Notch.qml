@@ -76,18 +76,14 @@ Item {
         bottomRightRadius: Config.notchTheme === "island" ? islandRadius : defaultRadius
         clip: true
 
-        // MouseArea para hover en todo el notch cuando hay notificaciones
-        MouseArea {
-            id: notchHoverArea
-            anchors.fill: parent
-            hoverEnabled: hasActiveNotifications
-            acceptedButtons: Qt.NoButton
-            z: -1  // Detrás de elementos interactivos
+        // HoverHandler para detectar hover sin bloquear eventos
+        HoverHandler {
+            id: notchHoverHandler
+            enabled: hasActiveNotifications
 
-            // Comunicar el hover al NotchNotificationView
-            onContainsMouseChanged: {
+            onHoveredChanged: {
                 if (hasActiveNotifications && stackViewInternal.currentItem) {
-                    stackViewInternal.currentItem.notchHovered = containsMouse;
+                    stackViewInternal.currentItem.notchHovered = hovered;
                 }
             }
         }

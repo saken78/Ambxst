@@ -14,7 +14,8 @@ Button {
     visible: visibleWhen
 
     background: Rectangle {
-        color: urgency == NotificationUrgency.Critical ? Colors.criticalRed : (parent.pressed ? Colors.error : (parent.hovered ? Colors.surfaceBright : Colors.surface))
+        property bool isCritical: urgency == NotificationUrgency.Critical
+        color: isCritical ? (parent.hovered ? Qt.lighter(Colors.criticalRed, 1.3) : Colors.criticalRed) : (parent.pressed ? Colors.error : (parent.hovered ? Colors.surfaceBright : Colors.surface))
         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
         Behavior on color {
