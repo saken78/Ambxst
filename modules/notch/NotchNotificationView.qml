@@ -45,12 +45,12 @@ Item {
         }
     }
 
-    // MouseArea para scroll solamente
+    // MouseArea para scroll y middle-click
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: false
-        acceptedButtons: Qt.NoButton
+        acceptedButtons: Qt.MiddleButton
         z: 50
 
         // Navegación con rueda del ratón cuando hay múltiples notificaciones
@@ -63,6 +63,17 @@ Item {
                     // Scroll hacia abajo - ir a la siguiente notificación
                     navigateToNext();
                 }
+            }
+        }
+
+        // Middle-click para descartar notificación
+        onPressed: {
+            if (mouse.button === Qt.MiddleButton && currentNotification) {
+                if (Notifications.popupList.length > 1) {
+                    root.isNavigating = true;
+                    navigationHoverTimer.restart();
+                }
+                Notifications.discardNotification(currentNotification.id);
             }
         }
     }
