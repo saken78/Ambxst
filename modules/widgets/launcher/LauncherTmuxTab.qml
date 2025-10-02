@@ -1109,30 +1109,31 @@ Rectangle {
             highlightMoveDuration: Config.animDuration / 2
             highlightMoveVelocity: -1
         }
+
+        MouseArea {
+            Layout.fillWidth: true
+            Layout.preferredHeight: resultsList.height
+            enabled: root.deleteMode || root.renameMode
+            z: 1000
+
+            onClicked: {
+                if (root.deleteMode) {
+                    root.cancelDeleteMode();
+                } else if (root.renameMode) {
+                    root.cancelRenameMode();
+                }
             }
-
-            MouseArea {
-                anchors.fill: resultsList
-                enabled: root.deleteMode || root.renameMode
-                z: -1
-
-                onClicked: {
-                    if (root.deleteMode) {
-                        root.cancelDeleteMode();
-                    } else if (root.renameMode) {
-                        root.cancelRenameMode();
-                    }
         }
-            }
+    }
 
-            Component.onCompleted: {
-                refreshTmuxSessions();
-                Qt.callLater(() => {
-                    focusSearchInput();
-                });
-            }
+    Component.onCompleted: {
+        refreshTmuxSessions();
+        Qt.callLater(() => {
+            focusSearchInput();
+        });
+    }
 
-            Keys.onPressed: event => {
+    Keys.onPressed: event => {
                 if (root.deleteMode) {
                     if (event.key === Qt.Key_Left) {
                         root.deleteButtonIndex = 0;
