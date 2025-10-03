@@ -93,7 +93,8 @@ Item {
                 enabled: stackViewInternal.busy
                 NumberAnimation {
                     duration: Config.animDuration
-                    easing.type: Easing.OutQuart
+                    easing.type: Easing.OutBack
+                    easing.overshoot: 1.2
                 }
             }
 
@@ -101,7 +102,8 @@ Item {
                 enabled: stackViewInternal.busy
                 NumberAnimation {
                     duration: Config.animDuration
-                    easing.type: Easing.OutQuart
+                    easing.type: Easing.OutBack
+                    easing.overshoot: 1.2
                 }
             }
 
