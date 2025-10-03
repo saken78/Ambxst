@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import qs.modules.theme
@@ -91,10 +92,38 @@ Item {
                     id: playerHover
                 }
 
-                Rectangle {
+                ClippingRectangle {
                     anchors.fill: parent
                     radius: Math.max(0, Config.roundness - 4)
                     color: Colors.surface
+
+                    Image {
+                        id: backgroundArt
+                        anchors.fill: parent
+                        source: compactPlayer.player?.trackArtUrl ?? ""
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                        visible: false
+                    }
+
+                    MultiEffect {
+                        anchors.fill: parent
+                        source: backgroundArt
+                        brightness: -0.25
+                        contrast: -0.75
+                        saturation: -0.5
+                        blurEnabled: true
+                        blurMax: 32
+                        blur: 0.75
+                        opacity: (compactPlayer.player?.trackArtUrl ?? "") !== "" ? 1.0 : 0.0
+
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: Config.animDuration
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                    }
 
                     Loader {
                         id: artworkLoader
@@ -116,7 +145,7 @@ Item {
                             width: 24
                             height: 24
                             radius: Math.max(0, Config.roundness - 8)
-                            color: Colors.surfaceContainerHigh
+                            color: Colors.background
 
                             Image {
                                 anchors.fill: parent
@@ -318,7 +347,7 @@ Item {
                             width: (1 - positionControl.progressRatio) * parent.width - 4
                             height: parent.height
                             radius: height / 2
-                            color: Colors.surfaceContainerHigh
+                            color: Colors.background
                         }
 
                         Loader {
