@@ -39,6 +39,23 @@ ClippingRectangle {
             font.family: Icons.font
             font.pixelSize: root.size * 0.5
             color: root.urgency == NotificationUrgency.Critical ? Colors.criticalText : Colors.primary
+
+            SequentialAnimation on opacity {
+                running: root.urgency == NotificationUrgency.Critical
+                loops: Animation.Infinite
+                NumberAnimation {
+                    from: 1.0
+                    to: 0.5
+                    duration: 800
+                    easing.type: Easing.InOutSine
+                }
+                NumberAnimation {
+                    from: 0.5
+                    to: 1.0
+                    duration: 800
+                    easing.type: Easing.InOutSine
+                }
+            }
         }
     }
 
