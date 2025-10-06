@@ -13,9 +13,6 @@ Item {
         description: "Toggle window overview"
 
         onPressed: {
-            console.log("Overview shortcut pressed");
-
-            // Toggle overview - if already open, close it; otherwise open overview
             if (Visibilities.currentActiveModule === "overview") {
                 Visibilities.setActiveModule("");
             } else {
@@ -31,9 +28,6 @@ Item {
         description: "Toggle power menu"
 
         onPressed: {
-            console.log("Power menu shortcut pressed");
-
-            // Toggle power menu - if already open, close it; otherwise open power menu
             if (Visibilities.currentActiveModule === "powermenu") {
                 Visibilities.setActiveModule("");
             } else {
@@ -50,9 +44,6 @@ Item {
         description: "Open launcher apps tab"
 
         onPressed: {
-            console.log("Launcher apps shortcut pressed");
-
-            // Toggle si ya está en launcher con apps tab, sino abrir/navegar
             if (Visibilities.currentActiveModule === "launcher" && GlobalStates.launcherCurrentTab === 0) {
                 GlobalStates.clearLauncherState();
                 Visibilities.setActiveModule("");
@@ -74,9 +65,6 @@ Item {
         description: "Open launcher tmux tab"
 
         onPressed: {
-            console.log("Launcher tmux shortcut pressed");
-
-            // Toggle si ya está en launcher con tmux tab, sino abrir/navegar
             if (Visibilities.currentActiveModule === "launcher" && GlobalStates.launcherCurrentTab === 1) {
                 GlobalStates.clearLauncherState();
                 Visibilities.setActiveModule("");
@@ -98,9 +86,6 @@ Item {
         description: "Open launcher clipboard tab"
 
         onPressed: {
-            console.log("Launcher clipboard shortcut pressed");
-
-            // Toggle si ya está en launcher con clipboard tab, sino abrir/navegar
             if (Visibilities.currentActiveModule === "launcher" && GlobalStates.launcherCurrentTab === 2) {
                 GlobalStates.clearLauncherState();
                 Visibilities.setActiveModule("");
@@ -123,9 +108,6 @@ Item {
         description: "Open dashboard widgets tab"
 
         onPressed: {
-            console.log("Dashboard widgets shortcut pressed");
-
-            // Toggle si ya está en dashboard con widgets tab, sino abrir/navegar
             if (Visibilities.currentActiveModule === "dashboard" && GlobalStates.dashboardCurrentTab === 0) {
                 Visibilities.setActiveModule("");
             } else if (Visibilities.currentActiveModule === "dashboard") {
@@ -146,9 +128,6 @@ Item {
         description: "Open dashboard pins tab"
 
         onPressed: {
-            console.log("Dashboard pins shortcut pressed");
-
-            // Toggle si ya está en dashboard con pins tab, sino abrir/navegar
             if (Visibilities.currentActiveModule === "dashboard" && GlobalStates.dashboardCurrentTab === 1) {
                 Visibilities.setActiveModule("");
             } else if (Visibilities.currentActiveModule === "dashboard") {
@@ -169,9 +148,6 @@ Item {
         description: "Open dashboard kanban tab"
 
         onPressed: {
-            console.log("Dashboard kanban shortcut pressed");
-
-            // Toggle si ya está en dashboard con kanban tab, sino abrir/navegar
             if (Visibilities.currentActiveModule === "dashboard" && GlobalStates.dashboardCurrentTab === 2) {
                 Visibilities.setActiveModule("");
             } else if (Visibilities.currentActiveModule === "dashboard") {
@@ -192,9 +168,6 @@ Item {
         description: "Open dashboard wallpapers tab"
 
         onPressed: {
-            console.log("Dashboard wallpapers shortcut pressed");
-
-            // Toggle si ya está en dashboard con wallpapers tab, sino abrir/navegar
             if (Visibilities.currentActiveModule === "dashboard" && GlobalStates.dashboardCurrentTab === 3) {
                 Visibilities.setActiveModule("");
             } else if (Visibilities.currentActiveModule === "dashboard") {
@@ -215,9 +188,6 @@ Item {
         description: "Open dashboard assistant tab"
 
         onPressed: {
-            console.log("Dashboard assistant shortcut pressed");
-
-            // Toggle si ya está en dashboard con assistant tab, sino abrir/navegar
             if (Visibilities.currentActiveModule === "dashboard" && GlobalStates.dashboardCurrentTab === 4) {
                 Visibilities.setActiveModule("");
             } else if (Visibilities.currentActiveModule === "dashboard") {
@@ -238,9 +208,6 @@ Item {
         description: "Open launcher emoji tab"
 
         onPressed: {
-            console.log("Launcher emoji shortcut pressed");
-
-            // Toggle si ya está en launcher con emoji tab, sino abrir/navegar
             if (Visibilities.currentActiveModule === "launcher" && GlobalStates.launcherCurrentTab === 3) {
                 GlobalStates.clearLauncherState();
                 Visibilities.setActiveModule("");
