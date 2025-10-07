@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 import Quickshell.Widgets
 import qs.modules.theme
+import qs.modules.components
 import qs.config
 
 Rectangle {
@@ -37,21 +37,21 @@ Rectangle {
                     width: parent.width
                     spacing: 8
 
-                    Rectangle {
+                    PaneRect {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 150
                         color: Colors.surface
                         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                     }
 
-                    Rectangle {
+                    PaneRect {
                         Layout.fillWidth: true
                         Layout.preferredHeight: width
                         color: Colors.surface
                         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                     }
 
-                    Rectangle {
+                    PaneRect {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 150
                         color: Colors.surface
