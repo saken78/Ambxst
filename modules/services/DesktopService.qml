@@ -105,7 +105,7 @@ Singleton {
     }
 
     function executeDesktopFile(filePath) {
-        execDesktopProcess.command = ["gtk-launch", filePath.split('/').pop().replace('.desktop', '')];
+        execDesktopProcess.command = ["gio", "launch", filePath];
         execDesktopProcess.running = true;
     }
 

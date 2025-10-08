@@ -94,6 +94,7 @@ PanelWindow {
                     itemPath: delegateRoot.path
                     itemType: delegateRoot.type
                     itemIcon: delegateRoot.icon
+                    isDesktopFile: delegateRoot.isDesktopFile
 
                     onActivated: {
                         console.log("Activated:", itemName);
@@ -167,6 +168,7 @@ PanelWindow {
                         itemPath: delegateRoot.path
                         itemType: delegateRoot.type
                         itemIcon: delegateRoot.icon
+                        isDesktopFile: delegateRoot.isDesktopFile
                         opacity: 0.7
                         scale: 1.05
                     }
