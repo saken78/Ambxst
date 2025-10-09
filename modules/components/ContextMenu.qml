@@ -54,10 +54,9 @@ PanelWindow {
                     let y = parseInt(coords[1].trim());
                     menu.x = x;
                     menu.y = y;
+                    menu.visible = false;
                     Qt.callLater(() => {
-                        if (menu.visible === false) {
-                            menu.popup();
-                        }
+                        menu.popup();
                     });
                 }
             }
