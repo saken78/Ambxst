@@ -23,10 +23,10 @@ Item {
 
     Rectangle {
         id: background
-        anchors.fill: parent
-        anchors.margins: 4
-        color: hoverHandler.hovered ? Qt.rgba(Colors.primary.r, Colors.primary.g, Colors.primary.b, 0.3) : "transparent"
-        radius: Config.roundness / 2
+        anchors.fill: root
+        color: Colors.primary
+        radius: Config.roundness
+        opacity: hoverHandler.hovered ? 0.25 : 0.0
 
         Behavior on color {
             ColorAnimation {
@@ -66,14 +66,12 @@ Item {
     }
 
     ColumnLayout {
-        anchors.fill: parent
+        id: contentLayout
+        anchors.fill: root
         anchors.margins: 8
-        spacing: 0
+        spacing: 4
         layer.enabled: true
-        layer.effect: Shadow {
-            shadowBlur: 0.25
-            shadowOpacity: 1
-        }
+        layer.effect: BgShadow {}
 
         Item {
             Layout.alignment: Qt.AlignHCenter
