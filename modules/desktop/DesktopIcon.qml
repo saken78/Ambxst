@@ -68,7 +68,12 @@ Item {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 8
-        spacing: 4
+        spacing: 0
+        layer.enabled: true
+        layer.effect: Shadow {
+            shadowBlur: 0.25
+            shadowOpacity: 1
+        }
 
         Item {
             Layout.alignment: Qt.AlignHCenter
@@ -90,18 +95,11 @@ Item {
             color: Colors[Config.desktop.textColor] || Colors.overBackground
             font.family: Config.defaultFont
             font.pixelSize: Config.theme.fontSize
+            font.weight: Font.Bold
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
             maximumLineCount: 2
             elide: Text.ElideRight
-
-            Rectangle {
-                anchors.fill: parent
-                anchors.margins: -2
-                color: Qt.rgba(0, 0, 0, 0.6)
-                radius: 4
-                z: -1
-            }
         }
     }
 
