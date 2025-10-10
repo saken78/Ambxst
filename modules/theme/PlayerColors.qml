@@ -214,6 +214,12 @@ Item {
             const cachePath = Quickshell.dataPath(`${playerType}_artwork.jpg`);
             downloadProcess.command = ["curl", "-sL", "-o", cachePath, artworkUrl];
             downloadProcess.running = true;
+        } else if (artworkUrl.startsWith("data:image/")) {
+            // Handle base64 encoded images (e.g., from Telegram)
+            const base64Data = artworkUrl.split(",")[1];
+            const cachePath = Quickshell.dataPath(`${playerType}_artwork.jpg`);
+            base64Process.command = ["bash", "-c", `echo "${base64Data}" | base64 -d > "${cachePath}"`];
+            base64Process.running = true;
         } else {
             const artPath = artworkUrl.replace("file://", "");
             matugenProcess.command = ["matugen", "image", artPath, "-c", configPath];
@@ -231,6 +237,24 @@ Item {
                 const configPath = assetsPath.replace("file://", "") + lastProcessedPlayerType + ".toml";
                 matugenProcess.command = ["matugen", "image", cachePath, "-c", configPath];
                 matugenProcess.running = true;
+            } else {
+                console.warn("Failed to download artwork for player:", lastProcessedPlayerType, "curl exit code:", code);
+            }
+        }
+    }
+
+    Process {
+        id: base64Process
+        running: false
+
+        onExited: function (code) {
+            if (code === 0) {
+                const cachePath = Quickshell.dataPath(`${lastProcessedPlayerType}_artwork.jpg`);
+                const configPath = assetsPath.replace("file://", "") + lastProcessedPlayerType + ".toml";
+                matugenProcess.command = ["matugen", "image", cachePath, "-c", configPath];
+                matugenProcess.running = true;
+            } else {
+                console.warn("Failed to decode base64 artwork for player:", lastProcessedPlayerType, "base64 decode exit code:", code);
             }
         }
     }
@@ -238,6 +262,12 @@ Item {
     Process {
         id: matugenProcess
         running: false
+
+        onExited: function (code) {
+            if (code !== 0) {
+                console.warn("matugen failed with code:", code, "for player:", lastProcessedPlayerType);
+            }
+        }
     }
 
     property var artworkConnections: null
