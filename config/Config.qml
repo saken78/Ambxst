@@ -57,6 +57,8 @@ Singleton {
                 property int shadowXOffset: 0
                 property int shadowYOffset: 0
                 property real shadowBlur: 1
+                property list<var> bgColor: [["background", 0.0]]
+                property string bgOrientation: "vertical"
             }
 
             property JsonObject bar: JsonObject {
@@ -142,8 +144,8 @@ Singleton {
             }
 
             property JsonObject desktop: JsonObject {
-                property bool enabled: true
-                property int iconSize: 64
+                property bool enabled: false
+                property int iconSize: 40
                 property int spacingVertical: 16
                 property string textColor: "overBackground"
             }
