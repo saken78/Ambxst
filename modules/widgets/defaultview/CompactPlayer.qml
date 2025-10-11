@@ -60,13 +60,13 @@ Item {
             }
         }
 
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 4
-            anchors.rightMargin: 8
-            spacing: compactPlayer.notchHovered ? 4 : 0
-            layer.enabled: true
-            layer.effect: BgShadow {}
+          RowLayout {
+              anchors.fill: parent
+              anchors.leftMargin: (compactPlayer.player !== null || compactPlayer.notchHovered) ? 4 : 0
+              anchors.rightMargin: (compactPlayer.player !== null || compactPlayer.notchHovered) ? 4 : 0
+              spacing: (compactPlayer.player !== null && compactPlayer.notchHovered) ? 4 : 0
+              layer.enabled: true
+              layer.effect: BgShadow {}
 
             Behavior on spacing {
                 NumberAnimation {
@@ -174,20 +174,20 @@ Item {
                 }
             }
 
-            Text {
-                id: previousBtn
-                text: Icons.previous
-                textFormat: Text.RichText
-                color: previousHover.hovered ? (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.primary : Colors.primaryFixed) : (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.overBackground : Colors.whiteSource)
-                font.pixelSize: 16
-                font.family: Icons.font
-                opacity: compactPlayer.player?.canGoPrevious ?? false ? 1.0 : 0.3
-                visible: compactPlayer.notchHovered && opacity > 0
-                clip: true
-                scale: 1.0
+             Text {
+                 id: previousBtn
+                 text: Icons.previous
+                 textFormat: Text.RichText
+                 color: previousHover.hovered ? (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.primary : Colors.primaryFixed) : (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.overBackground : Colors.whiteSource)
+                 font.pixelSize: 16
+                 font.family: Icons.font
+                 opacity: compactPlayer.player?.canGoPrevious ?? false ? 1.0 : 0.3
+                 visible: compactPlayer.player !== null && compactPlayer.notchHovered && opacity > 0
+                 clip: true
+                 scale: 1.0
 
-                readonly property real naturalWidth: implicitWidth
-                Layout.preferredWidth: compactPlayer.notchHovered ? naturalWidth : 0
+                 readonly property real naturalWidth: implicitWidth
+                 Layout.preferredWidth: (compactPlayer.player !== null && compactPlayer.notchHovered) ? naturalWidth : 0
 
                 Behavior on Layout.preferredWidth {
                     NumberAnimation {
@@ -378,20 +378,20 @@ Item {
                 }
             }
 
-            Text {
-                id: nextBtn
-                text: Icons.next
-                textFormat: Text.RichText
-                color: nextHover.hovered ? (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.primary : Colors.primaryFixed) : (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.overBackground : Colors.whiteSource)
-                font.pixelSize: 16
-                font.family: Icons.font
-                opacity: compactPlayer.player?.canGoNext ?? false ? 1.0 : 0.3
-                visible: opacity > 0
-                clip: true
-                scale: 1.0
+             Text {
+                 id: nextBtn
+                 text: Icons.next
+                 textFormat: Text.RichText
+                 color: nextHover.hovered ? (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.primary : Colors.primaryFixed) : (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.overBackground : Colors.whiteSource)
+                 font.pixelSize: 16
+                 font.family: Icons.font
+                 opacity: compactPlayer.player?.canGoNext ?? false ? 1.0 : 0.3
+                 visible: compactPlayer.player !== null && opacity > 0
+                 clip: true
+                 scale: 1.0
 
-                readonly property real naturalWidth: implicitWidth
-                Layout.preferredWidth: compactPlayer.notchHovered ? naturalWidth : 0
+                 readonly property real naturalWidth: implicitWidth
+                 Layout.preferredWidth: (compactPlayer.player !== null && compactPlayer.notchHovered) ? naturalWidth : 0
 
                 Behavior on Layout.preferredWidth {
                     NumberAnimation {
@@ -438,36 +438,37 @@ Item {
                 }
             }
 
-            Text {
-                id: modeBtn
-                text: {
-                    if (MprisController.hasShuffle)
-                        return Icons.shuffle;
-                    switch (MprisController.loopState) {
-                    case MprisLoopState.Track:
-                        return Icons.repeatOnce;
-                    case MprisLoopState.Playlist:
-                        return Icons.repeat;
-                    default:
-                        return Icons.shuffle;
-                    }
-                }
-                textFormat: Text.RichText
-                color: modeHover.hovered ? (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.primary : Colors.primaryFixed) : (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.overBackground : Colors.whiteSource)
-                font.pixelSize: 16
-                font.family: Icons.font
-                opacity: {
-                    if (!(MprisController.shuffleSupported || MprisController.loopSupported))
-                        return 0.3;
-                    if (!MprisController.hasShuffle && MprisController.loopState === MprisLoopState.None)
-                        return 0.3;
-                    return 1.0;
-                }
-                clip: true
-                scale: 1.0
+             Text {
+                 id: modeBtn
+                 text: {
+                     if (MprisController.hasShuffle)
+                         return Icons.shuffle;
+                     switch (MprisController.loopState) {
+                     case MprisLoopState.Track:
+                         return Icons.repeatOnce;
+                     case MprisLoopState.Playlist:
+                         return Icons.repeat;
+                     default:
+                         return Icons.shuffle;
+                     }
+                 }
+                 textFormat: Text.RichText
+                 color: modeHover.hovered ? (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.primary : Colors.primaryFixed) : (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.overBackground : Colors.whiteSource)
+                 font.pixelSize: 16
+                 font.family: Icons.font
+                 opacity: {
+                     if (!(MprisController.shuffleSupported || MprisController.loopSupported))
+                         return 0.3;
+                     if (!MprisController.hasShuffle && MprisController.loopState === MprisLoopState.None)
+                         return 0.3;
+                     return 1.0;
+                 }
+                 visible: compactPlayer.player !== null
+                 clip: true
+                 scale: 1.0
 
-                readonly property real naturalWidth: implicitWidth
-                Layout.preferredWidth: compactPlayer.notchHovered ? naturalWidth : 0
+                 readonly property real naturalWidth: implicitWidth
+                 Layout.preferredWidth: (compactPlayer.player !== null && compactPlayer.notchHovered) ? naturalWidth : 0
 
                 Behavior on Layout.preferredWidth {
                     NumberAnimation {
@@ -523,30 +524,48 @@ Item {
                 }
             }
 
-            Text {
-                id: playerIcon
-                text: {
-                    if (!compactPlayer.player)
-                        return Icons.player;
-                    const dbusName = (compactPlayer.player.dbusName || "").toLowerCase();
-                    const desktopEntry = (compactPlayer.player.desktopEntry || "").toLowerCase();
-                    const identity = (compactPlayer.player.identity || "").toLowerCase();
+             Text {
+                 id: playerIcon
+                 text: {
+                     if (!compactPlayer.player)
+                         return Icons.player;
+                     const dbusName = (compactPlayer.player.dbusName || "").toLowerCase();
+                     const desktopEntry = (compactPlayer.player.desktopEntry || "").toLowerCase();
+                     const identity = (compactPlayer.player.identity || "").toLowerCase();
 
-                    if (dbusName.includes("spotify") || desktopEntry.includes("spotify") || identity.includes("spotify"))
-                        return Icons.spotify;
-                    if (dbusName.includes("chromium") || dbusName.includes("chrome") || desktopEntry.includes("chromium") || desktopEntry.includes("chrome"))
-                        return Icons.chromium;
-                    if (dbusName.includes("firefox") || desktopEntry.includes("firefox"))
-                        return Icons.firefox;
-                    if (dbusName.includes("telegram") || desktopEntry.includes("telegram") || identity.includes("telegram"))
-                        return Icons.telegram;
-                    return Icons.player;
-                }
-                textFormat: Text.RichText
-                color: playerIconHover.hovered ? (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.primary : Colors.primaryFixed) : (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.overBackground : Colors.whiteSource)
-                font.pixelSize: 20
-                font.family: Icons.font
-                verticalAlignment: Text.AlignVCenter
+                     if (dbusName.includes("spotify") || desktopEntry.includes("spotify") || identity.includes("spotify"))
+                         return Icons.spotify;
+                     if (dbusName.includes("chromium") || dbusName.includes("chrome") || desktopEntry.includes("chromium") || desktopEntry.includes("chrome"))
+                         return Icons.chromium;
+                     if (dbusName.includes("firefox") || desktopEntry.includes("firefox"))
+                         return Icons.firefox;
+                     if (dbusName.includes("telegram") || desktopEntry.includes("telegram") || identity.includes("telegram"))
+                         return Icons.telegram;
+                     return Icons.player;
+                 }
+                 textFormat: Text.RichText
+                 color: playerIconHover.hovered ? (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.primary : Colors.primaryFixed) : (compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.overBackground : Colors.whiteSource)
+                 font.pixelSize: 20
+                 font.family: Icons.font
+                 verticalAlignment: Text.AlignVCenter
+                 visible: compactPlayer.player !== null
+
+                  Layout.preferredWidth: compactPlayer.player !== null ? implicitWidth : 0
+                  Layout.rightMargin: compactPlayer.player !== null ? 4 : 0
+
+                  Behavior on Layout.preferredWidth {
+                      NumberAnimation {
+                          duration: Config.animDuration
+                          easing.type: Easing.OutQuart
+                      }
+                  }
+
+                  Behavior on Layout.rightMargin {
+                      NumberAnimation {
+                          duration: Config.animDuration
+                          easing.type: Easing.OutQuart
+                      }
+                  }
 
                 Behavior on color {
                     ColorAnimation {
