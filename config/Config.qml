@@ -10,11 +10,12 @@ Singleton {
 
     property alias loader: loader
     property bool initialLoadComplete: false
+    property string configPath: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/Ambxst/config.json"
 
     Process {
         id: checkFile
         running: true
-        command: ["test", "-f", Qt.resolvedUrl("../config.json").toString().replace("file://", "")]
+        command: ["sh", "-c", "mkdir -p \"$(dirname '" + configPath + "')\" && test -f \"" + configPath + "\""]
 
         onExited: exitCode => {
             if (exitCode !== 0) {
@@ -27,7 +28,7 @@ Singleton {
 
     FileView {
         id: loader
-        path: Qt.resolvedUrl("../config.json")
+        path: configPath
         atomicWrites: true
         watchChanges: true
         onFileChanged: reload()
@@ -65,7 +66,7 @@ Singleton {
 
             property JsonObject bar: JsonObject {
                 property string position: "top"
-                property string launcherIcon: ""
+                property string launcherIcon: ""
                 property bool showBackground: false
                 property real bgOpacity: 0.5
                 property string bgColor: "surface"
