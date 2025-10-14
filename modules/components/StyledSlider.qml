@@ -203,25 +203,39 @@ Item {
         cursorShape: Qt.PointingHandCursor
         z: 3
         onClicked: mouse => {
-            const relativeX = mouse.x - sliderItem.x
-            root.value = Math.max(0, Math.min(1, relativeX / sliderItem.width))
+            if (mouse.x >= sliderItem.x) {
+                const relativeX = mouse.x - sliderItem.x
+                root.value = Math.max(0, Math.min(1, relativeX / sliderItem.width))
+            } else {
+                mouse.accepted = false
+            }
         }
         onPressed: mouse => {
-            root.isDragging = true
-            const relativeX = mouse.x - sliderItem.x
-            root.dragPosition = Math.max(0, Math.min(1, relativeX / sliderItem.width))
+            if (mouse.x >= sliderItem.x) {
+                root.isDragging = true
+                const relativeX = mouse.x - sliderItem.x
+                root.dragPosition = Math.max(0, Math.min(1, relativeX / sliderItem.width))
+            } else {
+                mouse.accepted = false
+            }
         }
         onReleased: {
-            root.value = root.dragPosition
-            root.isDragging = false
+            if (root.isDragging) {
+                root.value = root.dragPosition
+                root.isDragging = false
+            } else {
+                mouse.accepted = false
+            }
         }
         onPositionChanged: mouse => {
-            if (root.isDragging) {
+            if (root.isDragging && mouse.x >= sliderItem.x) {
                 const relativeX = mouse.x - sliderItem.x
                 root.dragPosition = Math.max(0, Math.min(1, relativeX / sliderItem.width))
                 if (!root.updateOnRelease) {
                     root.value = root.dragPosition
                 }
+            } else {
+                mouse.accepted = false
             }
         }
         onWheel: wheel => {

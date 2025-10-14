@@ -37,6 +37,33 @@ Item {
         radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
         color: Colors.surface
 
+        WavyLine {
+            id: noPlayerWavyLine
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            frequency: 2
+            color: Colors.outline
+            amplitudeMultiplier: 1
+            height: 16
+            lineWidth: 4
+            fullLength: width
+            visible: compactPlayer.player === null
+            opacity: 1.0
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: Config.animDuration
+                    easing.type: Easing.OutQuart
+                }
+            }
+
+            FrameAnimation {
+                running: noPlayerWavyLine.visible
+                onTriggered: noPlayerWavyLine.requestPaint()
+            }
+        }
+
         Image {
             id: backgroundArt
             anchors.fill: parent
@@ -72,6 +99,7 @@ Item {
             spacing: (compactPlayer.player !== null && compactPlayer.notchHovered) ? 4 : 0
             layer.enabled: true
             layer.effect: BgShadow {}
+            visible: compactPlayer.player !== null
 
             Behavior on spacing {
                 NumberAnimation {
