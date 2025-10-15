@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
 import qs.modules.services
+import qs.config
 
 Item {
     id: playerColors
@@ -222,7 +223,7 @@ Item {
             base64Process.running = true;
         } else {
             const artPath = artworkUrl.replace("file://", "");
-            matugenProcess.command = ["matugen", "image", artPath, "-c", configPath];
+            matugenProcess.command = ["matugen", "image", artPath, "-c", configPath, "-t", Config.theme.matugenScheme];
             matugenProcess.running = true;
         }
     }
@@ -235,7 +236,7 @@ Item {
             if (code === 0) {
                 const cachePath = Quickshell.dataPath(`${lastProcessedPlayerType}_artwork.jpg`);
                 const configPath = assetsPath.replace("file://", "") + lastProcessedPlayerType + ".toml";
-                matugenProcess.command = ["matugen", "image", cachePath, "-c", configPath];
+                matugenProcess.command = ["matugen", "image", cachePath, "-c", configPath, "-t", Config.theme.matugenScheme];
                 matugenProcess.running = true;
             } else {
                 console.warn("Failed to download artwork for player:", lastProcessedPlayerType, "curl exit code:", code);
@@ -251,7 +252,7 @@ Item {
             if (code === 0) {
                 const cachePath = Quickshell.dataPath(`${lastProcessedPlayerType}_artwork.jpg`);
                 const configPath = assetsPath.replace("file://", "") + lastProcessedPlayerType + ".toml";
-                matugenProcess.command = ["matugen", "image", cachePath, "-c", configPath];
+                matugenProcess.command = ["matugen", "image", cachePath, "-c", configPath, "-t", Config.theme.matugenScheme];
                 matugenProcess.running = true;
             } else {
                 console.warn("Failed to decode base64 artwork for player:", lastProcessedPlayerType, "base64 decode exit code:", code);
