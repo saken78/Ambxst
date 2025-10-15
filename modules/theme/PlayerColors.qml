@@ -306,6 +306,16 @@ Item {
         }
     }
 
+    Connections {
+        target: Config.theme
+        function onMatugenSchemeChanged() {
+            if (lastProcessedArtUrl && lastProcessedPlayerType) {
+                console.log("Regenerating player colors due to matugenScheme change");
+                runMatugen(lastProcessedArtUrl, lastProcessedPlayerType);
+            }
+        }
+    }
+
     Component.onCompleted: {
         if (MprisController.activePlayer) {
             artworkConnections = artworkConnectionsComponent.createObject(playerColors, {
