@@ -128,6 +128,7 @@ Item {
 
     property string lastProcessedArtUrl: ""
     property string lastProcessedPlayerType: ""
+    property string lastProcessedScheme: ""
 
     function getPlayerType(player) {
         if (!player)
@@ -203,11 +204,12 @@ Item {
         if (!artworkUrl || artworkUrl === "" || !playerType)
             return;
 
-        if (artworkUrl === lastProcessedArtUrl && playerType === lastProcessedPlayerType)
+        if (artworkUrl === lastProcessedArtUrl && playerType === lastProcessedPlayerType && Config.theme.matugenScheme === lastProcessedScheme)
             return;
 
         lastProcessedArtUrl = artworkUrl;
         lastProcessedPlayerType = playerType;
+        lastProcessedScheme = Config.theme.matugenScheme;
 
         const configPath = assetsPath.replace("file://", "") + playerType + ".toml";
 
@@ -309,9 +311,10 @@ Item {
     Connections {
         target: Config.theme
         function onMatugenSchemeChanged() {
-            if (lastProcessedArtUrl && lastProcessedPlayerType) {
+            if (MprisController.activePlayer && MprisController.activePlayer.trackArtUrl) {
                 console.log("Regenerating player colors due to matugenScheme change");
-                runMatugen(lastProcessedArtUrl, lastProcessedPlayerType);
+                const playerType = getPlayerType(MprisController.activePlayer);
+                runMatugen(MprisController.activePlayer.trackArtUrl, playerType);
             }
         }
     }
