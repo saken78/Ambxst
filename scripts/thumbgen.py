@@ -164,7 +164,7 @@ class ThumbnailGenerator:
                 '-i', str(video_path),
                 '-ss', '00:00:01',  # Skip first second to avoid black frames
                 '-vframes', '1',    # Extract only 1 frame
-                '-vf', f'scale=320:240:force_original_aspect_ratio=increase,crop=320:240',
+                '-vf', f'scale=140:140:force_original_aspect_ratio=increase,crop=140:140',
                 '-q:v', '2',        # High quality
                 '-f', 'image2',     # Force image format
                 str(thumbnail_path)
@@ -198,9 +198,9 @@ class ThumbnailGenerator:
             cmd = [
                 'convert',
                 str(image_path),
-                '-resize', '320x240^',  # Force resize to exact dimensions
-                '-gravity', 'center',   # Center the crop
-                '-extent', '320x240',   # Crop to exact size
+                 '-resize', '140x140^',  # Force resize to exact dimensions
+                 '-gravity', 'center',   # Center the crop
+                 '-extent', '140x140',   # Crop to exact size
                 '-quality', '85',       # High quality JPEG
                 str(thumbnail_path)
             ]
@@ -233,8 +233,8 @@ class ThumbnailGenerator:
             cmd = [
                 'ffmpeg', '-y',
                 '-i', str(gif_path),
-                '-vframes', '1',    # Extract only the first frame
-                '-vf', f'scale=320:240:force_original_aspect_ratio=increase,crop=320:240',
+                 '-vframes', '1',    # Extract only the first frame
+                 '-vf', f'scale=140:140:force_original_aspect_ratio=increase,crop=140:140',
                 '-q:v', '2',        # High quality
                 '-f', 'image2',     # Force image format
                 str(thumbnail_path)
