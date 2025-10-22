@@ -164,7 +164,7 @@ Item {
                         textFormat: Text.RichText
                         // --- CAMBIO 2: SIMPLIFICADO ---
                         // Ahora usamos PlayerColors directamente, condicionado por hasArtwork.
-                        color: playPauseHover.hovered ? (hasArtwork ? PlayerColors.primary : Colors.primaryFixed) : (hasArtwork ? PlayerColors.overBackground : Colors.whiteSource)
+                        color: playPauseHover.hovered ? (hasArtwork ? PlayerColors.primary : Colors.primary) : (hasArtwork ? PlayerColors.overBackground : Colors.overBackground)
                         font.pixelSize: 16
                         font.family: Icons.font
                         opacity: compactPlayer.player?.canPause ?? false ? 1.0 : 0.3
@@ -212,7 +212,7 @@ Item {
                 text: Icons.previous
                 textFormat: Text.RichText
                 // --- CAMBIO 2: SIMPLIFICADO ---
-                color: previousHover.hovered ? (hasArtwork ? PlayerColors.primary : Colors.primaryFixed) : (hasArtwork ? PlayerColors.overBackground : Colors.whiteSource)
+                color: previousHover.hovered ? (hasArtwork ? PlayerColors.primary : Colors.primary) : (hasArtwork ? PlayerColors.overBackground : Colors.overBackground)
                 font.pixelSize: 16
                 font.family: Icons.font
                 opacity: compactPlayer.player?.canGoPrevious ?? false ? 1.0 : 0.3
@@ -278,7 +278,7 @@ Item {
                 text: Icons.next
                 textFormat: Text.RichText
                 // --- CAMBIO 2: SIMPLIFICADO ---
-                color: nextHover.hovered ? (hasArtwork ? PlayerColors.primary : Colors.primaryFixed) : (hasArtwork ? PlayerColors.overBackground : Colors.whiteSource)
+                color: nextHover.hovered ? (hasArtwork ? PlayerColors.primary : Colors.primary) : (hasArtwork ? PlayerColors.overBackground : Colors.overBackground)
                 font.pixelSize: 16
                 font.family: Icons.font
                 opacity: compactPlayer.player?.canGoNext ?? false ? 1.0 : 0.3
@@ -343,7 +343,7 @@ Item {
                 }
                 textFormat: Text.RichText
                 // --- CAMBIO 2: SIMPLIFICADO ---
-                color: modeHover.hovered ? (hasArtwork ? PlayerColors.primary : Colors.primaryFixed) : (hasArtwork ? PlayerColors.overBackground : Colors.whiteSource)
+                color: modeHover.hovered ? (hasArtwork ? PlayerColors.primary : Colors.primary) : (hasArtwork ? PlayerColors.overBackground : Colors.overBackground)
                 font.pixelSize: 16
                 font.family: Icons.font
                 opacity: {
@@ -427,7 +427,7 @@ Item {
                 }
                 textFormat: Text.RichText
                 // --- CAMBIO 2: SIMPLIFICADO ---
-                color: playerIconHover.hovered ? (hasArtwork ? PlayerColors.primary : Colors.primaryFixed) : (hasArtwork ? PlayerColors.overBackground : Colors.whiteSource)
+                color: playerIconHover.hovered ? (hasArtwork ? PlayerColors.primary : Colors.primary) : (hasArtwork ? PlayerColors.overBackground : Colors.overBackground)
                 font.pixelSize: 20
                 font.family: Icons.font
                 verticalAlignment: Text.AlignVCenter
