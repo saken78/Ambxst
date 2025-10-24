@@ -39,6 +39,12 @@ Item {
         });
     }
 
+    function workspaceLabelFontSize(value) {
+        const label = String(value);
+        const shrink = label.length > 1 && label !== "10" ? (label.length - 1) * 2 : 0;
+        return Math.round(Math.max(1, Config.theme.fontSize - shrink));
+    }
+
     Component.onCompleted: updateWorkspaceOccupied()
 
     Connections {
@@ -299,7 +305,7 @@ Item {
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.family: Config.theme.font
-                        font.pixelSize: Styling.fontSize - ((text.length - 1) * (text !== "10") * 2)
+                        font.pixelSize: workspaceLabelFontSize(text)
                         text: `${button.workspaceValue}`
                         elide: Text.ElideRight
                         color: (monitor?.activeWorkspace?.id == button.workspaceValue) ? Colors.background : (workspaceOccupied[index] ? Colors.overBackground : Colors.overSecondaryFixedVariant)
@@ -422,7 +428,7 @@ Item {
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.family: Config.theme.font
-                        font.pixelSize: Styling.fontSize - ((text.length - 1) * (text !== "10") * 2)
+                        font.pixelSize: workspaceLabelFontSize(text)
                         text: `${buttonVert.workspaceValue}`
                         elide: Text.ElideRight
                         color: (monitor?.activeWorkspace?.id == buttonVert.workspaceValue) ? Colors.background : (workspaceOccupied[index] ? Colors.overBackground : Colors.overSecondaryFixedVariant)
