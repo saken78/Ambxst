@@ -391,8 +391,6 @@ Rectangle {
                         console.log("DEBUG: Enter in image delete mode - canceling");
                         root.cancelImageDeleteMode();
                     } else {
-                        console.log("DEBUG: Enter pressed! searchText:", root.searchText, "selectedIndex:", root.selectedIndex);
-
                         if (root.selectedIndex >= 0 && root.selectedIndex < root.textItems.length) {
                             let selectedItem = root.textItems[root.selectedIndex];
                             console.log("DEBUG: Selected item:", selectedItem);
@@ -412,8 +410,6 @@ Rectangle {
                 }
 
                 onShiftAccepted: {
-                    console.log("DEBUG: Shift+Enter pressed! selectedIndex:", root.selectedIndex, "selectedImageIndex:", root.selectedImageIndex, "deleteMode:", root.deleteMode, "imageDeleteMode:", root.imageDeleteMode);
-
                     if (!root.deleteMode && !root.imageDeleteMode) {
                         if (root.isImageSectionFocused && root.selectedImageIndex >= 0 && root.selectedImageIndex < root.imageItems.length) {
                             let selectedImage = root.imageItems[root.selectedImageIndex];
