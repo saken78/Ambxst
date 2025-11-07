@@ -14,6 +14,19 @@ Item {
     property bool scrollBarPressed: false
     property int selectedSchemeIndex: -1
 
+    signal schemeSelectorClosed()
+
+    function openAndFocus() {
+        schemeListExpanded = true;
+        updateSelectedIndex();
+        schemeButton.forceActiveFocus();
+    }
+
+    function closeAndSignal() {
+        schemeListExpanded = false;
+        schemeSelectorClosed();
+    }
+
     Connections {
         target: GlobalStates.wallpaperManager
         function onCurrentMatugenSchemeChanged() {
@@ -110,11 +123,10 @@ Item {
                         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                             if (selectedSchemeIndex >= 0 && GlobalStates.wallpaperManager) {
                                 GlobalStates.wallpaperManager.setMatugenScheme(schemeInternalNames[selectedSchemeIndex]);
-                                schemeListExpanded = false;
                             }
                             event.accepted = true;
                         } else if (event.key === Qt.Key_Escape) {
-                            schemeListExpanded = false;
+                            closeAndSignal();
                             event.accepted = true;
                         }
                     }

@@ -27,6 +27,11 @@ Rectangle {
         wallpaperSearchInput.focusInput();
     }
 
+    // Función para enfocar el scheme selector
+    function focusSchemeSelector() {
+        schemeSelector.openAndFocus();
+    }
+
     // Función para encontrar el índice del wallpaper actual en la lista filtrada
     function findCurrentWallpaperIndex() {
         if (!GlobalStates.wallpaperManager || !GlobalStates.wallpaperManager.currentWallpaper) {
@@ -206,6 +211,10 @@ Rectangle {
                         }
                     }
                 }
+
+                onShiftAccepted: {
+                    focusSchemeSelector();
+                }
             }
 
             // Barra de filtros usando el nuevo componente
@@ -243,7 +252,13 @@ Rectangle {
                         width: parent.width
                         spacing: 4
 
-                        SchemeSelector {}
+                        SchemeSelector {
+                            id: schemeSelector
+
+                            onSchemeSelectorClosed: {
+                                focusSearch();
+                            }
+                        }
                     }
                 }
             }
