@@ -150,9 +150,28 @@ PanelWindow {
             radius: Config.roundness > 0 ? (height / 2) * (Config.roundness / 16) : 0
 
             property real shakeOffset: 0
+            property bool showError: false
 
             transform: Translate {
                 x: passwordInputBox.shakeOffset
+            }
+
+            // Error overlay
+            Rectangle {
+                anchors.fill: parent
+                radius: parent.radius
+                color: Colors.error
+                border.color: Colors.error
+                border.width: Config.theme.borderSize
+                opacity: passwordInputBox.showError ? 1 : 0
+                visible: opacity > 0
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Config.animDuration / 2
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
 
             Row {
@@ -207,8 +226,15 @@ PanelWindow {
                     width: parent.width - avatarContainer.width - parent.spacing
                     height: parent.height
                     anchors.verticalCenter: parent.verticalCenter
-                    color: Colors.surface
+                    color: passwordInputBox.showError ? Colors.errorContainer : Colors.surface
                     radius: Config.roundness > 0 ? (height / 2) * (Config.roundness / 16) : 0
+                    
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: Config.animDuration
+                            easing.type: Easing.OutCubic
+                        }
+                    }
 
                     RowLayout {
                         anchors.fill: parent
@@ -216,16 +242,41 @@ PanelWindow {
                         anchors.rightMargin: 16
                         spacing: 8
 
-                        // User icon
+                        // User icon / Spinner
                         Text {
-                            text: Icons.user
+                            id: userIcon
+                            text: authenticating ? Icons.spinnerGap : Icons.user
                             font.family: Icons.font
                             font.pixelSize: 24
-                            color: Colors.overBackground
+                            color: passwordInputBox.showError ? Colors.overErrorContainer : Colors.overBackground
                             Layout.preferredWidth: 24
                             Layout.preferredHeight: 24
                             Layout.alignment: Qt.AlignVCenter
                             z: 10
+                            rotation: 0
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Config.animDuration
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+
+                            Timer {
+                                id: spinnerTimer
+                                interval: 100
+                                repeat: true
+                                running: authenticating
+                                onTriggered: {
+                                    userIcon.rotation = (userIcon.rotation + 45) % 360;
+                                }
+                            }
+
+                            onTextChanged: {
+                                if (text === Icons.user) {
+                                    rotation = 0;
+                                }
+                            }
                         }
 
                         // Text field
@@ -234,14 +285,28 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
                             placeholderText: usernameCollector.text.trim()
-                            placeholderTextColor: Colors.outline
+                            placeholderTextColor: passwordInputBox.showError ? Qt.rgba(Colors.overErrorContainer.r, Colors.overErrorContainer.g, Colors.overErrorContainer.b, 0.5) : Colors.outline
                             font.family: Config.theme.font
                             font.pixelSize: Config.theme.fontSize
-                            color: Colors.overBackground
+                            color: passwordInputBox.showError ? Colors.overErrorContainer : Colors.overBackground
                             background: null
                             echoMode: TextInput.Password
                             verticalAlignment: TextInput.AlignVCenter
                             enabled: !authenticating
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Config.animDuration
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+
+                            Behavior on placeholderTextColor {
+                                ColorAnimation {
+                                    duration: Config.animDuration
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
 
                             onAccepted: {
                                 if (passwordInput.text.trim() === "") return;
@@ -278,6 +343,11 @@ PanelWindow {
 
             SequentialAnimation {
                 id: wrongPasswordAnim
+                ScriptAction {
+                    script: {
+                        passwordInputBox.showError = true;
+                    }
+                }
                 NumberAnimation {
                     target: passwordInputBox
                     property: "shakeOffset"
@@ -310,39 +380,13 @@ PanelWindow {
                     script: {
                         passwordInput.text = "";
                         authenticating = false;
+                        passwordInputBox.showError = false;
                     }
                 }
             }
         }
 
-        // Error message text
-        Text {
-            anchors {
-                top: passwordInputBox.bottom
-                topMargin: 8
-                horizontalCenter: passwordInputBox.horizontalCenter
-            }
-            
-            function formatErrorMessage() {
-                if (failLockSecondsLeft > 0) {
-                    const minutes = Math.floor(failLockSecondsLeft / 60);
-                    const seconds = failLockSecondsLeft % 60;
-                    
-                    if (minutes > 0) {
-                        return `${errorMessage} (${minutes}m ${seconds}s restantes)`;
-                    } else {
-                        return `${errorMessage} (${seconds}s restantes)`;
-                    }
-                }
-                return errorMessage;
-            }
-            
-            text: formatErrorMessage()
-            font.family: Config.theme.font
-            font.pixelSize: Config.theme.fontSize - 2
-            color: Colors.error || "#f44336"
-            visible: errorMessage !== ""
-        }
+
     }
 
     // Timer to animate blur after capture
