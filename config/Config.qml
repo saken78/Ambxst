@@ -196,90 +196,93 @@ Singleton {
         }
 
         adapter: JsonAdapter {
-            property JsonObject launcher: JsonObject {
-                property JsonObject apps: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "R"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:launcher-apps"
+            property JsonObject ambxst: JsonObject {
+                property JsonObject launcher: JsonObject {
+                    property JsonObject apps: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "R"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:launcher-apps"
+                    }
+                    property JsonObject tmux: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "T"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:launcher-tmux"
+                    }
+                    property JsonObject clipboard: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "V"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:launcher-clipboard"
+                    }
+                    property JsonObject emoji: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "PERIOD"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:launcher-emoji"
+                    }
                 }
-                property JsonObject tmux: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "T"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:launcher-tmux"
+                property JsonObject dashboard: JsonObject {
+                    property JsonObject widgets: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "D"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:dashboard-widgets"
+                    }
+                    property JsonObject pins: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "Q"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:dashboard-pins"
+                    }
+                    property JsonObject kanban: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "N"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:dashboard-kanban"
+                    }
+                    property JsonObject wallpapers: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "COMMA"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:dashboard-wallpapers"
+                    }
+                    property JsonObject assistant: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "A"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:dashboard-assistant"
+                    }
                 }
-                property JsonObject clipboard: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "V"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:launcher-clipboard"
-                }
-                property JsonObject emoji: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "PERIOD"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:launcher-emoji"
+                property JsonObject system: JsonObject {
+                    property JsonObject overview: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "TAB"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:overview"
+                    }
+                    property JsonObject powermenu: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "ESCAPE"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:powermenu"
+                    }
+                    property JsonObject config: JsonObject {
+                        property list<string> modifiers: ["SUPER", "SHIFT"]
+                        property string key: "C"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:config"
+                    }
+                    property JsonObject lockscreen: JsonObject {
+                        property list<string> modifiers: ["SUPER"]
+                        property string key: "L"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:lockscreen"
+                    }
                 }
             }
-            property JsonObject dashboard: JsonObject {
-                property JsonObject widgets: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "D"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:dashboard-widgets"
-                }
-                property JsonObject pins: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "Q"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:dashboard-pins"
-                }
-                property JsonObject kanban: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "N"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:dashboard-kanban"
-                }
-                property JsonObject wallpapers: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "COMMA"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:dashboard-wallpapers"
-                }
-                property JsonObject assistant: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "A"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:dashboard-assistant"
-                }
-            }
-            property JsonObject system: JsonObject {
-                property JsonObject overview: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "TAB"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:overview"
-                }
-                property JsonObject powermenu: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "ESCAPE"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:powermenu"
-                }
-                property JsonObject config: JsonObject {
-                    property list<string> modifiers: ["SUPER", "SHIFT"]
-                    property string key: "C"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:config"
-                }
-                property JsonObject lockscreen: JsonObject {
-                    property list<string> modifiers: ["SUPER"]
-                    property string key: "L"
-                    property string dispatcher: "global"
-                    property string argument: "ambxst:lockscreen"
-                }
-            }
+            property list<var> custom: []
         }
     }
 

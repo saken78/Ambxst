@@ -28,12 +28,9 @@ QtObject {
 
         console.log("HyprlandKeybinds: Aplicando keybindings...");
 
-        // Primero unbind todas las keybindings de Ambxst para evitar duplicados
-        const unbindCommand = "keyword unbind SUPER,R; keyword unbind SUPER,T; keyword unbind SUPER,V; keyword unbind SUPER,PERIOD; keyword unbind SUPER,D; keyword unbind SUPER,Q; keyword unbind SUPER,N; keyword unbind SUPER,COMMA; keyword unbind SUPER,A; keyword unbind SUPER,TAB; keyword unbind SUPER,ESCAPE; keyword unbind SUPER SHIFT,C; keyword unbind SUPER,L";
-
-        // Construir batch command con todos los binds
-        let batchCommands = [];
-
+        // Construir lista de unbinds
+        let unbindCommands = [];
+        
         // Helper function para formatear modifiers
         function formatModifiers(modifiers) {
             if (!modifiers || modifiers.length === 0) return "";
@@ -41,23 +38,48 @@ QtObject {
         }
 
         // Helper function para crear un bind command
-        function createBindCommand(keybind) {
+        function createBindCommand(keybind, flags) {
             const mods = formatModifiers(keybind.modifiers);
             const key = keybind.key;
             const dispatcher = keybind.dispatcher;
-            const argument = keybind.argument;
-            return `keyword bind ${mods},${key},${dispatcher},${argument}`;
+            const argument = keybind.argument || "";
+            const bindKeyword = flags ? `bind${flags}` : "bind";
+            return `keyword ${bindKeyword} ${mods},${key},${dispatcher},${argument}`;
         }
 
+        // Helper function para crear un unbind command
+        function createUnbindCommand(keybind) {
+            const mods = formatModifiers(keybind.modifiers);
+            const key = keybind.key;
+            return `keyword unbind ${mods},${key}`;
+        }
+
+        // Construir batch command con todos los binds
+        let batchCommands = [];
+
+        // Procesar Ambxst keybinds
+        const ambxst = Config.keybindsLoader.adapter.ambxst;
+        
         // Launcher keybinds
-        const launcher = Config.keybindsLoader.adapter.launcher;
+        const launcher = ambxst.launcher;
+        unbindCommands.push(createUnbindCommand(launcher.apps));
+        unbindCommands.push(createUnbindCommand(launcher.tmux));
+        unbindCommands.push(createUnbindCommand(launcher.clipboard));
+        unbindCommands.push(createUnbindCommand(launcher.emoji));
+        
         batchCommands.push(createBindCommand(launcher.apps));
         batchCommands.push(createBindCommand(launcher.tmux));
         batchCommands.push(createBindCommand(launcher.clipboard));
         batchCommands.push(createBindCommand(launcher.emoji));
 
         // Dashboard keybinds
-        const dashboard = Config.keybindsLoader.adapter.dashboard;
+        const dashboard = ambxst.dashboard;
+        unbindCommands.push(createUnbindCommand(dashboard.widgets));
+        unbindCommands.push(createUnbindCommand(dashboard.pins));
+        unbindCommands.push(createUnbindCommand(dashboard.kanban));
+        unbindCommands.push(createUnbindCommand(dashboard.wallpapers));
+        unbindCommands.push(createUnbindCommand(dashboard.assistant));
+        
         batchCommands.push(createBindCommand(dashboard.widgets));
         batchCommands.push(createBindCommand(dashboard.pins));
         batchCommands.push(createBindCommand(dashboard.kanban));
@@ -65,14 +87,32 @@ QtObject {
         batchCommands.push(createBindCommand(dashboard.assistant));
 
         // System keybinds
-        const system = Config.keybindsLoader.adapter.system;
+        const system = ambxst.system;
+        unbindCommands.push(createUnbindCommand(system.overview));
+        unbindCommands.push(createUnbindCommand(system.powermenu));
+        unbindCommands.push(createUnbindCommand(system.config));
+        unbindCommands.push(createUnbindCommand(system.lockscreen));
+        
         batchCommands.push(createBindCommand(system.overview));
         batchCommands.push(createBindCommand(system.powermenu));
         batchCommands.push(createBindCommand(system.config));
         batchCommands.push(createBindCommand(system.lockscreen));
 
+        // Procesar custom keybinds
+        const customBinds = Config.keybindsLoader.adapter.custom;
+        if (customBinds && customBinds.length > 0) {
+            for (let i = 0; i < customBinds.length; i++) {
+                const bind = customBinds[i];
+                if (bind.enabled !== false) {  // Por defecto enabled=true
+                    unbindCommands.push(createUnbindCommand(bind));
+                    const flags = bind.flags || "";
+                    batchCommands.push(createBindCommand(bind, flags));
+                }
+            }
+        }
+
         // Combinar unbind y bind en un solo batch
-        const fullBatchCommand = unbindCommand + "; " + batchCommands.join("; ");
+        const fullBatchCommand = unbindCommands.join("; ") + "; " + batchCommands.join("; ");
 
         console.log("HyprlandKeybinds: Ejecutando batch command");
         hyprctlProcess.command = ["sh", "-c", `hyprctl --batch "${fullBatchCommand}"`];
