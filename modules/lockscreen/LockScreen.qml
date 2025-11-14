@@ -47,7 +47,7 @@ WlSessionLockSurface {
         visible: true
         opacity: 1
 
-        property real zoomScale: startAnim ? 1.1 : 1.0
+        property real zoomScale: startAnim ? 1.25 : 1.0
 
         transform: Scale {
             origin.x: blurEffect.width / 2
@@ -249,13 +249,13 @@ WlSessionLockSurface {
                     anchors.verticalCenter: parent.verticalCenter
                     color: passwordInputBox.showError ? Colors.error : Colors.surface
                     radius: Config.roundness > 0 ? (height / 2) * (Config.roundness / 16) : 0
-                    
-                            Behavior on color {
-                                ColorAnimation {
-                                    duration: Config.animDuration
-                                    easing.type: Easing.OutQuad
-                                }
-                            }
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: Config.animDuration
+                            easing.type: Easing.OutQuad
+                        }
+                    }
 
                     RowLayout {
                         anchors.fill: parent
@@ -330,12 +330,13 @@ WlSessionLockSurface {
                             }
 
                             onAccepted: {
-                                if (passwordInput.text.trim() === "") return;
-                                
+                                if (passwordInput.text.trim() === "")
+                                    return;
+
                                 // Guardar contraseña y limpiar campo inmediatamente
                                 authPasswordHolder.password = passwordInput.text;
                                 passwordInput.text = "";
-                                
+
                                 authenticating = true;
                                 errorMessage = "";
                                 pamAuth.running = true;
@@ -437,11 +438,11 @@ WlSessionLockSurface {
 
         stdout: StdioCollector {
             id: failLockCollector
-            
+
             onStreamFinished: {
                 const output = text.trim();
                 const seconds = parseInt(output);
-                
+
                 if (!isNaN(seconds) && seconds > 0) {
                     failLockSecondsLeft = seconds;
                     failLockCountdown.start();
@@ -486,61 +487,61 @@ WlSessionLockSurface {
             if (exitCode === 0) {
                 // Autenticación exitosa - trigger exit animation
                 startAnim = false;
-                
+
                 // Wait for exit animation, then unlock
                 unlockTimer.start();
-                
+
                 errorMessage = "";
                 authenticating = false;
             } else {
                 // Error de autenticación
                 let msg = "";
                 switch (exitCode) {
-                    case 10:
-                        msg = "Usuario no encontrado";
-                        break;
-                    case 11:
-                        msg = "Contraseña incorrecta";
-                        break;
-                    case 12:
-                        msg = "Error de autenticación";
-                        break;
-                    case 20:
-                        msg = "Cuenta expirada";
-                        break;
-                    case 21:
-                        msg = "Debe cambiar su contraseña";
-                        break;
-                    case 22:
-                        msg = "Cuenta bloqueada";
-                        break;
-                    case 23:
-                        msg = "Error de estado de cuenta";
-                        break;
-                    case 30:
-                        // Faillock detectado - verificar tiempo restante
-                        failLockCheck.running = true;
-                        msg = "Cuenta bloqueada por intentos fallidos";
-                        break;
-                    case 100:
-                        msg = "Error: parámetro inválido";
-                        break;
-                    case 101:
-                        msg = "Error leyendo contraseña";
-                        break;
-                    case 102:
-                        msg = "Error inicializando PAM";
-                        break;
-                    case 103:
-                        msg = "Timeout esperando contraseña";
-                        break;
-                    case 104:
-                        msg = "Error interno";
-                        break;
-                    default:
-                        msg = `Error desconocido (${exitCode})`;
+                case 10:
+                    msg = "Usuario no encontrado";
+                    break;
+                case 11:
+                    msg = "Contraseña incorrecta";
+                    break;
+                case 12:
+                    msg = "Error de autenticación";
+                    break;
+                case 20:
+                    msg = "Cuenta expirada";
+                    break;
+                case 21:
+                    msg = "Debe cambiar su contraseña";
+                    break;
+                case 22:
+                    msg = "Cuenta bloqueada";
+                    break;
+                case 23:
+                    msg = "Error de estado de cuenta";
+                    break;
+                case 30:
+                    // Faillock detectado - verificar tiempo restante
+                    failLockCheck.running = true;
+                    msg = "Cuenta bloqueada por intentos fallidos";
+                    break;
+                case 100:
+                    msg = "Error: parámetro inválido";
+                    break;
+                case 101:
+                    msg = "Error leyendo contraseña";
+                    break;
+                case 102:
+                    msg = "Error inicializando PAM";
+                    break;
+                case 103:
+                    msg = "Timeout esperando contraseña";
+                    break;
+                case 104:
+                    msg = "Error interno";
+                    break;
+                default:
+                    msg = `Error desconocido (${exitCode})`;
                 }
-                
+
                 errorMessage = msg;
                 console.warn("PAM auth failed:", exitCode, msg);
                 wrongPasswordAnim.start();
@@ -585,7 +586,7 @@ WlSessionLockSurface {
     Component.onCompleted: {
         // Capture screen immediately
         screencopyBackground.captureFrame();
-        
+
         // Start animations
         startAnim = true;
         passwordInput.forceActiveFocus();
