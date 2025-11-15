@@ -43,6 +43,7 @@ Item {
     property bool menuJustClosed: false
 
     property int previewImageSize: 200
+    property string currentFullContent: ""
 
     signal itemSelected
 
@@ -219,6 +220,23 @@ Item {
                 let item = root.allItems[root.selectedIndex];
                 if (item.isImage && !ClipboardService.getImageData(item.id)) {
                     ClipboardService.decodeToDataUrl(item.id, item.mime);
+                } else if (!item.isImage) {
+                    // Obtener contenido completo para texto
+                    root.currentFullContent = "";
+                    ClipboardService.getFullContent(item.id);
+                }
+            }
+        }
+    }
+
+    // Conexión para recibir el contenido completo
+    Connections {
+        target: ClipboardService
+        function onFullContentRetrieved(itemId, content) {
+            if (root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
+                let item = root.allItems[root.selectedIndex];
+                if (item.id === itemId) {
+                    root.currentFullContent = content;
                 }
             }
         }
@@ -944,6 +962,7 @@ Item {
 
             // Preview panel (65% del ancho)
             Rectangle {
+                id: previewPanel
                 width: parent.width * 0.65
                 height: parent.height
                 color: Colors.surface
@@ -963,11 +982,11 @@ Item {
                         width: Math.min(parent.width, root.previewImageSize)
                         height: Math.min(parent.height, root.previewImageSize)
                         fillMode: Image.PreserveAspectFit
-                        visible: parent.parent.currentItem && parent.parent.currentItem.isImage
+                        visible: previewPanel.currentItem && previewPanel.currentItem.isImage
                         source: {
-                            if (parent.parent.currentItem && parent.parent.currentItem.isImage) {
+                            if (previewPanel.currentItem && previewPanel.currentItem.isImage) {
                                 ClipboardService.revision;
-                                return ClipboardService.getImageData(parent.parent.currentItem.id);
+                                return ClipboardService.getImageData(previewPanel.currentItem.id);
                             }
                             return "";
                         }
@@ -983,7 +1002,7 @@ Item {
                         height: 120
                         color: Colors.surfaceBright
                         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
-                        visible: parent.parent.currentItem && parent.parent.currentItem.isImage && previewImage.status !== Image.Ready
+                        visible: previewPanel.currentItem && previewPanel.currentItem.isImage && previewImage.status !== Image.Ready
 
                         Text {
                             anchors.centerIn: parent
@@ -996,21 +1015,27 @@ Item {
                     }
 
                     // Preview para texto con scroll
-                    ScrollView {
+                    Flickable {
                         anchors.fill: parent
-                        visible: parent.parent.currentItem && !parent.parent.currentItem.isImage
+                        visible: previewPanel.currentItem && !previewPanel.currentItem.isImage
                         clip: true
+                        contentWidth: width
+                        contentHeight: previewText.height
+                        boundsBehavior: Flickable.StopAtBounds
 
-                        TextArea {
+                        Text {
                             id: previewText
-                            text: parent.parent.parent.parent.currentItem ? parent.parent.parent.parent.currentItem.preview : ""
+                            text: root.currentFullContent || (previewPanel.currentItem ? previewPanel.currentItem.preview : "")
                             font.family: Config.theme.font
                             font.pixelSize: Config.theme.fontSize
                             color: Colors.overBackground
-                            readOnly: true
                             wrapMode: Text.Wrap
-                            background: null
-                            selectByMouse: true
+                            width: parent.width
+                            textFormat: Text.PlainText
+                        }
+
+                        ScrollBar.vertical: ScrollBar {
+                            policy: ScrollBar.AsNeeded
                         }
                     }
                 }

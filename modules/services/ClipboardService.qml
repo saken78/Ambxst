@@ -90,6 +90,7 @@ QtObject {
                     clipboardItems.push({
                         id: id,
                         preview: isImage ? "[Image]" : (content.length > 100 ? content.substring(0, 97) + "..." : content),
+                        fullContent: content,
                         mime: mime,
                         isImage: isImage
                     });
@@ -175,6 +176,29 @@ QtObject {
         }
     }
 
+    property Process getFullContentProcess: Process {
+        property string itemId: ""
+        running: false
+
+        stdout: StdioCollector {
+            waitForEnd: true
+
+            onStreamFinished: {
+                // Emitir señal con el contenido completo
+                root.fullContentRetrieved(getFullContentProcess.itemId, text);
+            }
+        }
+
+        onExited: function (code) {
+            if (code !== 0) {
+                console.log("ClipboardService: Failed to get full content for:", getFullContentProcess.itemId);
+                root.fullContentRetrieved(getFullContentProcess.itemId, "");
+            }
+        }
+    }
+
+    signal fullContentRetrieved(string itemId, string content)
+
     function ensureWatchersRunning() {
         if (!watchersScriptPath)
             return;
@@ -245,6 +269,14 @@ QtObject {
 
     function getImageData(id) {
         return imageDataById[id] || "";
+    }
+
+    function getFullContent(id) {
+        if (!active)
+            return;
+        getFullContentProcess.itemId = id;
+        getFullContentProcess.command = ["bash", "-c", `cliphist decode "${id}"`];
+        getFullContentProcess.running = true;
     }
 
     Component.onCompleted: {
