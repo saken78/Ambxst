@@ -240,6 +240,19 @@ QtObject {
         property string itemId: ""
         running: false
         
+        stdout: StdioCollector {
+            waitForEnd: true
+            
+            onStreamFinished: {
+                var deletedHash = text.trim();
+                if (deletedHash.length > 0) {
+                    // Check if current clipboard content matches the deleted item
+                    clearClipboardIfMatches.deletedHash = deletedHash;
+                    clearClipboardIfMatches.running = true;
+                }
+            }
+        }
+        
         stderr: StdioCollector {
             onStreamFinished: {
                 if (text.length > 0) {
@@ -253,6 +266,36 @@ QtObject {
                 Qt.callLater(root.list);
             } else {
                 root._operationInProgress = false;
+            }
+        }
+    }
+    
+    // Clear system clipboard if it matches deleted item
+    property Process clearClipboardIfMatches: Process {
+        property string deletedHash: ""
+        running: false
+        
+        command: ["sh", "-c",
+            "# Get current clipboard hash for different types\n" +
+            "CURRENT_HASH=''; " +
+            "if CONTENT=$(wl-paste --type text/uri-list 2>/dev/null); then " +
+            "  CURRENT_HASH=$(echo -n \"$CONTENT\" | tr -d '\\r' | md5sum | cut -d' ' -f1); " +
+            "elif CONTENT=$(wl-paste --type text/plain 2>/dev/null); then " +
+            "  CURRENT_HASH=$(echo -n \"$CONTENT\" | md5sum | cut -d' ' -f1); " +
+            "elif IMAGE_MIME=$(wl-paste --list-types 2>/dev/null | grep '^image/' | head -1); then " +
+            "  [ -n \"$IMAGE_MIME\" ] && CURRENT_HASH=$(wl-paste --type \"$IMAGE_MIME\" 2>/dev/null | md5sum | cut -d' ' -f1); " +
+            "fi; " +
+            "# Clear clipboard if hashes match\n" +
+            "if [ \"$CURRENT_HASH\" = '" + deletedHash + "' ]; then " +
+            "  wl-copy --clear 2>/dev/null || true; " +
+            "fi"
+        ]
+        
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.length > 0 && !text.includes("No selection")) {
+                    console.warn("ClipboardService: clearClipboardIfMatches stderr:", text);
+                }
             }
         }
     }
@@ -467,13 +510,22 @@ QtObject {
         if (!_initialized) return;
         _operationInProgress = true;
         deleteProcess.itemId = id;
-        deleteProcess.command = ["sh", "-c", "sqlite3 '" + dbPath + "' '.timeout 5000' 'DELETE FROM clipboard_items WHERE id = " + id + ";'"];
+        
+        // First, get the item's hash to check if it's currently in clipboard
+        deleteProcess.command = ["sh", "-c", 
+            "HASH=$(sqlite3 '" + dbPath + "' '.timeout 5000' 'SELECT content_hash FROM clipboard_items WHERE id = " + id + ";'); " +
+            "sqlite3 '" + dbPath + "' '.timeout 5000' 'DELETE FROM clipboard_items WHERE id = " + id + ";'; " +
+            "echo \"$HASH\""
+        ];
         deleteProcess.running = true;
     }
 
     function clear() {
         if (!_initialized) return;
-        clearProcess.command = ["sh", "-c", "sqlite3 '" + dbPath + "' '.timeout 5000' 'DELETE FROM clipboard_items WHERE pinned = 0;'"];
+        clearProcess.command = ["sh", "-c", 
+            "sqlite3 '" + dbPath + "' '.timeout 5000' 'DELETE FROM clipboard_items WHERE pinned = 0;'; " +
+            "wl-copy --clear 2>/dev/null || true"
+        ];
         clearProcess.running = true;
     }
 
