@@ -30,7 +30,15 @@ Rectangle {
         // App Launcher (primera columna) - Inline desde LauncherAppsTab
         Rectangle {
             id: appLauncherItem
-            Layout.fillWidth: true
+            Layout.fillWidth: false
+            Layout.preferredWidth: {
+                var remainingWidth = parent.width - parent.spacing * 2 - 2; // Total - separators - separator width
+                var gridRows = 3;
+                var gridColumns = 5;
+                var wallpaperHeight = (parent.height + 4 * 2) / gridRows;
+                var rightPanelWidth = (wallpaperHeight * gridColumns) - 8;
+                return remainingWidth - rightPanelWidth;
+            }
             Layout.fillHeight: true
 
             property string searchText: GlobalStates.launcherSearchText

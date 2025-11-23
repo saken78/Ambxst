@@ -53,7 +53,7 @@ Item {
     property string newAlias: ""
     property int aliasSelectedIndex: -1
     property int aliasButtonIndex: 0
-    
+
     // Track item to restore selection after operations
     property string pendingItemIdToSelect: ""
 
@@ -66,24 +66,27 @@ Item {
     property string currentFullContent: ""
     property var linkPreviewData: null
     property bool loadingLinkPreview: false
-    
+
     // Helper function to get file path from URI
     function getFilePathFromUri(content) {
-        if (!content || !content.startsWith("file://")) return "";
+        if (!content || !content.startsWith("file://"))
+            return "";
         return decodeURIComponent(content.substring(7).trim());
     }
-    
+
     // Helper function to check if file is an image
     function isImageFile(filePath) {
-        if (!filePath) return false;
+        if (!filePath)
+            return false;
         var ext = filePath.split('.').pop().toLowerCase();
         return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'ico'].indexOf(ext) !== -1;
     }
-    
+
     // Helper function to get icon for item
     function getIconForItem(item) {
-        if (!item) return Icons.clip;
-        
+        if (!item)
+            return Icons.clip;
+
         // Check if it's a URL (for favicon)
         if (!item.isImage && !item.isFile) {
             var content = item.preview || "";
@@ -91,7 +94,7 @@ Item {
                 return "link"; // Special marker for URL
             }
         }
-        
+
         // For files, try to get icon based on extension
         if (item.isFile) {
             var content = item.preview || "";
@@ -100,16 +103,19 @@ Item {
                 return ClipboardUtils.getNerdFontIconForExtension(filePath);
             }
         }
-        
+
         // Default icons
-        if (item.isImage) return Icons.image;
-        if (item.isFile) return Icons.file;
+        if (item.isImage)
+            return Icons.image;
+        if (item.isFile)
+            return Icons.file;
         return Icons.clip;
     }
-    
+
     // Helper function to get favicon URL for item
     function getFaviconUrl(item) {
-        if (!item || item.isImage || item.isFile) return "";
+        if (!item || item.isImage || item.isFile)
+            return "";
         var content = item.preview || "";
         return ClipboardUtils.getFaviconUrl(content);
     }
@@ -121,7 +127,7 @@ Item {
         if (selectedIndex === -1 && resultsList.count > 0) {
             resultsList.positionViewAtIndex(0, ListView.Beginning);
         }
-        
+
         // Close expanded options when selection changes to a different item
         if (expandedItemIndex >= 0 && selectedIndex !== expandedItemIndex) {
             expandedItemIndex = -1;
@@ -200,7 +206,7 @@ Item {
         aliasSelectedIndex = selectedIndex;
         aliasMode = true;
         itemToAlias = itemId;
-        
+
         // Find current alias
         for (var i = 0; i < allItems.length; i++) {
             if (allItems[i].id === itemId) {
@@ -208,7 +214,7 @@ Item {
                 break;
             }
         }
-        
+
         aliasButtonIndex = 1;
         root.forceActiveFocus();
     }
@@ -228,7 +234,7 @@ Item {
 
     function confirmAliasItem() {
         console.log("DEBUG: Confirming alias for item:", itemToAlias, "new alias:", newAlias);
-        
+
         // Find the original preview to compare
         var originalPreview = "";
         for (var i = 0; i < allItems.length; i++) {
@@ -237,10 +243,10 @@ Item {
                 break;
             }
         }
-        
+
         // Mark this item to be selected after refresh
         pendingItemIdToSelect = itemToAlias;
-        
+
         // Only set alias if different from original preview
         if (newAlias.trim() !== "" && newAlias.trim() !== originalPreview) {
             ClipboardService.setAlias(itemToAlias, newAlias.trim());
@@ -277,9 +283,7 @@ Item {
             var alias = item.alias || "";
 
             // Search in both content and alias
-            if (searchText.length === 0 || 
-                content.toLowerCase().includes(searchText.toLowerCase()) ||
-                alias.toLowerCase().includes(searchText.toLowerCase())) {
+            if (searchText.length === 0 || content.toLowerCase().includes(searchText.toLowerCase()) || alias.toLowerCase().includes(searchText.toLowerCase())) {
                 newItems.push(item);
             }
         }
@@ -366,12 +370,10 @@ Item {
                     copyProcess.command = ["sh", "-c", "cat '" + item.binaryPath + "' | wl-copy --type '" + item.mime + "'"];
                 } else if (item.isFile) {
                     // Copy file URI with text/uri-list MIME type, removing carriage returns
-                    copyProcess.command = ["sh", "-c",
-                                          "sqlite3 '" + ClipboardService.dbPath + "' \"SELECT full_content FROM clipboard_items WHERE id = " + itemId + ";\" | tr -d '\\r' | wl-copy --type text/uri-list"];
+                    copyProcess.command = ["sh", "-c", "sqlite3 '" + ClipboardService.dbPath + "' \"SELECT full_content FROM clipboard_items WHERE id = " + itemId + ";\" | tr -d '\\r' | wl-copy --type text/uri-list"];
                 } else {
                     // Copy text as plain text
-                    copyProcess.command = ["sh", "-c",
-                                          "sqlite3 '" + ClipboardService.dbPath + "' \"SELECT full_content FROM clipboard_items WHERE id = " + itemId + ";\" | wl-copy"];
+                    copyProcess.command = ["sh", "-c", "sqlite3 '" + ClipboardService.dbPath + "' \"SELECT full_content FROM clipboard_items WHERE id = " + itemId + ";\" | wl-copy"];
                 }
                 copyProcess.running = true;
                 break;
@@ -385,7 +387,7 @@ Item {
             if (root.allItems[i].id === itemId) {
                 var item = root.allItems[i];
                 var content = root.currentFullContent || item.preview;
-                
+
                 if (item.isFile) {
                     // Open file with xdg-open
                     var filePath = getFilePathFromUri(content);
@@ -457,7 +459,7 @@ Item {
                 let item = root.allItems[root.selectedIndex];
                 if (item.id === itemId) {
                     root.currentFullContent = content;
-                    
+
                     // Si es una URL, obtener preview
                     if (ClipboardUtils.isUrl(content)) {
                         root.loadingLinkPreview = true;
@@ -466,7 +468,7 @@ Item {
                 }
             }
         }
-        
+
         function onLinkPreviewFetched(url, metadata) {
             root.loadingLinkPreview = false;
             if (root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
@@ -531,7 +533,7 @@ Item {
                     width: parent.width - clearButton.width - parent.spacing
                     height: parent.height
                     text: root.searchText
-                    placeholderText: "Search clipboard history..."
+                    placeholderText: "Search in clipboard..."
                     prefixText: root.prefixText
 
                     onSearchTextChanged: text => {
@@ -551,21 +553,30 @@ Item {
                             let item = root.allItems[root.expandedItemIndex];
                             if (item) {
                                 // Build options array dynamically
-                                let options = [
-                                    function() { root.copyToClipboard(item.id); Visibilities.setActiveModule(""); }
-                                ];
-                                
+                                let options = [function () {
+                                        root.copyToClipboard(item.id);
+                                        Visibilities.setActiveModule("");
+                                    }];
+
                                 // Add Open if applicable
                                 if (item.isFile || item.isImage || ClipboardUtils.isUrl(item.preview)) {
-                                    options.push(function() { root.openItem(item.id); });
+                                    options.push(function () {
+                                        root.openItem(item.id);
+                                    });
                                 }
-                                
-                                options.push(
-                                    function() { root.pendingItemIdToSelect = item.id; ClipboardService.togglePin(item.id); root.expandedItemIndex = -1; },
-                                    function() { root.enterAliasMode(item.id); root.expandedItemIndex = -1; },
-                                    function() { root.enterDeleteMode(item.id); root.expandedItemIndex = -1; }
-                                );
-                                
+
+                                options.push(function () {
+                                    root.pendingItemIdToSelect = item.id;
+                                    ClipboardService.togglePin(item.id);
+                                    root.expandedItemIndex = -1;
+                                }, function () {
+                                    root.enterAliasMode(item.id);
+                                    root.expandedItemIndex = -1;
+                                }, function () {
+                                    root.enterDeleteMode(item.id);
+                                    root.expandedItemIndex = -1;
+                                });
+
                                 if (root.selectedOptionIndex >= 0 && root.selectedOptionIndex < options.length) {
                                     options[root.selectedOptionIndex]();
                                 }
@@ -584,63 +595,63 @@ Item {
                         }
                     }
 
-            onShiftAccepted: {
-                if (!root.deleteMode && !root.aliasMode) {
-                    if (root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
-                        // Toggle expanded state
-                        if (root.expandedItemIndex === root.selectedIndex) {
-                            root.expandedItemIndex = -1;
-                            root.selectedOptionIndex = 0;
-                            root.keyboardNavigation = false;
-                        } else {
-                            root.expandedItemIndex = root.selectedIndex;
-                            root.selectedOptionIndex = 0;
-                            root.keyboardNavigation = true;
+                    onShiftAccepted: {
+                        if (!root.deleteMode && !root.aliasMode) {
+                            if (root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
+                                // Toggle expanded state
+                                if (root.expandedItemIndex === root.selectedIndex) {
+                                    root.expandedItemIndex = -1;
+                                    root.selectedOptionIndex = 0;
+                                    root.keyboardNavigation = false;
+                                } else {
+                                    root.expandedItemIndex = root.selectedIndex;
+                                    root.selectedOptionIndex = 0;
+                                    root.keyboardNavigation = true;
+                                }
+                            }
                         }
                     }
-                }
-            }
 
-            onCtrlRPressed: {
-                if (!root.deleteMode && !root.aliasMode && root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
-                    let selectedItem = root.allItems[root.selectedIndex];
-                    if (selectedItem && !selectedItem.isCreateButton) {
-                        root.enterAliasMode(selectedItem.id);
+                    onCtrlRPressed: {
+                        if (!root.deleteMode && !root.aliasMode && root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
+                            let selectedItem = root.allItems[root.selectedIndex];
+                            if (selectedItem && !selectedItem.isCreateButton) {
+                                root.enterAliasMode(selectedItem.id);
+                            }
+                        }
                     }
-                }
-            }
 
-            onCtrlPPressed: {
-                if (!root.deleteMode && !root.aliasMode && root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
-                    let selectedItem = root.allItems[root.selectedIndex];
-                    if (selectedItem) {
-                        root.pendingItemIdToSelect = selectedItem.id;
-                        ClipboardService.togglePin(selectedItem.id);
+                    onCtrlPPressed: {
+                        if (!root.deleteMode && !root.aliasMode && root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
+                            let selectedItem = root.allItems[root.selectedIndex];
+                            if (selectedItem) {
+                                root.pendingItemIdToSelect = selectedItem.id;
+                                ClipboardService.togglePin(selectedItem.id);
+                            }
+                        }
                     }
-                }
-            }
 
-            onCtrlUpPressed: {
-                if (!root.deleteMode && !root.aliasMode && root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
-                    let selectedItem = root.allItems[root.selectedIndex];
-                    if (selectedItem) {
-                        root.pendingItemIdToSelect = selectedItem.id;
-                        ClipboardService.moveItemUp(selectedItem.id);
+                    onCtrlUpPressed: {
+                        if (!root.deleteMode && !root.aliasMode && root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
+                            let selectedItem = root.allItems[root.selectedIndex];
+                            if (selectedItem) {
+                                root.pendingItemIdToSelect = selectedItem.id;
+                                ClipboardService.moveItemUp(selectedItem.id);
+                            }
+                        }
                     }
-                }
-            }
 
-            onCtrlDownPressed: {
-                if (!root.deleteMode && !root.aliasMode && root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
-                    let selectedItem = root.allItems[root.selectedIndex];
-                    if (selectedItem) {
-                        root.pendingItemIdToSelect = selectedItem.id;
-                        ClipboardService.moveItemDown(selectedItem.id);
+                    onCtrlDownPressed: {
+                        if (!root.deleteMode && !root.aliasMode && root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
+                            let selectedItem = root.allItems[root.selectedIndex];
+                            if (selectedItem) {
+                                root.pendingItemIdToSelect = selectedItem.id;
+                                ClipboardService.moveItemDown(selectedItem.id);
+                            }
+                        }
                     }
-                }
-            }
 
-            onEscapePressed: {
+                    onEscapePressed: {
                         if (root.expandedItemIndex >= 0) {
                             root.expandedItemIndex = -1;
                             root.selectedOptionIndex = 0;
@@ -973,11 +984,11 @@ Item {
                                             isVerticalDrag = true;
                                             isDraggingForReorder = true;
                                             root.anyItemDragging = true;
-                                            
+
                                             // Calculate target index based on drag position
                                             let itemHeight = 48;
                                             let targetIndex = index;
-                                            
+
                                             if (deltaY > itemHeight / 2 && index < root.allItems.length - 1) {
                                                 // Check if next item has same pinned status
                                                 let nextItem = root.allItems[index + 1];
@@ -991,7 +1002,7 @@ Item {
                                                     targetIndex = index - 1;
                                                 }
                                             }
-                                            
+
                                             // Visual feedback could be added here
                                         }
                                     }
@@ -1314,12 +1325,12 @@ Item {
 
                             onReleased: mouse => {
                                 longPressTimer.stop();
-                                
+
                                 // Handle reorder on release if vertical drag occurred
                                 if (isVerticalDrag && isDraggingForReorder) {
                                     let deltaY = mouse.y - startY;
                                     let itemHeight = 48;
-                                    
+
                                     if (Math.abs(deltaY) > itemHeight / 2) {
                                         if (deltaY > 0 && index < root.allItems.length - 1) {
                                             // Dragged down
@@ -1338,7 +1349,7 @@ Item {
                                         }
                                     }
                                 }
-                                
+
                                 isDragging = false;
                                 longPressTriggered = false;
                                 isVerticalDrag = false;
@@ -1419,7 +1430,7 @@ Item {
                                                 }
                                             }
                                         ];
-                                        
+
                                         // Add Open option for files, images, and URLs
                                         if (modelData.isFile || modelData.isImage || ClipboardUtils.isUrl(modelData.preview)) {
                                             options.push({
@@ -1432,41 +1443,37 @@ Item {
                                                 }
                                             });
                                         }
-                                        
-                                        options.push(
-                                            {
-                                                text: modelData.pinned ? "Unpin" : "Pin",
-                                                icon: modelData.pinned ? Icons.unpin : Icons.pin,
-                                                highlightColor: Colors.primary,
-                                                textColor: Colors.overPrimary,
-                                                action: function () {
-                                                    root.pendingItemIdToSelect = modelData.id;
-                                                    ClipboardService.togglePin(modelData.id);
-                                                    root.expandedItemIndex = -1;
-                                                }
-                                            },
-                                            {
-                                                text: "Alias",
-                                                icon: Icons.edit,
-                                                highlightColor: Colors.secondary,
-                                                textColor: Colors.overSecondary,
-                                                action: function () {
-                                                    root.enterAliasMode(modelData.id);
-                                                    root.expandedItemIndex = -1;
-                                                }
-                                            },
-                                            {
-                                                text: "Delete",
-                                                icon: Icons.trash,
-                                                highlightColor: Colors.error,
-                                                textColor: Colors.overError,
-                                                action: function () {
-                                                    root.enterDeleteMode(modelData.id);
-                                                    root.expandedItemIndex = -1;
-                                                }
+
+                                        options.push({
+                                            text: modelData.pinned ? "Unpin" : "Pin",
+                                            icon: modelData.pinned ? Icons.unpin : Icons.pin,
+                                            highlightColor: Colors.primary,
+                                            textColor: Colors.overPrimary,
+                                            action: function () {
+                                                root.pendingItemIdToSelect = modelData.id;
+                                                ClipboardService.togglePin(modelData.id);
+                                                root.expandedItemIndex = -1;
                                             }
-                                        );
-                                        
+                                        }, {
+                                            text: "Alias",
+                                            icon: Icons.edit,
+                                            highlightColor: Colors.secondary,
+                                            textColor: Colors.overSecondary,
+                                            action: function () {
+                                                root.enterAliasMode(modelData.id);
+                                                root.expandedItemIndex = -1;
+                                            }
+                                        }, {
+                                            text: "Delete",
+                                            icon: Icons.trash,
+                                            highlightColor: Colors.error,
+                                            textColor: Colors.overError,
+                                            action: function () {
+                                                root.enterDeleteMode(modelData.id);
+                                                root.expandedItemIndex = -1;
+                                            }
+                                        });
+
                                         return options;
                                     }
                                     currentIndex: root.selectedOptionIndex
@@ -1607,14 +1614,11 @@ Item {
                                     anchors.fill: parent
                                     propagateComposedEvents: true
                                     acceptedButtons: Qt.NoButton
-                                    
+
                                     onWheel: wheel => {
                                         if (optionsListView.contentHeight > optionsListView.height) {
                                             const delta = wheel.angleDelta.y;
-                                            optionsListView.contentY = Math.max(0, Math.min(
-                                                optionsListView.contentHeight - optionsListView.height,
-                                                optionsListView.contentY - delta
-                                            ));
+                                            optionsListView.contentY = Math.max(0, Math.min(optionsListView.contentHeight - optionsListView.height, optionsListView.contentY - delta));
                                             wheel.accepted = true;
                                         } else {
                                             wheel.accepted = false;
@@ -1676,8 +1680,10 @@ Item {
                             anchors.top: parent.top
                             anchors.margins: 8
                             anchors.rightMargin: {
-                                if (isInDeleteMode) return 84;
-                                if (isInAliasMode) return 84;
+                                if (isInDeleteMode)
+                                    return 84;
+                                if (isInAliasMode)
+                                    return 84;
                                 return 8;
                             }
                             height: 32
@@ -1717,7 +1723,7 @@ Item {
                                         easing.type: Easing.OutQuart
                                     }
                                 }
-                                
+
                                 property string iconType: {
                                     if (isInDeleteMode) {
                                         return "trash";
@@ -1726,7 +1732,7 @@ Item {
                                     }
                                     return root.getIconForItem(modelData);
                                 }
-                                
+
                                 property string faviconUrl: iconType === "link" ? root.getFaviconUrl(modelData) : ""
 
                                 // Favicon for URLs
@@ -1740,7 +1746,7 @@ Item {
                                     fillMode: Image.PreserveAspectFit
                                     asynchronous: true
                                     cache: true
-                                    
+
                                     onStatusChanged: {
                                         if (status === Image.Error) {
                                             visible = false;
@@ -1763,9 +1769,12 @@ Item {
                                             return iconStr;
                                         }
                                         // Fallback to Icons object
-                                        if (iconStr === "image") return Icons.image;
-                                        if (iconStr === "file") return Icons.file;
-                                        if (iconStr === "link") return Icons.clip; // Fallback for failed favicon
+                                        if (iconStr === "image")
+                                            return Icons.image;
+                                        if (iconStr === "file")
+                                            return Icons.file;
+                                        if (iconStr === "link")
+                                            return Icons.clip; // Fallback for failed favicon
                                         return Icons.clip;
                                     }
                                     color: {
@@ -1800,7 +1809,7 @@ Item {
                                         }
                                     }
                                 }
-                                
+
                                 // Pin indicator badge
                                 Rectangle {
                                     anchors.top: parent.top
@@ -1812,7 +1821,7 @@ Item {
                                     radius: 7
                                     visible: modelData.pinned && !isInDeleteMode && !isInAliasMode
                                     color: Colors.primary
-                                    
+
                                     Text {
                                         anchors.centerIn: parent
                                         text: Icons.pin
@@ -1924,7 +1933,8 @@ Item {
                                 Text {
                                     width: parent.width
                                     text: {
-                                        if (!modelData.createdAt) return "";
+                                        if (!modelData.createdAt)
+                                            return "";
                                         var date = new Date(modelData.createdAt);
                                         var now = new Date();
                                         var diffMs = now - date;
@@ -1932,12 +1942,16 @@ Item {
                                         var diffMins = Math.floor(diffSecs / 60);
                                         var diffHours = Math.floor(diffMins / 60);
                                         var diffDays = Math.floor(diffHours / 24);
-                                        
-                                        if (diffMins < 1) return "Just now";
-                                        if (diffMins < 60) return diffMins + " min ago";
-                                        if (diffHours < 24) return diffHours + " hour" + (diffHours > 1 ? "s" : "") + " ago";
-                                        if (diffDays < 7) return diffDays + " day" + (diffDays > 1 ? "s" : "") + " ago";
-                                        
+
+                                        if (diffMins < 1)
+                                            return "Just now";
+                                        if (diffMins < 60)
+                                            return diffMins + " min ago";
+                                        if (diffHours < 24)
+                                            return diffHours + " hour" + (diffHours > 1 ? "s" : "") + " ago";
+                                        if (diffDays < 7)
+                                            return diffDays + " day" + (diffDays > 1 ? "s" : "") + " ago";
+
                                         return Qt.formatDateTime(date, "MMM dd, yyyy");
                                     }
                                     color: {
@@ -2117,12 +2131,12 @@ Item {
                         contentWidth: width
                         contentHeight: textPreviewColumn.height
                         boundsBehavior: Flickable.StopAtBounds
-                        
+
                         Column {
                             id: textPreviewColumn
                             width: parent.width
                             spacing: 12
-                            
+
                             // Link embed preview (Discord-style)
                             Rectangle {
                                 width: parent.width
@@ -2133,16 +2147,15 @@ Item {
                                     }
                                     return linkEmbedContent.height + 24;
                                 }
-                                visible: root.linkPreviewData && !root.linkPreviewData.error && 
-                                        (root.linkPreviewData.title || root.linkPreviewData.description || root.linkPreviewData.image)
+                                visible: root.linkPreviewData && !root.linkPreviewData.error && (root.linkPreviewData.title || root.linkPreviewData.description || root.linkPreviewData.image)
                                 color: linkPreviewMouseArea.containsMouse ? Colors.surfaceBright : Colors.surface
-                                
+
                                 // Rounded corners only on the right side
                                 topLeftRadius: 0
                                 topRightRadius: Config.roundness > 0 ? Config.roundness + 4 : 0
                                 bottomLeftRadius: 0
                                 bottomRightRadius: Config.roundness > 0 ? Config.roundness + 4 : 0
-                                
+
                                 Behavior on color {
                                     enabled: Config.animDuration > 0
                                     ColorAnimation {
@@ -2150,13 +2163,13 @@ Item {
                                         easing.type: Easing.OutQuart
                                     }
                                 }
-                                
+
                                 MouseArea {
                                     id: linkPreviewMouseArea
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    
+
                                     onClicked: {
                                         if (root.currentFullContent) {
                                             Qt.openUrlExternally(root.currentFullContent.trim());
@@ -2165,7 +2178,7 @@ Item {
                                         }
                                     }
                                 }
-                                
+
                                 // Left accent bar
                                 Rectangle {
                                     x: 0
@@ -2173,14 +2186,14 @@ Item {
                                     width: 4
                                     height: parent.height
                                     color: Colors.primary
-                                    
+
                                     // Rounded corners only on the left side
                                     topLeftRadius: Config.roundness > 0 ? Config.roundness + 4 : 0
                                     topRightRadius: 0
                                     bottomLeftRadius: Config.roundness > 0 ? Config.roundness + 4 : 0
                                     bottomRightRadius: 0
                                 }
-                                
+
                                 // Video embed layout (YouTube, etc.)
                                 Column {
                                     id: videoEmbedContent
@@ -2191,24 +2204,23 @@ Item {
                                     anchors.leftMargin: 16
                                     spacing: 10
                                     visible: root.linkPreviewData && root.linkPreviewData.type === 'video'
-                                    
+
                                     // Site name with favicon
                                     Row {
                                         width: parent.width
                                         spacing: 8
                                         visible: root.linkPreviewData && root.linkPreviewData.site_name
-                                        
+
                                         Image {
                                             width: 16
                                             height: 16
-                                            source: root.linkPreviewData && root.linkPreviewData.favicon ? 
-                                                   root.linkPreviewData.favicon : ""
+                                            source: root.linkPreviewData && root.linkPreviewData.favicon ? root.linkPreviewData.favicon : ""
                                             fillMode: Image.PreserveAspectFit
                                             asynchronous: true
                                             cache: true
                                             visible: status === Image.Ready
                                         }
-                                        
+
                                         Text {
                                             text: root.linkPreviewData ? root.linkPreviewData.site_name : ""
                                             font.family: Config.theme.font
@@ -2219,7 +2231,7 @@ Item {
                                             width: parent.width - 24
                                         }
                                     }
-                                    
+
                                     // Video thumbnail with play overlay
                                     Rectangle {
                                         width: parent.width
@@ -2227,24 +2239,23 @@ Item {
                                         color: Colors.surfaceBright
                                         radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                         visible: root.linkPreviewData && root.linkPreviewData.image
-                                        
+
                                         Image {
                                             id: videoThumbnail
                                             anchors.fill: parent
-                                            source: root.linkPreviewData && root.linkPreviewData.image ? 
-                                                   root.linkPreviewData.image : ""
+                                            source: root.linkPreviewData && root.linkPreviewData.image ? root.linkPreviewData.image : ""
                                             fillMode: Image.PreserveAspectCrop
                                             asynchronous: true
                                             cache: true
                                             smooth: true
-                                            
+
                                             // Dark overlay
                                             Rectangle {
                                                 anchors.fill: parent
                                                 color: "#40000000"
                                                 radius: parent.parent.radius
                                             }
-                                            
+
                                             // Play button overlay
                                             Rectangle {
                                                 anchors.centerIn: parent
@@ -2253,7 +2264,7 @@ Item {
                                                 radius: 30
                                                 color: Colors.primary
                                                 opacity: 0.9
-                                                
+
                                                 Text {
                                                     anchors.centerIn: parent
                                                     text: Icons.play
@@ -2263,7 +2274,7 @@ Item {
                                                     textFormat: Text.RichText
                                                 }
                                             }
-                                            
+
                                             // Loading indicator
                                             Rectangle {
                                                 id: imageLoadingRect
@@ -2271,7 +2282,7 @@ Item {
                                                 color: Colors.surfaceBright
                                                 radius: parent.parent ? parent.parent.radius : 0
                                                 visible: parent.status === Image.Loading
-                                                
+
                                                 Text {
                                                     anchors.centerIn: parent
                                                     text: Icons.spinnerGap
@@ -2279,7 +2290,7 @@ Item {
                                                     font.pixelSize: 32
                                                     color: Colors.primary
                                                     textFormat: Text.RichText
-                                                    
+
                                                     RotationAnimator on rotation {
                                                         from: 0
                                                         to: 360
@@ -2291,12 +2302,11 @@ Item {
                                             }
                                         }
                                     }
-                                    
+
                                     // Title
                                     Text {
                                         width: parent.width
-                                        text: root.linkPreviewData && root.linkPreviewData.title ? 
-                                             root.linkPreviewData.title : ""
+                                        text: root.linkPreviewData && root.linkPreviewData.title ? root.linkPreviewData.title : ""
                                         font.family: Config.theme.font
                                         font.pixelSize: Config.theme.fontSize + 1
                                         font.weight: Font.Bold
@@ -2306,12 +2316,11 @@ Item {
                                         elide: Text.ElideRight
                                         visible: text.length > 0
                                     }
-                                    
+
                                     // Author/Description
                                     Text {
                                         width: parent.width
-                                        text: root.linkPreviewData && root.linkPreviewData.description ? 
-                                             root.linkPreviewData.description : ""
+                                        text: root.linkPreviewData && root.linkPreviewData.description ? root.linkPreviewData.description : ""
                                         font.family: Config.theme.font
                                         font.pixelSize: Config.theme.fontSize
                                         color: Colors.outline
@@ -2321,7 +2330,7 @@ Item {
                                         visible: text.length > 0
                                     }
                                 }
-                                
+
                                 // Regular link embed layout
                                 Row {
                                     id: linkEmbedContent
@@ -2332,30 +2341,28 @@ Item {
                                     anchors.leftMargin: 16
                                     spacing: 12
                                     visible: !root.linkPreviewData || root.linkPreviewData.type !== 'video'
-                                    
+
                                     // Text content column
                                     Column {
-                                        width: root.linkPreviewData && root.linkPreviewData.image ? 
-                                               parent.width - 100 - parent.spacing : parent.width
+                                        width: root.linkPreviewData && root.linkPreviewData.image ? parent.width - 100 - parent.spacing : parent.width
                                         spacing: 6
-                                        
+
                                         // Site name with favicon
                                         Row {
                                             width: parent.width
                                             spacing: 8
                                             visible: root.linkPreviewData && root.linkPreviewData.site_name
-                                            
+
                                             Image {
                                                 width: 16
                                                 height: 16
-                                                source: root.linkPreviewData && root.linkPreviewData.favicon ? 
-                                                       root.linkPreviewData.favicon : ""
+                                                source: root.linkPreviewData && root.linkPreviewData.favicon ? root.linkPreviewData.favicon : ""
                                                 fillMode: Image.PreserveAspectFit
                                                 asynchronous: true
                                                 cache: true
                                                 visible: status === Image.Ready
                                             }
-                                            
+
                                             Text {
                                                 text: root.linkPreviewData ? root.linkPreviewData.site_name : ""
                                                 font.family: Config.theme.font
@@ -2366,12 +2373,11 @@ Item {
                                                 width: parent.width - 24
                                             }
                                         }
-                                        
+
                                         // Title
                                         Text {
                                             width: parent.width
-                                            text: root.linkPreviewData && root.linkPreviewData.title ? 
-                                                 root.linkPreviewData.title : ""
+                                            text: root.linkPreviewData && root.linkPreviewData.title ? root.linkPreviewData.title : ""
                                             font.family: Config.theme.font
                                             font.pixelSize: Config.theme.fontSize + 1
                                             font.weight: Font.Bold
@@ -2381,12 +2387,11 @@ Item {
                                             elide: Text.ElideRight
                                             visible: text.length > 0
                                         }
-                                        
+
                                         // Description
                                         Text {
                                             width: parent.width
-                                            text: root.linkPreviewData && root.linkPreviewData.description ? 
-                                                 root.linkPreviewData.description : ""
+                                            text: root.linkPreviewData && root.linkPreviewData.description ? root.linkPreviewData.description : ""
                                             font.family: Config.theme.font
                                             font.pixelSize: Config.theme.fontSize
                                             color: Colors.outline
@@ -2396,7 +2401,7 @@ Item {
                                             visible: text.length > 0
                                         }
                                     }
-                                    
+
                                     // Preview image (thumbnail)
                                     Rectangle {
                                         width: 100
@@ -2405,22 +2410,21 @@ Item {
                                         radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                         visible: root.linkPreviewData && root.linkPreviewData.image
                                         anchors.verticalCenter: parent.verticalCenter
-                                        
+
                                         Image {
                                             anchors.fill: parent
-                                            source: root.linkPreviewData && root.linkPreviewData.image ? 
-                                                   root.linkPreviewData.image : ""
+                                            source: root.linkPreviewData && root.linkPreviewData.image ? root.linkPreviewData.image : ""
                                             fillMode: Image.PreserveAspectCrop
                                             asynchronous: true
                                             cache: true
                                             smooth: true
-                                            
+
                                             Rectangle {
                                                 anchors.fill: parent
                                                 color: Colors.surfaceBright
                                                 radius: parent.parent.radius
                                                 visible: parent.status === Image.Loading
-                                                
+
                                                 Text {
                                                     anchors.centerIn: parent
                                                     text: Icons.spinnerGap
@@ -2434,28 +2438,27 @@ Item {
                                     }
                                 }
                             }
-                            
+
                             // Loading indicator for link preview
                             Rectangle {
                                 id: linkPreviewLoadingRect
                                 width: parent.width
                                 height: 60
-                                visible: root.loadingLinkPreview && previewPanel.currentItem && 
-                                        ClipboardUtils.isUrl(root.currentFullContent || previewPanel.currentItem.preview)
+                                visible: root.loadingLinkPreview && previewPanel.currentItem && ClipboardUtils.isUrl(root.currentFullContent || previewPanel.currentItem.preview)
                                 color: Colors.surface
                                 radius: Config.roundness > 0 ? Config.roundness + 4 : 0
-                                
+
                                 Row {
                                     anchors.centerIn: parent
                                     spacing: 12
-                                    
+
                                     Text {
                                         text: Icons.spinnerGap
                                         font.family: Icons.font
                                         font.pixelSize: 20
                                         color: Colors.primary
                                         textFormat: Text.RichText
-                                        
+
                                         RotationAnimator on rotation {
                                             from: 0
                                             to: 360
@@ -2464,7 +2467,7 @@ Item {
                                             running: linkPreviewLoadingRect.visible
                                         }
                                     }
-                                    
+
                                     Text {
                                         text: "Loading preview..."
                                         font.family: Config.theme.font
@@ -2478,12 +2481,8 @@ Item {
                             Item {
                                 width: parent.width
                                 height: urlPreview.visible ? 60 : 0
-                                visible: previewPanel.currentItem && 
-                                        ClipboardUtils.isUrl(root.currentFullContent || previewPanel.currentItem.preview) &&
-                                        !root.loadingLinkPreview &&
-                                        (!root.linkPreviewData || 
-                                         (!root.linkPreviewData.title && !root.linkPreviewData.description && !root.linkPreviewData.image))
-                                
+                                visible: previewPanel.currentItem && ClipboardUtils.isUrl(root.currentFullContent || previewPanel.currentItem.preview) && !root.loadingLinkPreview && (!root.linkPreviewData || (!root.linkPreviewData.title && !root.linkPreviewData.description && !root.linkPreviewData.image))
+
                                 Rectangle {
                                     id: urlPreview
                                     anchors.centerIn: parent
@@ -2491,7 +2490,7 @@ Item {
                                     height: 60
                                     color: urlPreviewMouseArea.containsMouse ? Colors.surfaceBright : Colors.surface
                                     radius: Config.roundness > 0 ? Config.roundness + 4 : 0
-                                    
+
                                     Behavior on color {
                                         enabled: Config.animDuration > 0
                                         ColorAnimation {
@@ -2499,32 +2498,32 @@ Item {
                                             easing.type: Easing.OutQuart
                                         }
                                     }
-                                    
+
                                     MouseArea {
                                         id: urlPreviewMouseArea
                                         anchors.fill: parent
                                         hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
-                                        
+
                                         onClicked: {
                                             if (previewPanel.currentItem) {
                                                 root.openItem(previewPanel.currentItem.id);
                                             }
                                         }
                                     }
-                                    
+
                                     Row {
                                         anchors.fill: parent
                                         anchors.margins: 12
                                         spacing: 12
-                                        
+
                                         // Favicon or fallback icon
                                         Rectangle {
                                             width: 36
                                             height: 36
                                             color: Colors.surfaceBright
                                             radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
-                                            
+
                                             Image {
                                                 id: previewFavicon
                                                 anchors.centerIn: parent
@@ -2532,20 +2531,21 @@ Item {
                                                 height: 24
                                                 visible: previewPanel.currentItem !== null
                                                 source: {
-                                                    if (!previewPanel.currentItem) return "";
+                                                    if (!previewPanel.currentItem)
+                                                        return "";
                                                     return ClipboardUtils.getFaviconUrl(root.currentFullContent || previewPanel.currentItem.preview);
                                                 }
                                                 fillMode: Image.PreserveAspectFit
                                                 asynchronous: true
                                                 cache: true
-                                                
+
                                                 onStatusChanged: {
                                                     if (status === Image.Error) {
                                                         visible = false;
                                                     }
                                                 }
                                             }
-                                            
+
                                             Text {
                                                 anchors.centerIn: parent
                                                 visible: !previewFavicon.visible || previewFavicon.status === Image.Error
@@ -2556,12 +2556,12 @@ Item {
                                                 textFormat: Text.RichText
                                             }
                                         }
-                                        
+
                                         Column {
                                             width: parent.width - 48 - parent.spacing
                                             height: parent.height
                                             spacing: 4
-                                            
+
                                             Text {
                                                 text: "Link"
                                                 font.family: Config.theme.font
@@ -2569,10 +2569,11 @@ Item {
                                                 font.weight: Font.Medium
                                                 color: Colors.outline
                                             }
-                                            
+
                                             Text {
                                                 text: {
-                                                    if (!previewPanel.currentItem) return "";
+                                                    if (!previewPanel.currentItem)
+                                                        return "";
                                                     var url = root.currentFullContent || previewPanel.currentItem.preview;
                                                     try {
                                                         var urlObj = new URL(url.trim());
@@ -2609,20 +2610,21 @@ Item {
                             policy: ScrollBar.AsNeeded
                         }
                     }
-                    
+
                     // Preview para archivos (text/uri-list)
                     Item {
                         anchors.fill: parent
                         visible: previewPanel.currentItem && previewPanel.currentItem.isFile
-                        
+
                         property string filePath: {
-                            if (!previewPanel.currentItem) return "";
+                            if (!previewPanel.currentItem)
+                                return "";
                             var content = root.currentFullContent || previewPanel.currentItem.preview;
                             return root.getFilePathFromUri(content);
                         }
-                        
+
                         property bool isImage: root.isImageFile(filePath)
-                        
+
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
@@ -2632,7 +2634,7 @@ Item {
                                 }
                             }
                         }
-                        
+
                         // Preview de imagen para archivos de imagen
                         Image {
                             anchors.fill: parent
@@ -2641,7 +2643,7 @@ Item {
                             source: parent.isImage ? "file://" + parent.filePath : ""
                             cache: false
                             asynchronous: true
-                            
+
                             Rectangle {
                                 anchors.centerIn: parent
                                 width: 120
@@ -2649,7 +2651,7 @@ Item {
                                 color: Colors.surfaceBright
                                 radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                                 visible: parent.status === Image.Loading || parent.status === Image.Error
-                                
+
                                 Text {
                                     anchors.centerIn: parent
                                     text: Icons.image
@@ -2660,35 +2662,38 @@ Item {
                                 }
                             }
                         }
-                        
+
                         // Preview genérico para otros archivos
                         Column {
                             anchors.centerIn: parent
                             spacing: 16
                             visible: !parent.isImage
-                            
+
                             Rectangle {
                                 width: 120
                                 height: 120
                                 color: Colors.surfaceBright
                                 radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                
+
                                 Text {
                                     anchors.centerIn: parent
                                     text: {
-                                        if (!previewPanel.currentItem) return Icons.file;
+                                        if (!previewPanel.currentItem)
+                                            return Icons.file;
                                         var content = root.currentFullContent || previewPanel.currentItem.preview;
                                         var filePath = root.getFilePathFromUri(content);
                                         if (filePath) {
                                             var nerdIcon = ClipboardUtils.getNerdFontIconForExtension(filePath);
-                                            if (nerdIcon) return nerdIcon;
+                                            if (nerdIcon)
+                                                return nerdIcon;
                                         }
                                         return Icons.file;
                                     }
                                     textFormat: Text.RichText
                                     font.family: {
-                                        if (!previewPanel.currentItem) return Icons.font;
+                                        if (!previewPanel.currentItem)
+                                            return Icons.font;
                                         var content = root.currentFullContent || previewPanel.currentItem.preview;
                                         var filePath = root.getFilePathFromUri(content);
                                         if (filePath) {
@@ -2703,15 +2708,16 @@ Item {
                                     color: Colors.primary
                                 }
                             }
-                            
+
                             Column {
                                 width: previewPanel.width - 16
                                 spacing: 8
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                
+
                                 Text {
                                     text: {
-                                        if (!previewPanel.currentItem) return "";
+                                        if (!previewPanel.currentItem)
+                                            return "";
                                         var content = root.currentFullContent || previewPanel.currentItem.preview;
                                         if (content.startsWith("file://")) {
                                             var filePath = content.substring(7).trim();
@@ -2729,17 +2735,18 @@ Item {
                                     width: parent.width
                                     wrapMode: Text.Wrap
                                 }
-                                
+
                                 Text {
                                     text: {
-                                        if (!previewPanel.currentItem) return "";
+                                        if (!previewPanel.currentItem)
+                                            return "";
                                         var content = root.currentFullContent || previewPanel.currentItem.preview;
                                         if (content.startsWith("file://")) {
                                             var filePath = content.substring(7).trim();
                                             var parts = filePath.split('/');
                                             parts.pop(); // Remove filename
                                             // Decode each part of the path
-                                            var decodedParts = parts.map(function(part) {
+                                            var decodedParts = parts.map(function (part) {
                                                 return decodeURIComponent(part);
                                             });
                                             return decodedParts.join('/');
@@ -2834,10 +2841,13 @@ Item {
 
                                     Text {
                                         text: {
-                                            if (!previewPanel.currentItem) return "";
+                                            if (!previewPanel.currentItem)
+                                                return "";
                                             var bytes = previewPanel.currentItem.size || 0;
-                                            if (bytes < 1024) return bytes + " B";
-                                            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+                                            if (bytes < 1024)
+                                                return bytes + " B";
+                                            if (bytes < 1024 * 1024)
+                                                return (bytes / 1024).toFixed(1) + " KB";
                                             return (bytes / (1024 * 1024)).toFixed(1) + " MB";
                                         }
                                         font.family: Config.theme.font
@@ -2867,7 +2877,8 @@ Item {
 
                                     Text {
                                         text: {
-                                            if (!previewPanel.currentItem || !previewPanel.currentItem.createdAt) return "Unknown";
+                                            if (!previewPanel.currentItem || !previewPanel.currentItem.createdAt)
+                                                return "Unknown";
                                             var date = new Date(previewPanel.currentItem.createdAt);
                                             return Qt.formatDateTime(date, "MMM dd, yyyy hh:mm:ss AP");
                                         }
@@ -2926,11 +2937,12 @@ Item {
                                 color: metadataOpenButtonMouseArea.containsMouse ? Colors.surfaceBright : Colors.surface
                                 radius: Config.roundness
                                 visible: {
-                                    if (!previewPanel.currentItem) return false;
+                                    if (!previewPanel.currentItem)
+                                        return false;
                                     var item = previewPanel.currentItem;
                                     return item.isFile || item.isImage || ClipboardUtils.isUrl(root.currentFullContent || item.preview);
                                 }
-                                
+
                                 Behavior on color {
                                     enabled: Config.animDuration > 0
                                     ColorAnimation {
@@ -2944,7 +2956,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    
+
                                     onClicked: {
                                         if (previewPanel.currentItem) {
                                             root.openItem(previewPanel.currentItem.id);
@@ -2959,7 +2971,7 @@ Item {
                                     font.pixelSize: 20
                                     color: metadataOpenButtonMouseArea.containsMouse ? Colors.primary : Colors.overBackground
                                     textFormat: Text.RichText
-                                    
+
                                     Behavior on color {
                                         enabled: Config.animDuration > 0
                                         ColorAnimation {
@@ -2977,7 +2989,7 @@ Item {
                                 height: 36
                                 color: metadataDragArea.containsMouse ? Colors.surfaceBright : Colors.surface
                                 radius: Config.roundness
-                                
+
                                 Behavior on color {
                                     enabled: Config.animDuration > 0
                                     ColorAnimation {
@@ -2985,30 +2997,37 @@ Item {
                                         easing.type: Easing.OutQuart
                                     }
                                 }
-                                
+
                                 // Invisible drag target
                                 Item {
                                     id: dragTarget
-                                    
+
                                     // Drag properties on the invisible item
                                     Drag.active: metadataDragArea.drag.active
                                     Drag.dragType: Drag.Automatic
                                     Drag.supportedActions: Qt.CopyAction
                                     Drag.mimeData: {
-                                        if (!previewPanel.currentItem) return {};
-                                        
+                                        if (!previewPanel.currentItem)
+                                            return {};
+
                                         var item = previewPanel.currentItem;
                                         var content = (root.currentFullContent || item.preview).trim();
-                                        
+
                                         if (item.isFile) {
                                             // File: send as URI list
-                                            return { "text/uri-list": content };
+                                            return {
+                                                "text/uri-list": content
+                                            };
                                         } else if (item.isImage && item.binaryPath) {
                                             // Image from clipboard: send as file URI
-                                            return { "text/uri-list": "file://" + item.binaryPath };
+                                            return {
+                                                "text/uri-list": "file://" + item.binaryPath
+                                            };
                                         } else {
                                             // Text: send as plain text
-                                            return { "text/plain": content };
+                                            return {
+                                                "text/plain": content
+                                            };
                                         }
                                     }
                                 }
@@ -3020,7 +3039,7 @@ Item {
                                     font.pixelSize: 20
                                     color: metadataDragArea.containsMouse ? Colors.primary : Colors.overBackground
                                     textFormat: Text.RichText
-                                    
+
                                     Behavior on color {
                                         enabled: Config.animDuration > 0
                                         ColorAnimation {
