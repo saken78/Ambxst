@@ -2044,16 +2044,17 @@ Item {
             property var currentItem: root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length ? root.allItems[root.selectedIndex] : null
 
             // Content when item is selected
-            Column {
+            Item {
                 anchors.fill: parent
-                anchors.margins: 8
-                spacing: 8
                 visible: previewPanel.currentItem
 
                 // Preview area
                 Item {
-                    width: parent.width
-                    height: parent.height - metadataSection.height - parent.spacing - separator.height
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: separator.top
+                    anchors.bottomMargin: 8
 
                     // Preview para imagen
                     Image {
@@ -2745,7 +2746,10 @@ Item {
                 // Separator
                 Separator {
                     id: separator
-                    width: parent.width
+                    anchors.bottom: metadataSection.top
+                    anchors.bottomMargin: 8
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     height: 2
                     vert: false
                     gradient: null
@@ -2755,7 +2759,9 @@ Item {
                 // Metadata section
                 Item {
                     id: metadataSection
-                    width: parent.width
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     height: 80
 
                     Row {
@@ -2765,7 +2771,7 @@ Item {
                         Column {
                             width: {
                                 // Always reserve space for buttons if there's an item
-                                return parent.width - (previewPanel.currentItem ? 56 : 0);
+                                return parent.width - (previewPanel.currentItem ? 36 + 8 : 0);
                             }
                             height: parent.height
                             spacing: 4
@@ -2892,14 +2898,14 @@ Item {
 
                         // Action buttons column (Open and Drag)
                         Column {
-                            width: 48
+                            width: 36
                             height: parent.height
                             spacing: 4
                             visible: previewPanel.currentItem !== null
 
                             // Open button (for files, images, and URLs)
                             Rectangle {
-                                width: 48
+                                width: height
                                 height: 36
                                 color: metadataOpenButtonMouseArea.containsMouse ? Colors.surfaceBright : Colors.surface
                                 radius: Config.roundness
@@ -2951,7 +2957,7 @@ Item {
                             // Drag button
                             Rectangle {
                                 id: dragButton
-                                width: 48
+                                width: height
                                 height: 36
                                 color: metadataDragArea.containsMouse ? Colors.surfaceBright : Colors.surface
                                 radius: Config.roundness

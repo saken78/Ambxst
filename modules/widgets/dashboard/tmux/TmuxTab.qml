@@ -1318,10 +1318,8 @@ Item {
             property var currentSession: root.selectedIndex >= 0 && root.selectedIndex < root.filteredSessions.length ? root.filteredSessions[root.selectedIndex] : null
 
             // Content when session is selected
-            Column {
+            Item {
                 anchors.fill: parent
-                anchors.margins: 8
-                spacing: 8
                 visible: {
                     if (!previewPanel.currentSession) return false;
                     if (previewPanel.currentSession.isCreateButton === true) return false;
@@ -1331,8 +1329,11 @@ Item {
 
                 // Panes layout preview (top section)
                 Item {
-                    width: parent.width
-                    height: parent.height - 32 - parent.spacing - 2
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: separator.top
+                    anchors.bottomMargin: 8
 
                     Item {
                         anchors.fill: parent
@@ -1514,7 +1515,11 @@ Item {
 
                 // Separator
                 Rectangle {
-                    width: parent.width
+                    id: separator
+                    anchors.bottom: windowsSection.top
+                    anchors.bottomMargin: 8
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     height: 2
                     radius: Config.roundness
                     color: Colors.surface
@@ -1522,7 +1527,10 @@ Item {
 
                 // Windows info section (bottom section)
                 Item {
-                    width: parent.width
+                    id: windowsSection
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     height: 32
 
                     Flickable {
