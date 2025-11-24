@@ -23,7 +23,7 @@ Rectangle {
         shadowHorizontalOffset: 0
         shadowVerticalOffset: 0
         shadowBlur: 1
-        shadowColor: Colors[Config.theme.shadowColor] || Colors.shadow
+        shadowColor: Config.resolveColor(Config.theme.shadowColor)
         shadowOpacity: Config.theme.shadowOpacity
     }
 

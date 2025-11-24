@@ -14,21 +14,9 @@ Rectangle {
     property var firstColorData: Config.bar.barColor[0] || ["surface", 0.0]
     property var lastColorData: Config.bar.barColor[Config.bar.barColor.length - 1] || ["surface", 0.0]
     
-    property color firstColor: {
-        const colorValue = firstColorData[0];
-        if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
-            return colorValue;
-        }
-        return Colors[colorValue] || colorValue;
-    }
+    property color firstColor: Config.resolveColor(firstColorData[0])
     
-    property color lastColor: {
-        const colorValue = lastColorData[0];
-        if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
-            return colorValue;
-        }
-        return Colors[colorValue] || colorValue;
-    }
+    property color lastColor: Config.resolveColor(lastColorData[0])
 
     gradient: Gradient {
         orientation: Config.bar.barOrientation === "horizontal" ? Gradient.Horizontal : Gradient.Vertical
@@ -42,37 +30,19 @@ Rectangle {
         GradientStop {
             property var stopData: Config.bar.barColor[1] || Config.bar.barColor[Config.bar.barColor.length - 1]
             position: stopData[1]
-            color: {
-                const colorValue = stopData[0];
-                if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
-                    return colorValue;
-                }
-                return Colors[colorValue] || colorValue;
-            }
+            color: Config.resolveColor(stopData[0])
         }
         
         GradientStop {
             property var stopData: Config.bar.barColor[2] || Config.bar.barColor[Config.bar.barColor.length - 1]
             position: stopData[1]
-            color: {
-                const colorValue = stopData[0];
-                if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
-                    return colorValue;
-                }
-                return Colors[colorValue] || colorValue;
-            }
+            color: Config.resolveColor(stopData[0])
         }
         
         GradientStop {
             property var stopData: Config.bar.barColor[3] || Config.bar.barColor[Config.bar.barColor.length - 1]
             position: stopData[1]
-            color: {
-                const colorValue = stopData[0];
-                if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
-                    return colorValue;
-                }
-                return Colors[colorValue] || colorValue;
-            }
+            color: Config.resolveColor(stopData[0])
         }
         
         GradientStop {

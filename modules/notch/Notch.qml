@@ -364,9 +364,9 @@ Item {
                 return; // Only draw for default theme
             var ctx = getContext("2d");
             ctx.clearRect(0, 0, width, height);
-            // Resolve dynamic border color from config (string key referencing Colors)
+            // Resolve dynamic border color from config (HEX or named color)
             var colorKey = Config.theme.borderColor || "primary";
-            var strokeColor = Colors[colorKey] !== undefined ? Colors[colorKey] : Colors.primary;
+            var strokeColor = Config.resolveColor(colorKey);
             if (Config.theme.borderSize <= 0)
                 return; // No outline when borderSize is 0
             ctx.strokeStyle = strokeColor;
@@ -398,7 +398,7 @@ Item {
             }
             ctx.lineTo(rTop + wCenter, rTop);
             if (rTop > 0) {
-                ctx.arc(rTop + wCenter + rTop, rTop, rTop, Math.PI, 3 * Math.PI / 2);
+                ctx.arc(rTop + wCenter + rTop, rTop, Math.PI, 3 * Math.PI / 2);
             }
             ctx.stroke();
         }

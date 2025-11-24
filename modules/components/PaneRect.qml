@@ -14,61 +14,31 @@ Rectangle {
         GradientStop {
             property var stopData: Config.theme.paneColor[0] || ["surface", 0.0]
             position: stopData[1]
-            color: {
-                const colorValue = stopData[0];
-                if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
-                    return colorValue;
-                }
-                return Colors[colorValue] || colorValue;
-            }
+            color: Config.resolveColor(stopData[0])
         }
         
         GradientStop {
             property var stopData: Config.theme.paneColor[1] || Config.theme.paneColor[Config.theme.paneColor.length - 1]
             position: stopData[1]
-            color: {
-                const colorValue = stopData[0];
-                if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
-                    return colorValue;
-                }
-                return Colors[colorValue] || colorValue;
-            }
+            color: Config.resolveColor(stopData[0])
         }
         
         GradientStop {
             property var stopData: Config.theme.paneColor[2] || Config.theme.paneColor[Config.theme.paneColor.length - 1]
             position: stopData[1]
-            color: {
-                const colorValue = stopData[0];
-                if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
-                    return colorValue;
-                }
-                return Colors[colorValue] || colorValue;
-            }
+            color: Config.resolveColor(stopData[0])
         }
         
         GradientStop {
             property var stopData: Config.theme.paneColor[3] || Config.theme.paneColor[Config.theme.paneColor.length - 1]
             position: stopData[1]
-            color: {
-                const colorValue = stopData[0];
-                if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
-                    return colorValue;
-                }
-                return Colors[colorValue] || colorValue;
-            }
+            color: Config.resolveColor(stopData[0])
         }
         
         GradientStop {
             property var stopData: Config.theme.paneColor[4] || Config.theme.paneColor[Config.theme.paneColor.length - 1]
             position: stopData[1]
-            color: {
-                const colorValue = stopData[0];
-                if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
-                    return colorValue;
-                }
-                return Colors[colorValue] || colorValue;
-            }
+            color: Config.resolveColor(stopData[0])
         }
     }
 
@@ -78,7 +48,7 @@ Rectangle {
         shadowHorizontalOffset: 0
         shadowVerticalOffset: 0
         shadowBlur: 1
-         shadowColor: Colors[Config.theme.shadowColor] || Colors.shadow
+        shadowColor: Config.resolveColor(Config.theme.shadowColor)
         shadowOpacity: Config.theme.shadowOpacity
     }
 }

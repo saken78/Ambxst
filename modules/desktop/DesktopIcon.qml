@@ -127,7 +127,7 @@ Item {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
             text: root.itemName
-            color: Colors[Config.desktop.textColor] || Colors.overBackground
+            color: Config.resolveColor(Config.desktop.textColor)
             font.family: Config.defaultFont
             font.pixelSize: Config.theme.fontSize
             font.weight: Font.Bold

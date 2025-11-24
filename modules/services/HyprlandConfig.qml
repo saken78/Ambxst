@@ -32,7 +32,9 @@ QtObject {
     }
 
     function getColorValue(colorName) {
-        return Colors[colorName] || Colors.primary;
+        const resolved = Config.resolveColor(colorName);
+        // Si es un string (HEX), convertirlo a color; si ya es color, devolverlo tal cual
+        return (typeof resolved === 'string') ? Qt.color(resolved) : resolved;
     }
 
     function formatColorForHyprland(color) {

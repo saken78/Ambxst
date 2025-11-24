@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.modules.globals
+import qs.modules.theme
 
 Singleton {
     id: root
@@ -692,4 +693,23 @@ Singleton {
 
     // Prefix configuration
     property QtObject prefix: loader.adapter.prefix
+
+    // Helper functions for color handling (HEX or named colors)
+    function isHexColor(colorValue) {
+        if (typeof colorValue !== 'string') return false;
+        const normalized = colorValue.toLowerCase().trim();
+        return normalized.startsWith('#') || normalized.startsWith('rgb');
+    }
+
+    function resolveColor(colorValue) {
+        if (isHexColor(colorValue)) {
+            return colorValue;
+        }
+        return Colors[colorValue] || Colors.primary;
+    }
+
+    function resolveColorWithOpacity(colorValue, opacity) {
+        const color = isHexColor(colorValue) ? Qt.color(colorValue) : (Colors[colorValue] || Colors.primary);
+        return Qt.rgba(color.r, color.g, color.b, opacity);
+    }
 }
