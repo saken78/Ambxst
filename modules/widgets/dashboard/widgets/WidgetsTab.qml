@@ -158,7 +158,7 @@ Rectangle {
                                     targetItem.focusSearchInput();
                                 }
                             }
-                            // Otherwise, the onLoaded handler will take care of focusing
+                        // Otherwise, the onLoaded handler will take care of focusing
                         });
                     }
                 }
@@ -660,19 +660,26 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 48
                         spacing: 4
-                        
-                        Item { Layout.fillWidth: true }
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
 
                         ControlButton {
                             Layout.preferredWidth: 48
                             Layout.preferredHeight: 48
                             iconName: {
-                                if (!NetworkService.wifiEnabled) return Icons.wifiOff;
+                                if (!NetworkService.wifiEnabled)
+                                    return Icons.wifiOff;
                                 const strength = NetworkService.signalStrength;
-                                if (strength === 0) return Icons.wifiHigh;
-                                if (strength < 25) return Icons.wifiNone;
-                                if (strength < 50) return Icons.wifiLow;
-                                if (strength < 75) return Icons.wifiMedium;
+                                if (strength === 0)
+                                    return Icons.wifiHigh;
+                                if (strength < 25)
+                                    return Icons.wifiNone;
+                                if (strength < 50)
+                                    return Icons.wifiLow;
+                                if (strength < 75)
+                                    return Icons.wifiMedium;
                                 return Icons.wifiHigh;
                             }
                             isActive: NetworkService.wifiEnabled
@@ -684,14 +691,18 @@ Rectangle {
                             Layout.preferredWidth: 48
                             Layout.preferredHeight: 48
                             iconName: {
-                                if (!BluetoothService.enabled) return Icons.bluetoothOff;
-                                if (BluetoothService.connected) return Icons.bluetoothConnected;
+                                if (!BluetoothService.enabled)
+                                    return Icons.bluetoothOff;
+                                if (BluetoothService.connected)
+                                    return Icons.bluetoothConnected;
                                 return Icons.bluetooth;
                             }
                             isActive: BluetoothService.enabled
                             tooltipText: {
-                                if (!BluetoothService.enabled) return "Bluetooth: Off";
-                                if (BluetoothService.connected) return "Bluetooth: Connected";
+                                if (!BluetoothService.enabled)
+                                    return "Bluetooth: Off";
+                                if (BluetoothService.connected)
+                                    return "Bluetooth: Connected";
                                 return "Bluetooth: On";
                             }
                             onClicked: BluetoothService.toggle()
@@ -723,8 +734,10 @@ Rectangle {
                             tooltipText: GameModeService.toggled ? "Game Mode: On" : "Game Mode: Off"
                             onClicked: GameModeService.toggle()
                         }
-                        
-                        Item { Layout.fillWidth: true }
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
                     }
 
                     // Circular Controls Row
@@ -733,7 +746,9 @@ Rectangle {
                         Layout.preferredHeight: 48
                         spacing: 4
 
-                        Item { Layout.fillWidth: true }
+                        Item {
+                            Layout.fillWidth: true
+                        }
 
                         CircularControl {
                             id: brightnessControl
@@ -862,7 +877,9 @@ Rectangle {
                             }
                         }
 
-                        Item { Layout.fillWidth: true }
+                        Item {
+                            Layout.fillWidth: true
+                        }
                     }
 
                     FullPlayer {
@@ -902,7 +919,7 @@ Rectangle {
         onStarted: function () {
             console.log("DEBUG: globalOpenProcess started with command:", globalOpenProcess.command);
         }
-        
+
         onExited: function (code, status) {
             if (code === 0) {
                 console.log("DEBUG: globalOpenProcess completed successfully");
