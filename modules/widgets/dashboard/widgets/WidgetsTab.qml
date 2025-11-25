@@ -656,6 +656,78 @@ Rectangle {
                     width: parent.width
                     spacing: 8
 
+                    // Control Buttons Row
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 48
+                        spacing: 4
+                        
+                        Item { Layout.fillWidth: true }
+
+                        ControlButton {
+                            Layout.preferredWidth: 48
+                            Layout.preferredHeight: 48
+                            iconName: {
+                                if (!NetworkService.wifiEnabled) return Icons.wifiOff;
+                                const strength = NetworkService.signalStrength;
+                                if (strength === 0) return Icons.wifiHigh;
+                                if (strength < 25) return Icons.wifiNone;
+                                if (strength < 50) return Icons.wifiLow;
+                                if (strength < 75) return Icons.wifiMedium;
+                                return Icons.wifiHigh;
+                            }
+                            isActive: NetworkService.wifiEnabled
+                            tooltipText: NetworkService.wifiEnabled ? "Wi-Fi: On" : "Wi-Fi: Off"
+                            onClicked: NetworkService.toggleWifi()
+                        }
+
+                        ControlButton {
+                            Layout.preferredWidth: 48
+                            Layout.preferredHeight: 48
+                            iconName: {
+                                if (!BluetoothService.enabled) return Icons.bluetoothOff;
+                                if (BluetoothService.connected) return Icons.bluetoothConnected;
+                                return Icons.bluetooth;
+                            }
+                            isActive: BluetoothService.enabled
+                            tooltipText: {
+                                if (!BluetoothService.enabled) return "Bluetooth: Off";
+                                if (BluetoothService.connected) return "Bluetooth: Connected";
+                                return "Bluetooth: On";
+                            }
+                            onClicked: BluetoothService.toggle()
+                        }
+
+                        ControlButton {
+                            Layout.preferredWidth: 48
+                            Layout.preferredHeight: 48
+                            iconName: Icons.nightLight
+                            isActive: NightLightService.active
+                            tooltipText: NightLightService.active ? "Night Light: On" : "Night Light: Off"
+                            onClicked: NightLightService.toggle()
+                        }
+
+                        ControlButton {
+                            Layout.preferredWidth: 48
+                            Layout.preferredHeight: 48
+                            iconName: Icons.caffeine
+                            isActive: CaffeineService.inhibit
+                            tooltipText: CaffeineService.inhibit ? "Caffeine: On" : "Caffeine: Off"
+                            onClicked: CaffeineService.toggleInhibit()
+                        }
+
+                        ControlButton {
+                            Layout.preferredWidth: 48
+                            Layout.preferredHeight: 48
+                            iconName: Icons.gameMode
+                            isActive: GameModeService.toggled
+                            tooltipText: GameModeService.toggled ? "Game Mode: On" : "Game Mode: Off"
+                            onClicked: GameModeService.toggle()
+                        }
+                        
+                        Item { Layout.fillWidth: true }
+                    }
+
                     FullPlayer {
                         Layout.fillWidth: true
                     }
