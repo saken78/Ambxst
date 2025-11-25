@@ -240,7 +240,7 @@ Item {
                         delegate: Rectangle {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredHeight: 32
+                            Layout.preferredHeight: 28
                             color: (rowIndex === root.currentWeekRow) ? Colors.surface : "transparent"
                             radius: Config.roundness > 0 ? Config.roundness - 4 : 0
 

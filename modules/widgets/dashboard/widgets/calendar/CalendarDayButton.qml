@@ -14,8 +14,8 @@ Rectangle {
 
     Layout.fillWidth: true
     Layout.fillHeight: false
-    Layout.preferredWidth: 32
-    Layout.preferredHeight: 32
+    Layout.preferredWidth: 28
+    Layout.preferredHeight: 28
 
     color: "transparent"
     radius: Config.roundness > 0 ? Config.roundness - 2 : 0
@@ -33,7 +33,7 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             font.weight: Font.Bold
-            font.pixelSize: Config.theme.fontSize
+            font.pixelSize: Math.max(8, Config.theme.fontSize - 2)
             font.family: Config.defaultFont
             color: {
                 if (isToday === 1)
