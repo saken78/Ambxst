@@ -496,8 +496,8 @@ Rectangle {
                         }
                     }
 
-                    highlight: Rectangle {
-                        color: Colors.primary
+                    highlight: StyledRect {
+                        variant: "active"
                         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                         visible: appLauncher.selectedIndex >= 0 && (appLauncher.optionsMenuOpen ? appLauncher.selectedIndex === appLauncher.menuItemIndex : true)
                     }

@@ -652,8 +652,8 @@ Rectangle {
                         }
                     }
 
-                    highlight: Rectangle {
-                        color: Colors.primary
+                    highlight: StyledRect {
+                        variant: "active"
                         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                         visible: root.selectedIndex >= 0 && !root.isRecentFocused
                     }
@@ -785,8 +785,8 @@ Rectangle {
                         }
                     }
 
-                    highlight: Rectangle {
-                        color: Colors.primary
+                    highlight: StyledRect {
+                        variant: "active"
                         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                         visible: root.isRecentFocused
                     }

@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell.Widgets
 import qs.modules.theme
+import qs.modules.components
 import qs.modules.globals
 import qs.config
 
@@ -252,12 +253,12 @@ Item {
                             font.pixelSize: 20
                         }
 
-                        Rectangle {
+                        StyledRect {
+                            variant: "active"
                             z: 0
                             width: 36
                             height: 36
                             radius: Math.max(0, (Config.roundness - 2))
-                            color: Colors.primary
                             x: Config.theme.lightMode ? 2 : 36
                             anchors.verticalCenter: parent.verticalCenter
 
@@ -357,8 +358,8 @@ Item {
                             }
                         }
 
-                        highlight: Rectangle {
-                            color: Colors.primary
+                        highlight: StyledRect {
+                            variant: "active"
                             radius: Config.roundness
                             visible: selectedSchemeIndex >= 0
                             z: -1
@@ -411,8 +412,8 @@ Item {
                         radius: Config.roundness
                     }
 
-                    contentItem: Rectangle {
-                        color: Colors.primary
+                    contentItem: StyledRect {
+                        variant: "active"
                         radius: Config.roundness
                     }
 

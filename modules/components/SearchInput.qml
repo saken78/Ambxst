@@ -63,11 +63,11 @@ StyledRect {
         }
 
         // Prefix indicator
-        Rectangle {
+        StyledRect {
+            variant: "active"
             Layout.preferredWidth: 32
             Layout.preferredHeight: 32
             radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
-            color: Colors.primary
             visible: root.prefixText.length > 0 || root.prefixIcon.length > 0
 
             Text {

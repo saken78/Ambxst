@@ -465,43 +465,46 @@ FocusScope {
                                                 }
                                             }
 
-                                            Rectangle {
+                                            Item {
                                                 anchors.fill: parent
-                                                radius: Config.roundness
-                                                color: oledCheckbox.checked ? Colors.primary : Colors.background
 
-                                                Behavior on color {
-                                                    enabled: Config.animDuration > 0
-                                                    ColorAnimation {
-                                                        duration: Config.animDuration / 2
-                                                        easing.type: Easing.OutQuart
-                                                    }
+                                                Rectangle {
+                                                    anchors.fill: parent
+                                                    radius: Config.roundness
+                                                    color: Colors.background
+                                                    visible: !oledCheckbox.checked
                                                 }
 
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    text: Icons.accept
-                                                    color: Colors.overPrimary
-                                                    font.family: Icons.font
-                                                    font.pixelSize: 20
+                                                StyledRect {
+                                                    variant: "active"
+                                                    anchors.fill: parent
+                                                    radius: Config.roundness
                                                     visible: oledCheckbox.checked
-                                                    scale: oledCheckbox.checked ? 1.0 : 0.0
                                                     opacity: oledCheckbox.checked ? 1.0 : 0.0
-
-                                                    Behavior on scale {
-                                                        enabled: Config.animDuration > 0
-                                                        NumberAnimation {
-                                                            duration: Config.animDuration / 2
-                                                            easing.type: Easing.OutBack
-                                                            easing.overshoot: 1.5
-                                                        }
-                                                    }
 
                                                     Behavior on opacity {
                                                         enabled: Config.animDuration > 0
                                                         NumberAnimation {
                                                             duration: Config.animDuration / 2
                                                             easing.type: Easing.OutQuart
+                                                        }
+                                                    }
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: Icons.accept
+                                                        color: Colors.overPrimary
+                                                        font.family: Icons.font
+                                                        font.pixelSize: 20
+                                                        scale: oledCheckbox.checked ? 1.0 : 0.0
+
+                                                        Behavior on scale {
+                                                            enabled: Config.animDuration > 0
+                                                            NumberAnimation {
+                                                                duration: Config.animDuration / 2
+                                                                easing.type: Easing.OutBack
+                                                                easing.overshoot: 1.5
+                                                            }
                                                         }
                                                     }
                                                 }

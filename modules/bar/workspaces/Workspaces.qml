@@ -251,7 +251,8 @@ Item {
     }
 
     // Horizontal active workspace highlight
-    Rectangle {
+    StyledRect {
+        variant: "active"
         id: activeHighlightH
         visible: orientation === "horizontal"
         z: 2
@@ -279,7 +280,6 @@ Item {
 
 
         }
-        color: Colors.primary
         anchors.verticalCenter: parent.verticalCenter
 
         x: Math.min(idx1, idx2) * workspaceButtonWidth + activeWorkspaceMargin + widgetPadding
@@ -312,7 +312,8 @@ Item {
     }
 
     // Vertical active workspace highlight
-    Rectangle {
+    StyledRect {
+        variant: "active"
         id: activeHighlightV
         visible: orientation === "vertical"
         z: 2
@@ -340,7 +341,6 @@ Item {
 
 
         }
-        color: Colors.primary
         anchors.horizontalCenter: parent.horizontalCenter
 
         x: parent.width / 2 - implicitWidth / 2

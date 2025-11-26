@@ -142,11 +142,11 @@ NotchAnimationBehavior {
             }
 
             // Background highlight que se desplaza verticalmente con efecto elástico
-            Rectangle {
+            StyledRect {
+                variant: "active"
                 id: tabHighlight
                 width: parent.width
                 radius: Config.roundness > 0 ? Config.roundness + 4 : 0
-                color: Colors.primary
                 z: 0
 
                 property real idx1: root.state.currentTab

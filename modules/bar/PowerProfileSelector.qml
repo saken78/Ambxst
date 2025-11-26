@@ -65,10 +65,10 @@ StyledRect {
         anchors.margins: padding
 
         // Sliding highlight indicator (behind buttons)
-        Rectangle {
+        StyledRect {
+            variant: "active"
             id: highlight
             z: 0
-            color: Colors.primary
             radius: Math.max(0, Config.roundness - 2)
 
             property int currentIndex: {

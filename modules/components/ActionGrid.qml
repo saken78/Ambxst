@@ -77,17 +77,9 @@ FocusScope {
         color: "transparent"
 
         // Highlight que se desplaza entre botones con efecto elástico
-        Rectangle {
+        StyledRect {
+            variant: "active"
             id: highlight
-            color: {
-                // Buscar si algún botón está presionado
-                for (let i = 0; i < repeater.count; i++) {
-                    if (repeater.itemAt(i) && repeater.itemAt(i).pressed) {
-                        return Colors.overPrimary;
-                    }
-                }
-                return Colors.primary;
-            }
             radius: Config.roundness > 0 ? Config.roundness + 4 : 0
             border.width: 0
             border.color: Colors.primary
