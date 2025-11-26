@@ -90,11 +90,13 @@ Singleton {
                 property list<var> gradFocus: [["surfaceBright", 0.0]]
                 property list<var> gradPrimary: [["primary", 0.0]]
                 property list<var> gradPrimaryFocus: [["overBackground", 0.0]]
+                property list<var> gradOverPrimary: [["overPrimary", 0.0]]
                 property list<var> gradSecondary: [["secondary", 0.0]]
                 property list<var> gradSecondaryFocus: [["overBackground", 0.0]]
                 property list<var> gradOverSecondary: [["overSecondary", 0.0]]
                 property list<var> gradTertiary: [["tertiary", 0.0]]
                 property list<var> gradTertiaryFocus: [["overBackground", 0.0]]
+                property list<var> gradOverTertiary: [["overTertiary", 0.0]]
                 property list<var> gradError: [["error", 0.0]]
                 property list<var> gradErrorFocus: [["overBackground", 0.0]]
                 property list<var> gradOverError: [["overError", 0.0]]
@@ -106,11 +108,13 @@ Singleton {
                 property list<var> borderFocus: ["surfaceBright", 0]
                 property list<var> borderPrimary: ["primary", 0]
                 property list<var> borderPrimaryFocus: ["overBackground", 0]
+                property list<var> borderOverPrimary: ["overPrimary", 0]
                 property list<var> borderSecondary: ["secondary", 0]
                 property list<var> borderSecondaryFocus: ["overBackground", 0]
                 property list<var> borderOverSecondary: ["overSecondary", 0]
                 property list<var> borderTertiary: ["tertiary", 0]
                 property list<var> borderTertiaryFocus: ["overBackground", 0]
+                property list<var> borderOverTertiary: ["overTertiary", 0]
                 property list<var> borderError: ["error", 0]
                 property list<var> borderErrorFocus: ["overBackground", 0]
                 property list<var> borderOverError: ["overError", 0]
@@ -122,11 +126,13 @@ Singleton {
                 property string itemFocus: "overBackground"
                 property string itemPrimary: "overPrimary"
                 property string itemPrimaryFocus: "overPrimary"
+                property string itemOverPrimary: "primary"
                 property string itemSecondary: "overSecondary"
                 property string itemSecondaryFocus: "overSecondary"
                 property string itemOverSecondary: "secondary"
                 property string itemTertiary: "overTertiary"
                 property string itemTertiaryFocus: "overTertiary"
+                property string itemOverTertiary: "tertiary"
                 property string itemError: "overError"
                 property string itemErrorFocus: "overError"
                 property string itemOverError: "error"

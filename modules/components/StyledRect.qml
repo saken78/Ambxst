@@ -20,11 +20,13 @@ Rectangle {
             case "focus": return Config.theme.gradFocus
             case "primary": return Config.theme.gradPrimary
             case "primaryfocus": return Config.theme.gradPrimaryFocus
+            case "overprimary": return Config.theme.gradOverPrimary
             case "secondary": return Config.theme.gradSecondary
             case "secondaryfocus": return Config.theme.gradSecondaryFocus
             case "oversecondary": return Config.theme.gradOverSecondary
             case "tertiary": return Config.theme.gradTertiary
             case "tertiaryfocus": return Config.theme.gradTertiaryFocus
+            case "overtertiary": return Config.theme.gradOverTertiary
             case "error": return Config.theme.gradError
             case "errorfocus": return Config.theme.gradErrorFocus
             case "overerror": return Config.theme.gradOverError
@@ -40,11 +42,13 @@ Rectangle {
             case "focus": return Config.theme.borderFocus
             case "primary": return Config.theme.borderPrimary
             case "primaryfocus": return Config.theme.borderPrimaryFocus
+            case "overprimary": return Config.theme.borderOverPrimary
             case "secondary": return Config.theme.borderSecondary
             case "secondaryfocus": return Config.theme.borderSecondaryFocus
             case "oversecondary": return Config.theme.borderOverSecondary
             case "tertiary": return Config.theme.borderTertiary
             case "tertiaryfocus": return Config.theme.borderTertiaryFocus
+            case "overtertiary": return Config.theme.borderOverTertiary
             case "error": return Config.theme.borderError
             case "errorfocus": return Config.theme.borderErrorFocus
             case "overerror": return Config.theme.borderOverError
@@ -60,11 +64,13 @@ Rectangle {
             case "focus": return Config.resolveColor(Config.theme.itemFocus)
             case "primary": return Config.resolveColor(Config.theme.itemPrimary)
             case "primaryfocus": return Config.resolveColor(Config.theme.itemPrimaryFocus)
+            case "overprimary": return Config.resolveColor(Config.theme.itemOverPrimary)
             case "secondary": return Config.resolveColor(Config.theme.itemSecondary)
             case "secondaryfocus": return Config.resolveColor(Config.theme.itemSecondaryFocus)
             case "oversecondary": return Config.resolveColor(Config.theme.itemOverSecondary)
             case "tertiary": return Config.resolveColor(Config.theme.itemTertiary)
             case "tertiaryfocus": return Config.resolveColor(Config.theme.itemTertiaryFocus)
+            case "overtertiary": return Config.resolveColor(Config.theme.itemOverTertiary)
             case "error": return Config.resolveColor(Config.theme.itemError)
             case "errorfocus": return Config.resolveColor(Config.theme.itemErrorFocus)
             case "overerror": return Config.resolveColor(Config.theme.itemOverError)
