@@ -94,18 +94,10 @@ Item {
         }
     }
 
-    Rectangle {
-        color: keyboardNavigationActive && schemeButton.activeFocus ? Colors.surfaceBright : Colors.surface
+    StyledRect {
+        variant: keyboardNavigationActive && schemeButton.activeFocus ? "focus" : "pane"
         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
         anchors.fill: parent
-
-        Behavior on color {
-            enabled: Config.animDuration > 0
-            ColorAnimation {
-                duration: Config.animDuration / 2
-                easing.type: Easing.OutQuart
-            }
-        }
 
         ColumnLayout {
             id: mainLayout

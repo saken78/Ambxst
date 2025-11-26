@@ -369,19 +369,11 @@ FocusScope {
 
                                 property bool keyboardNavigationActive: false
 
-                                Rectangle {
+                                StyledRect {
+                                    variant: oledCheckboxContainer.keyboardNavigationActive && oledCheckbox.activeFocus ? "focus" : "pane"
                                     anchors.fill: parent
-                                    color: oledCheckboxContainer.keyboardNavigationActive && oledCheckbox.activeFocus ? Colors.surfaceBright : Colors.surface
                                     radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                                     opacity: oledCheckbox.enabled ? 1.0 : 0.5
-
-                                    Behavior on color {
-                                        enabled: Config.animDuration > 0
-                                        ColorAnimation {
-                                            duration: Config.animDuration / 2
-                                            easing.type: Easing.OutQuart
-                                        }
-                                    }
 
                                     Behavior on opacity {
                                         enabled: Config.animDuration > 0

@@ -40,10 +40,10 @@ Item {
         }
     }
 
-    ClippingRectangle {
+    StyledRect {
+        variant: "common"
         anchors.fill: parent
         radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
-        color: hasArtwork ? PlayerColors.background : Colors.surface
 
         WavyLine {
             id: noPlayerWavyLine
