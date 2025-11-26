@@ -597,12 +597,14 @@ Rectangle {
 
                             Text {
                                 width: parent.width - emojiIcon.implicitWidth - 6 - parent.spacing - 16
+                                height: parent.height
                                 text: modelData.search
                                 color: textColor
                                 font.family: Config.theme.font
                                 font.weight: Font.Bold
                                 font.pixelSize: Config.theme.fontSize
                                 elide: Text.ElideRight
+                                verticalAlignment: Text.AlignVCenter
                             }
                         }
                     }
@@ -723,12 +725,14 @@ Rectangle {
 
                             Text {
                                 width: parent.width - recentEmojiIcon.implicitWidth - 6 - parent.spacing - 16
+                                height: parent.height
                                 text: modelData.search
                                 color: textColor
                                 font.family: Config.theme.font
                                 font.weight: Font.Bold
                                 font.pixelSize: Config.theme.fontSize
                                 elide: Text.ElideRight
+                                verticalAlignment: Text.AlignVCenter
                             }
                         }
                     }

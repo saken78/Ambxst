@@ -771,7 +771,6 @@ QtObject {
     
     // Emoji paste process - persists even when dashboard closes
     property Process emojiTypeProcess: Process {
-        property string emojiText: ""
         running: false
         
         stderr: StdioCollector {
@@ -793,15 +792,13 @@ QtObject {
         interval: 250
         repeat: false
         onTriggered: {
-            if (emojiTypeProcess.emojiText.length > 0) {
-                emojiTypeProcess.command = ["wtype", emojiTypeProcess.emojiText];
-                emojiTypeProcess.running = true;
-                emojiTypeProcess.emojiText = "";
-            }
+            // Simulate Ctrl+V: press Ctrl, press V, release V, release Ctrl
+            emojiTypeProcess.command = ["wtype", "-M", "ctrl", "-P", "v", "-p", "v", "-m", "ctrl"];
+            emojiTypeProcess.running = true;
         }
     }
     
-    // Function to copy and type emoji
+    // Function to copy and paste emoji via Ctrl+V
     function copyAndTypeEmoji(emojiText) {
         // Copy to clipboard
         var copyCmd = ["bash", "-c", "echo -n '" + emojiText.replace(/'/g, "'\\''") + "' | wl-copy"];
@@ -809,8 +806,7 @@ QtObject {
         copyProc.command = copyCmd;
         copyProc.running = true;
         
-        // Schedule typing
-        emojiTypeProcess.emojiText = emojiText;
+        // Schedule Ctrl+V paste
         emojiTypeTimer.start();
     }
 
