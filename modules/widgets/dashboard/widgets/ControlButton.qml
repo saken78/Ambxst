@@ -4,7 +4,7 @@ import qs.modules.theme
 import qs.modules.components
 import qs.config
 
-Rectangle {
+StyledRect {
     id: root
 
     required property bool isActive
@@ -12,16 +12,16 @@ Rectangle {
     required property string tooltipText
     signal clicked
 
-    color: root.isActive ? Colors.primary : Colors.surfaceBright
-    radius: root.isActive ? Config.roundness : Config.roundness * 1.25
+    property bool isHovered: mouseArea.containsMouse
 
-    Behavior on color {
-        enabled: Config.animDuration > 0
-        ColorAnimation {
-            duration: Config.animDuration / 2
-            easing.type: Easing.OutQuart
-        }
+    variant: {
+        if (isActive && isHovered) return "activefocus"
+        if (isActive) return "active"
+        if (isHovered) return "focus"
+        return "pane"
     }
+
+    radius: root.isActive ? Config.roundness : Config.roundness * 1.25
 
     Behavior on radius {
         enabled: Config.animDuration > 0
@@ -34,7 +34,7 @@ Rectangle {
     Text {
         anchors.centerIn: parent
         text: root.iconName
-        color: root.isActive ? Colors.overPrimary : Colors.overBackground
+        color: root.itemColor
         font.family: Icons.font
         font.pixelSize: 18
         horizontalAlignment: Text.AlignHCenter
@@ -50,6 +50,7 @@ Rectangle {
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor

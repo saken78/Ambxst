@@ -82,7 +82,7 @@ Singleton {
                 property list<var> paneColor: [["surface", 0.0]]
                 property string paneOrientation: "vertical"
                 property list<var> separatorColor: [["surfaceBright", 0.0]]
-                
+
                 // Gradient configurations
                 property list<var> gradBg: [["background", 0.0]]
                 property list<var> gradPane: [["surface", 0.0]]
@@ -90,22 +90,22 @@ Singleton {
                 property list<var> gradFocus: [["surfaceBright", 0.0]]
                 property list<var> gradActive: [["primary", 0.0]]
                 property list<var> gradActiveFocus: [["overBackground", 0.0]]
-                
+
                 // Border configurations [color, width]
                 property list<var> borderBg: ["surfaceBright", 0]
                 property list<var> borderPane: ["surfaceBright", 0]
                 property list<var> borderCommon: ["surfaceBright", 0]
-                property list<var> borderFocus: ["surfaceBright", 1]
-                property list<var> borderActive: ["primary", 1]
-                property list<var> borderActiveFocus: ["overBackground", 1]
-                
+                property list<var> borderFocus: ["surfaceBright", 0]
+                property list<var> borderActive: ["primary", 0]
+                property list<var> borderActiveFocus: ["overBackground", 0]
+
                 // Item color configurations
-                property string itemBg: "onBackground"
-                property string itemPane: "onSurface"
-                property string itemCommon: "onSurface"
-                property string itemFocus: "onSurface"
-                property string itemActive: "overBackground"
-                property string itemActiveFocus: "overBackground"
+                property string itemBg: "overBackground"
+                property string itemPane: "overBackground"
+                property string itemCommon: "overBackground"
+                property string itemFocus: "overBackground"
+                property string itemActive: "overPrimary"
+                property string itemActiveFocus: "overPrimary"
             }
 
             property JsonObject bar: JsonObject {
@@ -721,7 +721,8 @@ Singleton {
 
     // Helper functions for color handling (HEX or named colors)
     function isHexColor(colorValue) {
-        if (typeof colorValue !== 'string') return false;
+        if (typeof colorValue !== 'string')
+            return false;
         const normalized = colorValue.toLowerCase().trim();
         return normalized.startsWith('#') || normalized.startsWith('rgb');
     }
