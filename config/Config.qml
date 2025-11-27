@@ -89,81 +89,193 @@ Singleton {
                 property int gradBgAngle: 0
                 property real gradBgCenterX: 0.5
                 property real gradBgCenterY: 0.5
+                property real gradBgHalftoneDotMin: 2.0
+                property real gradBgHalftoneDotMax: 8.0
+                property real gradBgHalftoneStart: 0.0
+                property real gradBgHalftoneEnd: 1.0
+                property real gradBgHalftoneSpread: 2.5
+                property string gradBgHalftoneDotColor: "primary"
+                property string gradBgHalftoneBackgroundColor: "surface"
                 property list<var> gradPane: [["surface", 0.0]]
                 property string gradPaneType: "linear"
                 property int gradPaneAngle: 0
                 property real gradPaneCenterX: 0.5
                 property real gradPaneCenterY: 0.5
+                property real gradPaneHalftoneDotMin: 2.0
+                property real gradPaneHalftoneDotMax: 8.0
+                property real gradPaneHalftoneStart: 0.0
+                property real gradPaneHalftoneEnd: 1.0
+                property real gradPaneHalftoneSpread: 2.5
+                property string gradPaneHalftoneDotColor: "primary"
+                property string gradPaneHalftoneBackgroundColor: "surface"
                 property list<var> gradCommon: [["surface", 0.0]]
                 property string gradCommonType: "linear"
                 property int gradCommonAngle: 0
                 property real gradCommonCenterX: 0.5
                 property real gradCommonCenterY: 0.5
+                property real gradCommonHalftoneDotMin: 2.0
+                property real gradCommonHalftoneDotMax: 8.0
+                property real gradCommonHalftoneStart: 0.0
+                property real gradCommonHalftoneEnd: 1.0
+                property real gradCommonHalftoneSpread: 2.5
+                property string gradCommonHalftoneDotColor: "primary"
+                property string gradCommonHalftoneBackgroundColor: "surface"
                 property list<var> gradFocus: [["surfaceBright", 0.0]]
                 property string gradFocusType: "linear"
                 property int gradFocusAngle: 0
                 property real gradFocusCenterX: 0.5
                 property real gradFocusCenterY: 0.5
+                property real gradFocusHalftoneDotMin: 2.0
+                property real gradFocusHalftoneDotMax: 8.0
+                property real gradFocusHalftoneStart: 0.0
+                property real gradFocusHalftoneEnd: 1.0
+                property real gradFocusHalftoneSpread: 2.5
+                property string gradFocusHalftoneDotColor: "primary"
+                property string gradFocusHalftoneBackgroundColor: "surfaceBright"
                 property list<var> gradPrimary: [["primary", 0.0]]
                 property string gradPrimaryType: "linear"
                 property int gradPrimaryAngle: 0
                 property real gradPrimaryCenterX: 0.5
                 property real gradPrimaryCenterY: 0.5
+                property real gradPrimaryHalftoneDotMin: 2.0
+                property real gradPrimaryHalftoneDotMax: 8.0
+                property real gradPrimaryHalftoneStart: 0.0
+                property real gradPrimaryHalftoneEnd: 1.0
+                property real gradPrimaryHalftoneSpread: 2.5
+                property string gradPrimaryHalftoneDotColor: "overPrimary"
+                property string gradPrimaryHalftoneBackgroundColor: "primary"
                 property list<var> gradPrimaryFocus: [["overBackground", 0.0]]
                 property string gradPrimaryFocusType: "linear"
                 property int gradPrimaryFocusAngle: 0
                 property real gradPrimaryFocusCenterX: 0.5
                 property real gradPrimaryFocusCenterY: 0.5
+                property real gradPrimaryFocusHalftoneDotMin: 2.0
+                property real gradPrimaryFocusHalftoneDotMax: 8.0
+                property real gradPrimaryFocusHalftoneStart: 0.0
+                property real gradPrimaryFocusHalftoneEnd: 1.0
+                property real gradPrimaryFocusHalftoneSpread: 2.5
+                property string gradPrimaryFocusHalftoneDotColor: "primary"
+                property string gradPrimaryFocusHalftoneBackgroundColor: "overBackground"
                 property list<var> gradOverPrimary: [["overPrimary", 0.0]]
                 property string gradOverPrimaryType: "linear"
                 property int gradOverPrimaryAngle: 0
                 property real gradOverPrimaryCenterX: 0.5
                 property real gradOverPrimaryCenterY: 0.5
+                property real gradOverPrimaryHalftoneDotMin: 2.0
+                property real gradOverPrimaryHalftoneDotMax: 8.0
+                property real gradOverPrimaryHalftoneStart: 0.0
+                property real gradOverPrimaryHalftoneEnd: 1.0
+                property real gradOverPrimaryHalftoneSpread: 2.5
+                property string gradOverPrimaryHalftoneDotColor: "primary"
+                property string gradOverPrimaryHalftoneBackgroundColor: "overPrimary"
                 property list<var> gradSecondary: [["secondary", 0.0]]
                 property string gradSecondaryType: "linear"
                 property int gradSecondaryAngle: 0
                 property real gradSecondaryCenterX: 0.5
                 property real gradSecondaryCenterY: 0.5
+                property real gradSecondaryHalftoneDotMin: 2.0
+                property real gradSecondaryHalftoneDotMax: 8.0
+                property real gradSecondaryHalftoneStart: 0.0
+                property real gradSecondaryHalftoneEnd: 1.0
+                property real gradSecondaryHalftoneSpread: 2.5
+                property string gradSecondaryHalftoneDotColor: "overSecondary"
+                property string gradSecondaryHalftoneBackgroundColor: "secondary"
                 property list<var> gradSecondaryFocus: [["overBackground", 0.0]]
                 property string gradSecondaryFocusType: "linear"
                 property int gradSecondaryFocusAngle: 0
                 property real gradSecondaryFocusCenterX: 0.5
                 property real gradSecondaryFocusCenterY: 0.5
+                property real gradSecondaryFocusHalftoneDotMin: 2.0
+                property real gradSecondaryFocusHalftoneDotMax: 8.0
+                property real gradSecondaryFocusHalftoneStart: 0.0
+                property real gradSecondaryFocusHalftoneEnd: 1.0
+                property real gradSecondaryFocusHalftoneSpread: 2.5
+                property string gradSecondaryFocusHalftoneDotColor: "secondary"
+                property string gradSecondaryFocusHalftoneBackgroundColor: "overBackground"
                 property list<var> gradOverSecondary: [["overSecondary", 0.0]]
                 property string gradOverSecondaryType: "linear"
                 property int gradOverSecondaryAngle: 0
                 property real gradOverSecondaryCenterX: 0.5
                 property real gradOverSecondaryCenterY: 0.5
+                property real gradOverSecondaryHalftoneDotMin: 2.0
+                property real gradOverSecondaryHalftoneDotMax: 8.0
+                property real gradOverSecondaryHalftoneStart: 0.0
+                property real gradOverSecondaryHalftoneEnd: 1.0
+                property real gradOverSecondaryHalftoneSpread: 2.5
+                property string gradOverSecondaryHalftoneDotColor: "secondary"
+                property string gradOverSecondaryHalftoneBackgroundColor: "overSecondary"
                 property list<var> gradTertiary: [["tertiary", 0.0]]
                 property string gradTertiaryType: "linear"
                 property int gradTertiaryAngle: 0
                 property real gradTertiaryCenterX: 0.5
                 property real gradTertiaryCenterY: 0.5
+                property real gradTertiaryHalftoneDotMin: 2.0
+                property real gradTertiaryHalftoneDotMax: 8.0
+                property real gradTertiaryHalftoneStart: 0.0
+                property real gradTertiaryHalftoneEnd: 1.0
+                property real gradTertiaryHalftoneSpread: 2.5
+                property string gradTertiaryHalftoneDotColor: "overTertiary"
+                property string gradTertiaryHalftoneBackgroundColor: "tertiary"
                 property list<var> gradTertiaryFocus: [["overBackground", 0.0]]
                 property string gradTertiaryFocusType: "linear"
                 property int gradTertiaryFocusAngle: 0
                 property real gradTertiaryFocusCenterX: 0.5
                 property real gradTertiaryFocusCenterY: 0.5
+                property real gradTertiaryFocusHalftoneDotMin: 2.0
+                property real gradTertiaryFocusHalftoneDotMax: 8.0
+                property real gradTertiaryFocusHalftoneStart: 0.0
+                property real gradTertiaryFocusHalftoneEnd: 1.0
+                property real gradTertiaryFocusHalftoneSpread: 2.5
+                property string gradTertiaryFocusHalftoneDotColor: "tertiary"
+                property string gradTertiaryFocusHalftoneBackgroundColor: "overBackground"
                 property list<var> gradOverTertiary: [["overTertiary", 0.0]]
                 property string gradOverTertiaryType: "linear"
                 property int gradOverTertiaryAngle: 0
                 property real gradOverTertiaryCenterX: 0.5
                 property real gradOverTertiaryCenterY: 0.5
+                property real gradOverTertiaryHalftoneDotMin: 2.0
+                property real gradOverTertiaryHalftoneDotMax: 8.0
+                property real gradOverTertiaryHalftoneStart: 0.0
+                property real gradOverTertiaryHalftoneEnd: 1.0
+                property real gradOverTertiaryHalftoneSpread: 2.5
+                property string gradOverTertiaryHalftoneDotColor: "tertiary"
+                property string gradOverTertiaryHalftoneBackgroundColor: "overTertiary"
                 property list<var> gradError: [["error", 0.0]]
                 property string gradErrorType: "linear"
                 property int gradErrorAngle: 0
                 property real gradErrorCenterX: 0.5
                 property real gradErrorCenterY: 0.5
+                property real gradErrorHalftoneDotMin: 2.0
+                property real gradErrorHalftoneDotMax: 8.0
+                property real gradErrorHalftoneStart: 0.0
+                property real gradErrorHalftoneEnd: 1.0
+                property real gradErrorHalftoneSpread: 2.5
+                property string gradErrorHalftoneDotColor: "overError"
+                property string gradErrorHalftoneBackgroundColor: "error"
                 property list<var> gradErrorFocus: [["overBackground", 0.0]]
                 property string gradErrorFocusType: "linear"
                 property int gradErrorFocusAngle: 0
                 property real gradErrorFocusCenterX: 0.5
                 property real gradErrorFocusCenterY: 0.5
+                property real gradErrorFocusHalftoneDotMin: 2.0
+                property real gradErrorFocusHalftoneDotMax: 8.0
+                property real gradErrorFocusHalftoneStart: 0.0
+                property real gradErrorFocusHalftoneEnd: 1.0
+                property real gradErrorFocusHalftoneSpread: 2.5
+                property string gradErrorFocusHalftoneDotColor: "error"
+                property string gradErrorFocusHalftoneBackgroundColor: "overBackground"
                 property list<var> gradOverError: [["overError", 0.0]]
                 property string gradOverErrorType: "linear"
                 property int gradOverErrorAngle: 0
                 property real gradOverErrorCenterX: 0.5
                 property real gradOverErrorCenterY: 0.5
+                property real gradOverErrorHalftoneDotMin: 2.0
+                property real gradOverErrorHalftoneDotMax: 8.0
+                property real gradOverErrorHalftoneStart: 0.0
+                property real gradOverErrorHalftoneEnd: 1.0
+                property real gradOverErrorHalftoneSpread: 2.5
+                property string gradOverErrorHalftoneDotColor: "error"
+                property string gradOverErrorHalftoneBackgroundColor: "overError"
 
                 // Border configurations [color, width]
                 property list<var> borderBg: ["surfaceBright", 0]

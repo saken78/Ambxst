@@ -212,6 +212,279 @@ ClippingRectangle {
         }
     }
 
+    readonly property real halftoneDotMin: {
+        switch (variant) {
+        case "bg":
+            return Config.theme.gradBgHalftoneDotMin;
+        case "pane":
+            return Config.theme.gradPaneHalftoneDotMin;
+        case "common":
+            return Config.theme.gradCommonHalftoneDotMin;
+        case "focus":
+            return Config.theme.gradFocusHalftoneDotMin;
+        case "primary":
+            return Config.theme.gradPrimaryHalftoneDotMin;
+        case "primaryfocus":
+            return Config.theme.gradPrimaryFocusHalftoneDotMin;
+        case "overprimary":
+            return Config.theme.gradOverPrimaryHalftoneDotMin;
+        case "secondary":
+            return Config.theme.gradSecondaryHalftoneDotMin;
+        case "secondaryfocus":
+            return Config.theme.gradSecondaryFocusHalftoneDotMin;
+        case "oversecondary":
+            return Config.theme.gradOverSecondaryHalftoneDotMin;
+        case "tertiary":
+            return Config.theme.gradTertiaryHalftoneDotMin;
+        case "tertiaryfocus":
+            return Config.theme.gradTertiaryFocusHalftoneDotMin;
+        case "overtertiary":
+            return Config.theme.gradOverTertiaryHalftoneDotMin;
+        case "error":
+            return Config.theme.gradErrorHalftoneDotMin;
+        case "errorfocus":
+            return Config.theme.gradErrorFocusHalftoneDotMin;
+        case "overerror":
+            return Config.theme.gradOverErrorHalftoneDotMin;
+        default:
+            return Config.theme.gradCommonHalftoneDotMin;
+        }
+    }
+
+    readonly property real halftoneDotMax: {
+        switch (variant) {
+        case "bg":
+            return Config.theme.gradBgHalftoneDotMax;
+        case "pane":
+            return Config.theme.gradPaneHalftoneDotMax;
+        case "common":
+            return Config.theme.gradCommonHalftoneDotMax;
+        case "focus":
+            return Config.theme.gradFocusHalftoneDotMax;
+        case "primary":
+            return Config.theme.gradPrimaryHalftoneDotMax;
+        case "primaryfocus":
+            return Config.theme.gradPrimaryFocusHalftoneDotMax;
+        case "overprimary":
+            return Config.theme.gradOverPrimaryHalftoneDotMax;
+        case "secondary":
+            return Config.theme.gradSecondaryHalftoneDotMax;
+        case "secondaryfocus":
+            return Config.theme.gradSecondaryFocusHalftoneDotMax;
+        case "oversecondary":
+            return Config.theme.gradOverSecondaryHalftoneDotMax;
+        case "tertiary":
+            return Config.theme.gradTertiaryHalftoneDotMax;
+        case "tertiaryfocus":
+            return Config.theme.gradTertiaryFocusHalftoneDotMax;
+        case "overtertiary":
+            return Config.theme.gradOverTertiaryHalftoneDotMax;
+        case "error":
+            return Config.theme.gradErrorHalftoneDotMax;
+        case "errorfocus":
+            return Config.theme.gradErrorFocusHalftoneDotMax;
+        case "overerror":
+            return Config.theme.gradOverErrorHalftoneDotMax;
+        default:
+            return Config.theme.gradCommonHalftoneDotMax;
+        }
+    }
+
+    readonly property real halftoneStart: {
+        switch (variant) {
+        case "bg":
+            return Config.theme.gradBgHalftoneStart;
+        case "pane":
+            return Config.theme.gradPaneHalftoneStart;
+        case "common":
+            return Config.theme.gradCommonHalftoneStart;
+        case "focus":
+            return Config.theme.gradFocusHalftoneStart;
+        case "primary":
+            return Config.theme.gradPrimaryHalftoneStart;
+        case "primaryfocus":
+            return Config.theme.gradPrimaryFocusHalftoneStart;
+        case "overprimary":
+            return Config.theme.gradOverPrimaryHalftoneStart;
+        case "secondary":
+            return Config.theme.gradSecondaryHalftoneStart;
+        case "secondaryfocus":
+            return Config.theme.gradSecondaryFocusHalftoneStart;
+        case "oversecondary":
+            return Config.theme.gradOverSecondaryHalftoneStart;
+        case "tertiary":
+            return Config.theme.gradTertiaryHalftoneStart;
+        case "tertiaryfocus":
+            return Config.theme.gradTertiaryFocusHalftoneStart;
+        case "overtertiary":
+            return Config.theme.gradOverTertiaryHalftoneStart;
+        case "error":
+            return Config.theme.gradErrorHalftoneStart;
+        case "errorfocus":
+            return Config.theme.gradErrorFocusHalftoneStart;
+        case "overerror":
+            return Config.theme.gradOverErrorHalftoneStart;
+        default:
+            return Config.theme.gradCommonHalftoneStart;
+        }
+    }
+
+    readonly property real halftoneEnd: {
+        switch (variant) {
+        case "bg":
+            return Config.theme.gradBgHalftoneEnd;
+        case "pane":
+            return Config.theme.gradPaneHalftoneEnd;
+        case "common":
+            return Config.theme.gradCommonHalftoneEnd;
+        case "focus":
+            return Config.theme.gradFocusHalftoneEnd;
+        case "primary":
+            return Config.theme.gradPrimaryHalftoneEnd;
+        case "primaryfocus":
+            return Config.theme.gradPrimaryFocusHalftoneEnd;
+        case "overprimary":
+            return Config.theme.gradOverPrimaryHalftoneEnd;
+        case "secondary":
+            return Config.theme.gradSecondaryHalftoneEnd;
+        case "secondaryfocus":
+            return Config.theme.gradSecondaryFocusHalftoneEnd;
+        case "oversecondary":
+            return Config.theme.gradOverSecondaryHalftoneEnd;
+        case "tertiary":
+            return Config.theme.gradTertiaryHalftoneEnd;
+        case "tertiaryfocus":
+            return Config.theme.gradTertiaryFocusHalftoneEnd;
+        case "overtertiary":
+            return Config.theme.gradOverTertiaryHalftoneEnd;
+        case "error":
+            return Config.theme.gradErrorHalftoneEnd;
+        case "errorfocus":
+            return Config.theme.gradErrorFocusHalftoneEnd;
+        case "overerror":
+            return Config.theme.gradOverErrorHalftoneEnd;
+        default:
+            return Config.theme.gradCommonHalftoneEnd;
+        }
+    }
+
+    readonly property color halftoneDotColor: {
+        switch (variant) {
+        case "bg":
+            return Config.resolveColor(Config.theme.gradBgHalftoneDotColor);
+        case "pane":
+            return Config.resolveColor(Config.theme.gradPaneHalftoneDotColor);
+        case "common":
+            return Config.resolveColor(Config.theme.gradCommonHalftoneDotColor);
+        case "focus":
+            return Config.resolveColor(Config.theme.gradFocusHalftoneDotColor);
+        case "primary":
+            return Config.resolveColor(Config.theme.gradPrimaryHalftoneDotColor);
+        case "primaryfocus":
+            return Config.resolveColor(Config.theme.gradPrimaryFocusHalftoneDotColor);
+        case "overprimary":
+            return Config.resolveColor(Config.theme.gradOverPrimaryHalftoneDotColor);
+        case "secondary":
+            return Config.resolveColor(Config.theme.gradSecondaryHalftoneDotColor);
+        case "secondaryfocus":
+            return Config.resolveColor(Config.theme.gradSecondaryFocusHalftoneDotColor);
+        case "oversecondary":
+            return Config.resolveColor(Config.theme.gradOverSecondaryHalftoneDotColor);
+        case "tertiary":
+            return Config.resolveColor(Config.theme.gradTertiaryHalftoneDotColor);
+        case "tertiaryfocus":
+            return Config.resolveColor(Config.theme.gradTertiaryFocusHalftoneDotColor);
+        case "overtertiary":
+            return Config.resolveColor(Config.theme.gradOverTertiaryHalftoneDotColor);
+        case "error":
+            return Config.resolveColor(Config.theme.gradErrorHalftoneDotColor);
+        case "errorfocus":
+            return Config.resolveColor(Config.theme.gradErrorFocusHalftoneDotColor);
+        case "overerror":
+            return Config.resolveColor(Config.theme.gradOverErrorHalftoneDotColor);
+        default:
+            return Config.resolveColor(Config.theme.gradCommonHalftoneDotColor);
+        }
+    }
+
+    readonly property color halftoneBackgroundColor: {
+        switch (variant) {
+        case "bg":
+            return Config.resolveColor(Config.theme.gradBgHalftoneBackgroundColor);
+        case "pane":
+            return Config.resolveColor(Config.theme.gradPaneHalftoneBackgroundColor);
+        case "common":
+            return Config.resolveColor(Config.theme.gradCommonHalftoneBackgroundColor);
+        case "focus":
+            return Config.resolveColor(Config.theme.gradFocusHalftoneBackgroundColor);
+        case "primary":
+            return Config.resolveColor(Config.theme.gradPrimaryHalftoneBackgroundColor);
+        case "primaryfocus":
+            return Config.resolveColor(Config.theme.gradPrimaryFocusHalftoneBackgroundColor);
+        case "overprimary":
+            return Config.resolveColor(Config.theme.gradOverPrimaryHalftoneBackgroundColor);
+        case "secondary":
+            return Config.resolveColor(Config.theme.gradSecondaryHalftoneBackgroundColor);
+        case "secondaryfocus":
+            return Config.resolveColor(Config.theme.gradSecondaryFocusHalftoneBackgroundColor);
+        case "oversecondary":
+            return Config.resolveColor(Config.theme.gradOverSecondaryHalftoneBackgroundColor);
+        case "tertiary":
+            return Config.resolveColor(Config.theme.gradTertiaryHalftoneBackgroundColor);
+        case "tertiaryfocus":
+            return Config.resolveColor(Config.theme.gradTertiaryFocusHalftoneBackgroundColor);
+        case "overtertiary":
+            return Config.resolveColor(Config.theme.gradOverTertiaryHalftoneBackgroundColor);
+        case "error":
+            return Config.resolveColor(Config.theme.gradErrorHalftoneBackgroundColor);
+        case "errorfocus":
+            return Config.resolveColor(Config.theme.gradErrorFocusHalftoneBackgroundColor);
+        case "overerror":
+            return Config.resolveColor(Config.theme.gradOverErrorHalftoneBackgroundColor);
+        default:
+            return Config.resolveColor(Config.theme.gradCommonHalftoneBackgroundColor);
+        }
+    }
+
+    readonly property real halftoneSpread: {
+        switch (variant) {
+        case "bg":
+            return Config.theme.gradBgHalftoneSpread;
+        case "pane":
+            return Config.theme.gradPaneHalftoneSpread;
+        case "common":
+            return Config.theme.gradCommonHalftoneSpread;
+        case "focus":
+            return Config.theme.gradFocusHalftoneSpread;
+        case "primary":
+            return Config.theme.gradPrimaryHalftoneSpread;
+        case "primaryfocus":
+            return Config.theme.gradPrimaryFocusHalftoneSpread;
+        case "overprimary":
+            return Config.theme.gradOverPrimaryHalftoneSpread;
+        case "secondary":
+            return Config.theme.gradSecondaryHalftoneSpread;
+        case "secondaryfocus":
+            return Config.theme.gradSecondaryFocusHalftoneSpread;
+        case "oversecondary":
+            return Config.theme.gradOverSecondaryHalftoneSpread;
+        case "tertiary":
+            return Config.theme.gradTertiaryHalftoneSpread;
+        case "tertiaryfocus":
+            return Config.theme.gradTertiaryFocusHalftoneSpread;
+        case "overtertiary":
+            return Config.theme.gradOverTertiaryHalftoneSpread;
+        case "error":
+            return Config.theme.gradErrorHalftoneSpread;
+        case "errorfocus":
+            return Config.theme.gradErrorFocusHalftoneSpread;
+        case "overerror":
+            return Config.theme.gradOverErrorHalftoneSpread;
+        default:
+            return Config.theme.gradCommonHalftoneSpread;
+        }
+    }
+
     readonly property var borderData: {
         switch (variant) {
         case "bg":
@@ -293,26 +566,77 @@ ClippingRectangle {
     radius: Config.roundness
     color: "transparent"
 
-    // Gradiente source - con stretch completo
-    Item {
-        id: gradientSource
-        anchors.fill: parent
-        anchors.margins: 0
-        layer.enabled: true
+    // Linear gradient
+    Rectangle {
+        readonly property real diagonal: Math.sqrt(parent.width * parent.width + parent.height * parent.height)
+        width: diagonal
+        height: diagonal
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        visible: gradientType === "linear"
+        rotation: gradientAngle
+        transformOrigin: Item.Center
+        gradient: Gradient {
+            orientation: gradientOrientation === "horizontal" ? Gradient.Horizontal : Gradient.Vertical
 
-        // Linear gradient
-        Rectangle {
-            // Expandir el rectángulo para cubrir completamente el área incluso rotado
-            readonly property real diagonal: Math.sqrt(parent.width * parent.width + parent.height * parent.height)
-            width: diagonal
-            height: diagonal
-            x: (parent.width - width) / 2
-            y: (parent.height - height) / 2
-            visible: gradientType === "linear"
-            rotation: gradientAngle
-            transformOrigin: Item.Center
-            gradient: Gradient {
-                orientation: gradientOrientation === "horizontal" ? Gradient.Horizontal : Gradient.Vertical
+            GradientStop {
+                property var stopData: gradientStops[0] || ["surface", 0.0]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[1] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[2] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[3] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[4] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+        }
+    }
+
+    // Radial gradient
+    Shape {
+        id: radialShape
+        readonly property real maxDim: Math.max(parent.width, parent.height)
+        width: maxDim + 2
+        height: maxDim + 2
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        visible: gradientType === "radial"
+        layer.enabled: true
+        layer.smooth: true
+
+        transform: Scale {
+            xScale: radialShape.parent.width / radialShape.maxDim
+            yScale: radialShape.parent.height / radialShape.maxDim
+            origin.x: radialShape.width / 2
+            origin.y: radialShape.height / 2
+        }
+
+        ShapePath {
+            fillGradient: RadialGradient {
+                centerX: radialShape.width * gradientCenterX
+                centerY: radialShape.height * gradientCenterY
+                centerRadius: radialShape.maxDim
+                focalX: centerX
+                focalY: centerY
 
                 GradientStop {
                     property var stopData: gradientStops[0] || ["surface", 0.0]
@@ -344,107 +668,53 @@ ClippingRectangle {
                     color: Config.resolveColor(stopData[0])
                 }
             }
-        }
 
-        // Radial gradient
-        Shape {
-            id: radialShape
-            readonly property real maxDim: Math.max(parent.width, parent.height)
-            width: maxDim + 2
-            height: maxDim + 2
-            x: (parent.width - width) / 2
-            y: (parent.height - height) / 2
-            visible: gradientType === "radial"
-            layer.enabled: true
-            layer.smooth: true
+            startX: 0
+            startY: 0
 
-            transform: Scale {
-                xScale: radialShape.parent.width / radialShape.maxDim
-                yScale: radialShape.parent.height / radialShape.maxDim
-                origin.x: radialShape.width / 2
-                origin.y: radialShape.height / 2
+            PathLine {
+                x: radialShape.width
+                y: 0
             }
-
-            ShapePath {
-                fillGradient: RadialGradient {
-                    centerX: radialShape.width * gradientCenterX
-                    centerY: radialShape.height * gradientCenterY
-                    centerRadius: radialShape.maxDim
-                    focalX: centerX
-                    focalY: centerY
-
-                    GradientStop {
-                        property var stopData: gradientStops[0] || ["surface", 0.0]
-                        position: stopData[1]
-                        color: Config.resolveColor(stopData[0])
-                    }
-
-                    GradientStop {
-                        property var stopData: gradientStops[1] || gradientStops[gradientStops.length - 1]
-                        position: stopData[1]
-                        color: Config.resolveColor(stopData[0])
-                    }
-
-                    GradientStop {
-                        property var stopData: gradientStops[2] || gradientStops[gradientStops.length - 1]
-                        position: stopData[1]
-                        color: Config.resolveColor(stopData[0])
-                    }
-
-                    GradientStop {
-                        property var stopData: gradientStops[3] || gradientStops[gradientStops.length - 1]
-                        position: stopData[1]
-                        color: Config.resolveColor(stopData[0])
-                    }
-
-                    GradientStop {
-                        property var stopData: gradientStops[4] || gradientStops[gradientStops.length - 1]
-                        position: stopData[1]
-                        color: Config.resolveColor(stopData[0])
-                    }
-                }
-
-                startX: 0
-                startY: 0
-
-                PathLine {
-                    x: radialShape.width
-                    y: 0
-                }
-                PathLine {
-                    x: radialShape.width
-                    y: radialShape.height
-                }
-                PathLine {
-                    x: 0
-                    y: radialShape.height
-                }
-                PathLine {
-                    x: 0
-                    y: 0
-                }
+            PathLine {
+                x: radialShape.width
+                y: radialShape.height
+            }
+            PathLine {
+                x: 0
+                y: radialShape.height
+            }
+            PathLine {
+                x: 0
+                y: 0
             }
         }
     }
 
-    // Máscara con el radio correcto
-    Rectangle {
-        id: maskRect
+    // Halftone gradient
+    ShaderEffect {
         anchors.fill: parent
-        radius: root.radius
-        color: "white"
-        visible: false
-        layer.enabled: true
-    }
+        visible: gradientType === "halftone"
+        
+        property real angle: gradientAngle
+        property real dotMinSize: halftoneDotMin
+        property real dotMaxSize: halftoneDotMax
+        property real gradientStart: halftoneStart
+        property real gradientEnd: halftoneEnd
+        property vector4d dotColor: {
+            const c = halftoneDotColor || Qt.rgba(1, 1, 1, 1);
+            return Qt.vector4d(c.r, c.g, c.b, c.a);
+        }
+        property vector4d backgroundColor: {
+            const c = halftoneBackgroundColor || Qt.rgba(0, 0.5, 1, 1);
+            return Qt.vector4d(c.r, c.g, c.b, c.a);
+        }
+        property real canvasWidth: width
+        property real canvasHeight: height
+        property real dotSpread: halftoneSpread
 
-    // Aplicar gradiente con máscara
-    MultiEffect {
-        anchors.fill: parent
-        source: gradientSource
-        maskEnabled: true
-        maskSource: maskRect
-        maskThresholdMin: 0.5
-        maskSpreadAtMin: 0.0
+        vertexShader: "halftone.vert.qsb"
+        fragmentShader: "halftone.frag.qsb"
     }
 
     // Shadow effect
