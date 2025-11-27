@@ -1434,8 +1434,10 @@ Item {
                                             if (optionsListView.currentIndex >= 0 && optionsListView.currentIndex < optionsListView.count) {
                                                 var item = optionsListView.model[optionsListView.currentIndex];
                                                 if (item && item.highlightColor) {
-                                                    if (item.highlightColor === Colors.error) return "error";
-                                                    if (item.highlightColor === Colors.secondary) return "secondary";
+                                                    if (item.highlightColor === Colors.error)
+                                                        return "error";
+                                                    if (item.highlightColor === Colors.secondary)
+                                                        return "secondary";
                                                     return "primary";
                                                 }
                                             }
@@ -1668,11 +1670,12 @@ Item {
                                 }
 
                                 property string faviconUrl: {
-                                    if (iconType !== "link") return "";
+                                    if (iconType !== "link")
+                                        return "";
                                     var url = root.getFaviconUrl(modelData);
                                     return (url && url !== "") ? url : "";
                                 }
-                                
+
                                 property bool faviconLoaded: false
 
                                 // Favicon for URLs
@@ -1694,7 +1697,7 @@ Item {
                                         }
                                     }
                                 }
-                                
+
                                 Timer {
                                     id: faviconLoader
                                     interval: 1
@@ -1944,7 +1947,7 @@ Item {
                     Text {
                         text: "Copy something to get started"
                         font.family: Config.theme.font
-                        font.pixelSize: Config.theme.fontSize
+                        font.pixelSize: Math.max(8, Config.theme.fontSize - 2)
                         color: Colors.outline
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
@@ -2003,18 +2006,21 @@ Item {
                         clip: true
                         cache: false
                         asynchronous: true
-                        
+
                         property bool isImageFile: {
-                            if (!previewPanel.currentItem || !previewPanel.currentItem.isFile) return false;
+                            if (!previewPanel.currentItem || !previewPanel.currentItem.isFile)
+                                return false;
                             var content = root.currentFullContent || previewPanel.currentItem.preview;
                             var filePath = root.getFilePathFromUri(content);
                             return root.isImageFile(filePath);
                         }
-                        
+
                         property bool isGifImage: {
-                            if (!previewPanel.currentItem) return false;
+                            if (!previewPanel.currentItem)
+                                return false;
                             // Check direct image mime type
-                            if (previewPanel.currentItem.mime === "image/gif") return true;
+                            if (previewPanel.currentItem.mime === "image/gif")
+                                return true;
                             // Check file extension for text/uri-list
                             if (previewPanel.currentItem.isFile) {
                                 var content = root.currentFullContent || previewPanel.currentItem.preview;
@@ -2027,7 +2033,7 @@ Item {
                             return false;
                         }
                     }
-                    
+
                     // Preview para GIF animado
                     AnimatedImage {
                         id: previewGif
@@ -2051,18 +2057,21 @@ Item {
                         cache: false
                         asynchronous: true
                         playing: true
-                        
+
                         property bool isImageFile: {
-                            if (!previewPanel.currentItem || !previewPanel.currentItem.isFile) return false;
+                            if (!previewPanel.currentItem || !previewPanel.currentItem.isFile)
+                                return false;
                             var content = root.currentFullContent || previewPanel.currentItem.preview;
                             var filePath = root.getFilePathFromUri(content);
                             return root.isImageFile(filePath);
                         }
-                        
+
                         property bool isGifImage: {
-                            if (!previewPanel.currentItem) return false;
+                            if (!previewPanel.currentItem)
+                                return false;
                             // Check direct image mime type
-                            if (previewPanel.currentItem.mime === "image/gif") return true;
+                            if (previewPanel.currentItem.mime === "image/gif")
+                                return true;
                             // Check file extension for text/uri-list
                             if (previewPanel.currentItem.isFile) {
                                 var content = root.currentFullContent || previewPanel.currentItem.preview;
@@ -2084,10 +2093,12 @@ Item {
                         color: Colors.surfaceBright
                         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                         visible: {
-                            if (!previewPanel.currentItem) return false;
+                            if (!previewPanel.currentItem)
+                                return false;
                             var isImg = previewPanel.currentItem.isImage || previewImage.isImageFile || previewGif.isImageFile;
-                            if (!isImg) return false;
-                            
+                            if (!isImg)
+                                return false;
+
                             if (previewImage.visible) {
                                 return previewImage.status !== Image.Ready;
                             } else if (previewGif.visible) {
