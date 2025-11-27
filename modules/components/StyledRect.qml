@@ -10,6 +10,7 @@ ClippingRectangle {
     id: root
 
     clip: true
+    antialiasing: true
 
     required property string variant
 
@@ -356,7 +357,7 @@ ClippingRectangle {
             visible: gradientType === "radial"
             layer.enabled: true
             layer.smooth: true
-            
+
             transform: Scale {
                 xScale: radialShape.parent.width / radialShape.maxDim
                 yScale: radialShape.parent.height / radialShape.maxDim

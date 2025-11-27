@@ -186,13 +186,7 @@ Item {
                 width: (modelData.end - modelData.start + 1) * workspaceButtonWidth
                 height: workspaceButtonWidth
                 
-                property var radiusLeft: Config.roundness > 0 ? Math.max(Config.roundness - widgetPadding, 0) : 0
-                property var radiusRight: Config.roundness > 0 ? Math.max(Config.roundness - widgetPadding, 0) : 0
-
-                topLeftRadius: radiusLeft
-                bottomLeftRadius: radiusLeft
-                topRightRadius: radiusRight
-                bottomRightRadius: radiusRight
+                radius: Config.roundness > 0 ? Math.max(Config.roundness - widgetPadding, 0) : 0
 
                 opacity: Config.opacity
 
@@ -243,13 +237,7 @@ Item {
                 width: workspaceButtonWidth
                 height: (modelData.end - modelData.start + 1) * workspaceButtonWidth
                 
-                property var radiusTop: Config.roundness > 0 ? Math.max(Config.roundness - widgetPadding, 0) : 0
-                property var radiusBottom: Config.roundness > 0 ? Math.max(Config.roundness - widgetPadding, 0) : 0
-
-                topLeftRadius: radiusTop
-                topRightRadius: radiusTop
-                bottomLeftRadius: radiusBottom
-                bottomRightRadius: radiusBottom
+                radius: Config.roundness > 0 ? Math.max(Config.roundness - widgetPadding, 0) : 0
 
                 opacity: Config.opacity
 
