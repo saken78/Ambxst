@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import Quickshell.Services.Notifications
 import qs.modules.theme
+import qs.modules.components
 import qs.config
 
 Button {
@@ -13,8 +14,9 @@ Button {
     hoverEnabled: true
     visible: visibleWhen
 
-    background: Rectangle {
+    background: StyledRect {
         property bool isCritical: urgency == NotificationUrgency.Critical
+        variant: isCritical ? "" : "common"
         color: isCritical ? (parent.hovered ? Qt.lighter(Colors.criticalRed, 1.3) : Colors.criticalRed) : (parent.pressed ? Colors.error : (parent.hovered ? Colors.surfaceBright : Colors.surface))
         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
     }

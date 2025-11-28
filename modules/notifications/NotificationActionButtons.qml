@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell.Services.Notifications
 import qs.modules.theme
+import qs.modules.components
 import qs.modules.services
 import qs.config
 
@@ -35,7 +36,8 @@ Item {
                 font.weight: Font.Bold
                 hoverEnabled: true
 
-                background: Rectangle {
+                background: StyledRect {
+                    variant: root.urgency == NotificationUrgency.Critical ? "" : "common"
                     color: root.urgency == NotificationUrgency.Critical ? Colors.criticalRed : (parent.pressed ? Colors.primary : (parent.hovered ? Colors.surfaceBright : Colors.surface))
                     radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 

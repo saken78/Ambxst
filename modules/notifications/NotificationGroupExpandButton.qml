@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import qs.modules.theme
+import qs.modules.components
 import qs.config
 
 Button {
@@ -13,7 +14,8 @@ Button {
     implicitWidth: contentRow.implicitWidth + 12
     implicitHeight: 24
 
-    background: Rectangle {
+    background: StyledRect {
+        variant: root.expanded ? "primary" : "common"
         color: root.expanded ? Colors.primary : (root.pressed ? Colors.primary : (root.hovered ? Colors.surfaceBright : Colors.surfaceContainerHigh))
         radius: Config.roundness
 

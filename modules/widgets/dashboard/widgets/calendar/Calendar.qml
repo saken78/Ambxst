@@ -70,7 +70,8 @@ Item {
                 }
                 topLeftRadius: Config.roundness > 0 ? Config.roundness + 4 : 0
                 topRightRadius: Config.roundness > 0 ? Config.roundness + 4 : 0
-                Rectangle {
+                StyledRect {
+                    variant: "bg"
                     anchors.fill: parent
                     anchors.margins: 4
                     anchors.bottomMargin: 0
@@ -221,7 +222,8 @@ Item {
             topLeftRadius: 0
             clip: true
 
-            Rectangle {
+            StyledRect {
+                variant: "bg"
                 anchors.fill: parent
                 anchors.margins: 4
                 color: Colors.background

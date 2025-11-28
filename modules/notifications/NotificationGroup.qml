@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Notifications
 import qs.modules.theme
+import qs.modules.components
 import qs.modules.services
 import qs.config
 import "./NotificationAnimation.qml"
@@ -137,8 +138,9 @@ Item {
         }
     }
 
-    ClippingRectangle {
+    StyledRect {
         id: background
+        variant: "bg"
         anchors.left: parent.left
         width: parent.width
         color: Colors.background
