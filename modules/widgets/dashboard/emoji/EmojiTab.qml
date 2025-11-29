@@ -798,7 +798,7 @@ Rectangle {
                         
                         property color textColor: {
                             if (root.selectedIndex === index && !root.isRecentFocused) {
-                                return Colors.overPrimary;
+                                return Config.resolveColor(Config.theme.srPrimary.itemColor);
                             } else {
                                 return Colors.overSurface;
                             }
@@ -1022,7 +1022,7 @@ Rectangle {
                         
                         property color textColor: {
                             if (root.selectedRecentIndex === index && root.isRecentFocused) {
-                                return Colors.overPrimary;
+                                return Config.resolveColor(Config.theme.srPrimary.itemColor);
                             } else {
                                 return Colors.overSurface;
                             }

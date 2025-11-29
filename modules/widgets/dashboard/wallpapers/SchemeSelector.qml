@@ -229,7 +229,7 @@ Item {
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
                             text: Icons.sun
-                            color: Config.theme.lightMode ? Colors.overPrimary : Colors.overBackground
+                            color: Config.theme.lightMode ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overBackground
                             font.family: Icons.font
                             font.pixelSize: 20
                         }
@@ -240,7 +240,7 @@ Item {
                             anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
                             text: Icons.moon
-                            color: Config.theme.lightMode ? Colors.overBackground : Colors.overPrimary
+                            color: Config.theme.lightMode ? Colors.overBackground : Config.resolveColor(Config.theme.srPrimary.itemColor)
                             font.family: Icons.font
                             font.pixelSize: 20
                         }

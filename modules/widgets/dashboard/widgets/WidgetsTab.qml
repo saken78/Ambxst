@@ -650,7 +650,7 @@ Rectangle {
                                 Text {
                                     width: parent.width
                                     text: appName
-                                    color: appLauncher.selectedIndex === index ? Colors.overPrimary : Colors.overBackground
+                                    color: appLauncher.selectedIndex === index ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overBackground
                                     font.family: Config.theme.font
                                     font.pixelSize: Config.theme.fontSize
                                     font.weight: Font.Bold
@@ -668,7 +668,7 @@ Rectangle {
                                 Text {
                                     width: parent.width
                                     text: appComment || ""
-                                    color: appLauncher.selectedIndex === index ? Colors.overPrimary : Colors.outline
+                                    color: appLauncher.selectedIndex === index ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.outline
                                     font.family: Config.theme.font
                                     font.pixelSize: Math.max(8, Config.theme.fontSize - 2)
                                     elide: Text.ElideRight
@@ -1022,7 +1022,7 @@ Rectangle {
                             text: iconContainer.showingSyncFeedback ? Icons.sync : Icons.sun
                             font.family: Icons.font
                             font.pixelSize: 18
-                            color: Brightness.syncBrightness ? Colors.overPrimary : Colors.overBackground
+                            color: Brightness.syncBrightness ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overBackground
                             rotation: iconContainer.showingSyncFeedback ? syncIconRotation : brightnessIconRotation
                             scale: iconContainer.showingSyncFeedback ? 1 : brightnessIconScale
                             opacity: iconOpacity

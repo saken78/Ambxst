@@ -1035,7 +1035,7 @@ Item {
                             } else if (isExpanded) {
                                 return Colors.overBackground;
                             } else if (isSelected) {
-                                return Colors.overPrimary;
+                                return Config.resolveColor(Config.theme.srPrimary.itemColor);
                             } else {
                                 return Colors.overSurface;
                             }
