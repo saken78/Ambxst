@@ -54,12 +54,7 @@ Item {
 
     
     onExpandedItemIndexChanged: {
-        // Adjust scroll when item expands to ensure it's fully visible
-        if (expandedItemIndex >= 0 && expandedItemIndex < animatedSessionsModel.count) {
-            Qt.callLater(() => {
-                adjustScrollForExpandedItem(expandedItemIndex);
-            });
-        }
+        // Close expanded options when selection changes to a different item is handled in onSelectedIndexChanged
     }
     
     function adjustScrollForExpandedItem(index) {
@@ -75,18 +70,24 @@ Item {
         var listHeight = 36 * 3;
         var expandedHeight = 48 + 4 + listHeight + 8;
         
+        // Calculate max valid scroll position
+        var maxContentY = Math.max(0, resultsList.contentHeight - resultsList.height);
+        
+        // Current viewport bounds
         var viewportTop = resultsList.contentY;
         var viewportBottom = viewportTop + resultsList.height;
-        var viewportCenter = viewportTop + resultsList.height / 2;
         
-        // Calculate desired position to center the expanded item
-        var desiredY = itemY - (resultsList.height / 2 - expandedHeight / 2);
+        // Only scroll if item is not fully visible
+        var itemBottom = itemY + expandedHeight;
         
-        // Clamp to valid scroll range
-        var maxContentY = Math.max(0, resultsList.contentHeight - resultsList.height);
-        desiredY = Math.max(0, Math.min(desiredY, maxContentY));
-        
-        resultsList.contentY = desiredY;
+        if (itemY < viewportTop) {
+            // Item top is above viewport - scroll up to show it
+            resultsList.contentY = itemY;
+        } else if (itemBottom > viewportBottom) {
+            // Item bottom is below viewport - scroll down to show it
+            resultsList.contentY = Math.min(itemBottom - resultsList.height, maxContentY);
+        }
+        // Otherwise, item is already fully visible - no scroll needed
     }
 
     onSelectedIndexChanged: {
@@ -1702,6 +1703,15 @@ Item {
                         return baseHeight + 4 + listHeight + 8;
                     }
                     return baseHeight;
+                }
+                
+                onHeightChanged: {
+                    // Adjust scroll immediately when height changes due to expansion
+                    if (root.expandedItemIndex >= 0 && height > 48) {
+                        Qt.callLater(() => {
+                            adjustScrollForExpandedItem(root.expandedItemIndex);
+                        });
+                    }
                 }
                 
                 // Calculate Y position based on index, accounting for expanded items
