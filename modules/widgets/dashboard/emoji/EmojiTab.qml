@@ -838,9 +838,13 @@ Rectangle {
                                             root.expandedItemIndex = -1;
                                             root.selectedOptionIndex = 0;
                                             root.keyboardNavigation = false;
+                                            // Update selection to current hover position after closing
+                                            root.selectedIndex = index;
+                                            emojiList.currentIndex = index;
                                         } else {
                                             root.expandedItemIndex = index;
                                             root.selectedIndex = index;
+                                            emojiList.currentIndex = index;
                                             root.selectedOptionIndex = 0;
                                             root.keyboardNavigation = false;
                                         }
@@ -855,9 +859,13 @@ Rectangle {
                                             root.expandedItemIndex = -1;
                                             root.selectedOptionIndex = 0;
                                             root.keyboardNavigation = false;
+                                            // Update selection to current hover position after closing
+                                            root.selectedIndex = index;
+                                            emojiList.currentIndex = index;
                                         } else {
                                             root.expandedItemIndex = index;
                                             root.selectedIndex = index;
+                                            emojiList.currentIndex = index;
                                             root.selectedOptionIndex = 0;
                                             root.keyboardNavigation = false;
                                         }
