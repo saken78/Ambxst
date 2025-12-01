@@ -70,26 +70,32 @@ Rectangle {
         
         // Calculate Y position of the item
         var itemY = 0;
-        for (var i = 0; i < index; i++) {
+        for (var i = 0; i < index && i < emojisModel.count; i++) {
             var h = 48;
             if (i === root.expandedItemIndex) {
-                 var itemData = emojisModel.get(i).emojiData;
-                 if (itemData && itemData.skin_tone_support) {
-                     var optionsCount = root.skinTones.length;
-                     var listHeight = 36 * Math.min(3, optionsCount);
-                     h = 48 + 4 + listHeight + 8;
-                 }
+                var item = emojisModel.get(i);
+                if (item) {
+                    var itemData = item.emojiData;
+                    if (itemData && itemData.skin_tone_support) {
+                        var optionsCount = root.skinTones.length;
+                        var listHeight = 36 * Math.min(3, optionsCount);
+                        h = 48 + 4 + listHeight + 8;
+                    }
+                }
             }
             itemY += h;
         }
         
         // Calculate expanded item height
         var currentItemHeight = 48;
-        var itemData = emojisModel.get(index).emojiData;
-        if (itemData && itemData.skin_tone_support) {
-             var optionsCount = root.skinTones.length;
-             var listHeight = 36 * Math.min(3, optionsCount);
-             currentItemHeight = 48 + 4 + listHeight + 8;
+        var item = emojisModel.get(index);
+        if (item) {
+            var itemData = item.emojiData;
+            if (itemData && itemData.skin_tone_support) {
+                var optionsCount = root.skinTones.length;
+                var listHeight = 36 * Math.min(3, optionsCount);
+                currentItemHeight = 48 + 4 + listHeight + 8;
+            }
         }
         
         // Calculate max valid scroll position
@@ -736,26 +742,32 @@ Rectangle {
 
                         if (currentIndex >= 0 && !root.isRecentFocused) {
                             var itemY = 0;
-                            for (var i = 0; i < currentIndex; i++) {
+                            for (var i = 0; i < currentIndex && i < emojisModel.count; i++) {
                                 var itemHeight = 48;
                                 if (i === root.expandedItemIndex && !root.deleteMode && !root.aliasMode) {
-                                    var itemData = emojisModel.get(i).emojiData;
-                                    if (itemData && itemData.skin_tone_support) {
-                                        var optionsCount = root.skinTones.length;
-                                        var listHeight = 36 * Math.min(3, optionsCount);
-                                        itemHeight = 48 + 4 + listHeight + 8;
+                                    var item = emojisModel.get(i);
+                                    if (item) {
+                                        var itemData = item.emojiData;
+                                        if (itemData && itemData.skin_tone_support) {
+                                            var optionsCount = root.skinTones.length;
+                                            var listHeight = 36 * Math.min(3, optionsCount);
+                                            itemHeight = 48 + 4 + listHeight + 8;
+                                        }
                                     }
                                 }
                                 itemY += itemHeight;
                             }
 
                             var currentItemHeight = 48;
-                            if (currentIndex === root.expandedItemIndex && !root.deleteMode && !root.aliasMode) {
-                                var itemData = emojisModel.get(currentIndex).emojiData;
-                                if (itemData && itemData.skin_tone_support) {
-                                    var optionsCount = root.skinTones.length;
-                                    var listHeight = 36 * Math.min(3, optionsCount);
-                                    currentItemHeight = 48 + 4 + listHeight + 8;
+                            if (currentIndex === root.expandedItemIndex && !root.deleteMode && !root.aliasMode && currentIndex < emojisModel.count) {
+                                var item = emojisModel.get(currentIndex);
+                                if (item) {
+                                    var itemData = item.emojiData;
+                                    if (itemData && itemData.skin_tone_support) {
+                                        var optionsCount = root.skinTones.length;
+                                        var listHeight = 36 * Math.min(3, optionsCount);
+                                        currentItemHeight = 48 + 4 + listHeight + 8;
+                                    }
                                 }
                             }
 
@@ -1130,12 +1142,15 @@ Rectangle {
                         width: emojiList.width
                         height: {
                             let baseHeight = 48;
-                            if (emojiList.currentIndex === root.expandedItemIndex) {
-                                var itemData = emojisModel.get(emojiList.currentIndex).emojiData;
-                                if (itemData && itemData.skin_tone_support) {
-                                    var optionsCount = root.skinTones.length;
-                                    var listHeight = 36 * Math.min(3, optionsCount);
-                                    return baseHeight + 4 + listHeight + 8;
+                            if (emojiList.currentIndex === root.expandedItemIndex && emojiList.currentIndex >= 0 && emojiList.currentIndex < emojisModel.count) {
+                                var item = emojisModel.get(emojiList.currentIndex);
+                                if (item) {
+                                    var itemData = item.emojiData;
+                                    if (itemData && itemData.skin_tone_support) {
+                                        var optionsCount = root.skinTones.length;
+                                        var listHeight = 36 * Math.min(3, optionsCount);
+                                        return baseHeight + 4 + listHeight + 8;
+                                    }
                                 }
                             }
                             return baseHeight;
