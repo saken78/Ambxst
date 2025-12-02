@@ -47,7 +47,14 @@ QtObject {
     readonly property string pin: ""
     readonly property string unpin: ""
     readonly property string popOpen: ""
+    readonly property string hand: ""
     readonly property string handGrab: ""
+    readonly property string heartbeat: ""
+    readonly property string cpu: ""
+    readonly property string gpu: ""
+    readonly property string ram: ""
+    readonly property string disk: ""
+    readonly property string temperature: ""
 
     // Wi-Fi
     readonly property string wifiOff: ""
@@ -122,6 +129,7 @@ QtObject {
 
     // Power-profiles
     readonly property string powerSave: ""
+    readonly property string power: ""
     readonly property string balanced: ""
     readonly property string performance: ""
 
@@ -161,6 +169,5 @@ QtObject {
     readonly property string folder: ""
     readonly property string cactus: ""
     readonly property string countdown: ""
-    readonly property string temperature: ""
     readonly property string sync: ""
 }
