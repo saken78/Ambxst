@@ -46,9 +46,7 @@
       # NixGL
       nixGL = nixgl.packages.${system}.nixGLDefault;
 
-      # --- Quickshell desde git ---
       quickshellPkg = quickshell.packages.${system}.default;
-      # ----------------------------
 
       # Wrapper nixGL
       wrapWithNixGL = pkg:
@@ -86,8 +84,37 @@
         '';
       };
 
+      # Phosphor Icons
+      ttf-phosphor-icons = pkgs.stdenvNoCC.mkDerivation rec {
+        pname = "ttf-phosphor-icons";
+        version = "2.1.2";
+
+        src = pkgs.fetchzip {
+          url = "https://github.com/phosphor-icons/web/archive/refs/tags/v${version}.zip";
+          sha256 = "sha256-96ivFjm0cBhqDKNB50klM7D3fevt8X9Zzm82KkJKMtU=";
+          stripRoot = true;
+        };
+
+        dontBuild = true;
+
+        installPhase = ''
+          runHook preInstall
+
+          install -Dm644 src/*/*.ttf -t $out/share/fonts/truetype
+          install -Dm644 LICENSE -t $out/share/licenses/${pname}
+
+          runHook postInstall
+        '';
+
+        meta = with pkgs.lib; {
+          description = "A flexible icon family for interfaces, diagrams, presentations";
+          homepage = "https://phosphoricons.com";
+          license = licenses.mit;
+          platforms = platforms.all;
+        };
+      };
+
       baseEnv = with pkgs; [
-        # Usar Quickshell desde git (con NixGL si corresponde)
         (wrapWithNixGL quickshellPkg)
 
         (wrapWithNixGL gpu-screen-recorder)
@@ -99,6 +126,7 @@
         cliphist
         sqlite
         hypridle
+        fontconfig
 
       ] ++ (if isNixOS then [
         ambxst-auth
@@ -140,6 +168,7 @@
         nerd-fonts.symbols-only
         noto-fonts
         noto-fonts-color-emoji
+        ttf-phosphor-icons
       ]);
 
       envAmbxst = pkgs.buildEnv {
@@ -160,7 +189,6 @@
         # Pass nixGL for non-NixOS
         ${lib.optionalString (!isNixOS) "export AMBXST_NIXGL=\"${nixGL}/bin/nixGL\""}
 
-        # Use Quickshell from git
         export AMBXST_QS="${quickshellPkg}/bin/qs"
 
         # Delegate execution to CLI
