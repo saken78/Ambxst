@@ -155,21 +155,87 @@ Rectangle {
                         spacing: 12
 
                         // CPU
-                        ResourceItem {
+                        Column {
                             width: parent.width
-                            icon: Icons.cpu
-                            label: "CPU"
-                            value: SystemResources.cpuUsage / 100
-                            barColor: Colors.red
+                            spacing: 4
+
+                            ResourceItem {
+                                width: parent.width
+                                icon: Icons.cpu
+                                label: "CPU"
+                                value: SystemResources.cpuUsage / 100
+                                barColor: Colors.red
+                            }
+
+                            RowLayout {
+                                width: parent.width
+                                spacing: 8
+
+                                Text {
+                                    text: "CPU"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Config.theme.fontSize - 2
+                                    color: Colors.surfaceBright
+                                    elide: Text.ElideMiddle
+                                }
+
+                                Separator {
+                                    Layout.preferredHeight: 2
+                                    Layout.fillWidth: true
+                                    gradient: null
+                                    color: Colors.surface
+                                }
+
+                                Text {
+                                    text: `${Math.round(SystemResources.cpuUsage)}%`
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Math.max(8, Config.theme.fontSize - 2)
+                                    font.weight: Font.Medium
+                                    color: Colors.surfaceBright
+                                }
+                            }
                         }
 
                         // RAM
-                        ResourceItem {
+                        Column {
                             width: parent.width
-                            icon: Icons.ram
-                            label: "RAM"
-                            value: SystemResources.ramUsage / 100
-                            barColor: Colors.cyan
+                            spacing: 4
+
+                            ResourceItem {
+                                width: parent.width
+                                icon: Icons.ram
+                                label: "RAM"
+                                value: SystemResources.ramUsage / 100
+                                barColor: Colors.cyan
+                            }
+
+                            RowLayout {
+                                width: parent.width
+                                spacing: 8
+
+                                Text {
+                                    text: "RAM"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Config.theme.fontSize - 2
+                                    color: Colors.surfaceBright
+                                    elide: Text.ElideMiddle
+                                }
+
+                                Separator {
+                                    Layout.preferredHeight: 2
+                                    Layout.fillWidth: true
+                                    gradient: null
+                                    color: Colors.surface
+                                }
+
+                                Text {
+                                    text: `${Math.round(SystemResources.ramUsage)}%`
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Math.max(8, Config.theme.fontSize - 2)
+                                    font.weight: Font.Medium
+                                    color: Colors.surfaceBright
+                                }
+                            }
                         }
 
                         // GPUs (if detected) - show one bar per GPU
@@ -177,45 +243,70 @@ Rectangle {
                             id: gpuRepeater
                             model: SystemResources.gpuDetected ? SystemResources.gpuCount : 0
 
-                            ResourceItem {
+                            Column {
                                 required property int index
                                 width: parent.width
-                                icon: Icons.gpu
-                                label: {
-                                    const name = SystemResources.gpuNames[index] || "";
-                                    const vendor = SystemResources.gpuVendors[index] || "";
-                                    
-                                    // If we have a descriptive name, use it
-                                    if (name && name !== `${vendor.toUpperCase()} GPU ${index}`) {
-                                        return name;
+                                spacing: 4
+
+                                ResourceItem {
+                                    width: parent.width
+                                    icon: Icons.gpu
+                                    label: {
+                                        const name = SystemResources.gpuNames[index] || "";
+                                        const vendor = SystemResources.gpuVendors[index] || "";
+                                        
+                                        // If we have a descriptive name, use it
+                                        if (name && name !== `${vendor.toUpperCase()} GPU ${index}`) {
+                                            return name;
+                                        }
+                                        // Otherwise show GPU index if multiple, or just "GPU" if single
+                                        return SystemResources.gpuCount > 1 ? `GPU ${index}` : "GPU";
                                     }
-                                    // Otherwise show GPU index if multiple, or just "GPU" if single
-                                    return SystemResources.gpuCount > 1 ? `GPU ${index}` : "GPU";
+                                    value: (SystemResources.gpuUsages[index] || 0) / 100
+                                    barColor: {
+                                        // Color based on vendor
+                                        const vendor = SystemResources.gpuVendors[index] || "";
+                                        switch (vendor.toLowerCase()) {
+                                            case "nvidia":
+                                                return Colors.green;
+                                            case "amd":
+                                                return Colors.red;
+                                            case "intel":
+                                                return Colors.blue;
+                                            default:
+                                                return Colors.magenta;
+                                        }
+                                    }
                                 }
-                                value: (SystemResources.gpuUsages[index] || 0) / 100
-                                barColor: {
-                                    // Color based on vendor
-                                    const vendor = SystemResources.gpuVendors[index] || "";
-                                    switch (vendor.toLowerCase()) {
-                                        case "nvidia":
-                                            return Colors.green;
-                                        case "amd":
-                                            return Colors.red;
-                                        case "intel":
-                                            return Colors.blue;
-                                        default:
-                                            return Colors.magenta;
+
+                                RowLayout {
+                                    width: parent.width
+                                    spacing: 8
+
+                                    Text {
+                                        text: "GPU"
+                                        font.family: Config.theme.font
+                                        font.pixelSize: Config.theme.fontSize - 2
+                                        color: Colors.surfaceBright
+                                        elide: Text.ElideMiddle
+                                    }
+
+                                    Separator {
+                                        Layout.preferredHeight: 2
+                                        Layout.fillWidth: true
+                                        gradient: null
+                                        color: Colors.surface
+                                    }
+
+                                    Text {
+                                        text: `${Math.round(SystemResources.gpuUsages[index] || 0)}%`
+                                        font.family: Config.theme.font
+                                        font.pixelSize: Math.max(8, Config.theme.fontSize - 2)
+                                        font.weight: Font.Medium
+                                        color: Colors.surfaceBright
                                     }
                                 }
                             }
-                        }
-
-                        // Separator before disks
-                        Separator {
-                            width: parent.width
-                            height: 2
-                            gradient: null
-                            color: Colors.surface
                         }
 
                         // Disks
