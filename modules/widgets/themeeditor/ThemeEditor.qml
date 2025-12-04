@@ -16,7 +16,7 @@ FloatingWindow {
     title: "Theme Editor"
     color: "transparent"
 
-    minimumSize: Qt.size(1200, 750)
+    minimumSize: Qt.size(750, 750)
 
     property string selectedVariant: ""
     property bool hasChanges: false
@@ -81,24 +81,42 @@ FloatingWindow {
     // Get the Config variant object by id
     function getConfigVariant(variantId) {
         switch (variantId) {
-        case "bg": return Config.theme.srBg;
-        case "internalbg": return Config.theme.srInternalBg;
-        case "pane": return Config.theme.srPane;
-        case "common": return Config.theme.srCommon;
-        case "focus": return Config.theme.srFocus;
-        case "primary": return Config.theme.srPrimary;
-        case "primaryfocus": return Config.theme.srPrimaryFocus;
-        case "overprimary": return Config.theme.srOverPrimary;
-        case "secondary": return Config.theme.srSecondary;
-        case "secondaryfocus": return Config.theme.srSecondaryFocus;
-        case "oversecondary": return Config.theme.srOverSecondary;
-        case "tertiary": return Config.theme.srTertiary;
-        case "tertiaryfocus": return Config.theme.srTertiaryFocus;
-        case "overtertiary": return Config.theme.srOverTertiary;
-        case "error": return Config.theme.srError;
-        case "errorfocus": return Config.theme.srErrorFocus;
-        case "overerror": return Config.theme.srOverError;
-        default: return null;
+        case "bg":
+            return Config.theme.srBg;
+        case "internalbg":
+            return Config.theme.srInternalBg;
+        case "pane":
+            return Config.theme.srPane;
+        case "common":
+            return Config.theme.srCommon;
+        case "focus":
+            return Config.theme.srFocus;
+        case "primary":
+            return Config.theme.srPrimary;
+        case "primaryfocus":
+            return Config.theme.srPrimaryFocus;
+        case "overprimary":
+            return Config.theme.srOverPrimary;
+        case "secondary":
+            return Config.theme.srSecondary;
+        case "secondaryfocus":
+            return Config.theme.srSecondaryFocus;
+        case "oversecondary":
+            return Config.theme.srOverSecondary;
+        case "tertiary":
+            return Config.theme.srTertiary;
+        case "tertiaryfocus":
+            return Config.theme.srTertiaryFocus;
+        case "overtertiary":
+            return Config.theme.srOverTertiary;
+        case "error":
+            return Config.theme.srError;
+        case "errorfocus":
+            return Config.theme.srErrorFocus;
+        case "overerror":
+            return Config.theme.srOverError;
+        default:
+            return null;
         }
     }
 
@@ -113,7 +131,8 @@ FloatingWindow {
 
     // Apply: write current Config state to JSON
     function applyChanges() {
-        if (!hasChanges) return;
+        if (!hasChanges)
+            return;
         Config.loader.writeAdapter();
         takeSnapshot(); // Update snapshot to current state
         hasChanges = false;
@@ -121,7 +140,8 @@ FloatingWindow {
 
     // Discard: restore Config from saved snapshot
     function discardChanges() {
-        if (!hasChanges) return;
+        if (!hasChanges)
+            return;
 
         // Restore each variant from snapshot
         restoreVariant(savedSnapshot.srBg, Config.theme.srBg);
@@ -344,9 +364,18 @@ FloatingWindow {
 
                         Repeater {
                             model: [
-                                { name: "Theme", icon: Icons.cube },
-                                { name: "Bar", icon: Icons.gear },
-                                { name: "Hyprland", icon: Icons.gear }
+                                {
+                                    name: "Theme",
+                                    icon: Icons.cube
+                                },
+                                {
+                                    name: "Bar",
+                                    icon: Icons.gear
+                                },
+                                {
+                                    name: "Hyprland",
+                                    icon: Icons.gear
+                                }
                             ]
 
                             delegate: Button {
@@ -364,7 +393,9 @@ FloatingWindow {
 
                                     Behavior on opacity {
                                         enabled: (Config.animDuration ?? 0) > 0
-                                        NumberAnimation { duration: (Config.animDuration ?? 0) / 2 }
+                                        NumberAnimation {
+                                            duration: (Config.animDuration ?? 0) / 2
+                                        }
                                     }
                                 }
 
@@ -393,7 +424,9 @@ FloatingWindow {
                             }
                         }
 
-                        Item { Layout.fillHeight: true }
+                        Item {
+                            Layout.fillHeight: true
+                        }
                     }
                 }
 

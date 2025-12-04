@@ -103,6 +103,9 @@ StyledRect {
     // List of available color names from Colors.qml
     readonly property var colorNames: ["background", "surface", "surfaceBright", "surfaceContainer", "surfaceContainerHigh", "surfaceContainerHighest", "surfaceContainerLow", "surfaceContainerLowest", "surfaceDim", "surfaceTint", "surfaceVariant", "primary", "primaryContainer", "primaryFixed", "primaryFixedDim", "secondary", "secondaryContainer", "secondaryFixed", "secondaryFixedDim", "tertiary", "tertiaryContainer", "tertiaryFixed", "tertiaryFixedDim", "error", "errorContainer", "overBackground", "overSurface", "overSurfaceVariant", "overPrimary", "overPrimaryContainer", "overPrimaryFixed", "overPrimaryFixedVariant", "overSecondary", "overSecondaryContainer", "overSecondaryFixed", "overSecondaryFixedVariant", "overTertiary", "overTertiaryContainer", "overTertiaryFixed", "overTertiaryFixedVariant", "overError", "overErrorContainer", "outline", "outlineVariant", "inversePrimary", "inverseSurface", "inverseOnSurface", "shadow", "scrim", "blue", "blueContainer", "overBlue", "overBlueContainer", "cyan", "cyanContainer", "overCyan", "overCyanContainer", "green", "greenContainer", "overGreen", "overGreenContainer", "magenta", "magentaContainer", "overMagenta", "overMagentaContainer", "red", "redContainer", "overRed", "overRedContainer", "yellow", "yellowContainer", "overYellow", "overYellowContainer", "white", "whiteContainer", "overWhite", "overWhiteContainer"]
 
+    // Gradient type options
+    readonly property var gradientTypes: ["linear", "radial", "halftone"]
+
     // Helper to update a property - updates Config directly
     function updateProp(prop, value) {
         if (variantConfig) {
@@ -111,27 +114,22 @@ StyledRect {
         }
     }
 
-    ColumnLayout {
+    ScrollView {
         anchors.fill: parent
         anchors.margins: 12
-        spacing: 12
+        contentWidth: availableWidth
+        clip: true
 
-
-
-        // 3-column layout
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            spacing: 12
+        ColumnLayout {
+            width: parent.width
+            spacing: 16
             enabled: root.variantConfig !== null
 
-            // === LEFT COLUMN: Type + Opacity ===
+            // === GRADIENT TYPE SELECTOR (PowerProfile style) ===
             ColumnLayout {
-                Layout.preferredWidth: 200
-                Layout.fillHeight: true
-                spacing: 12
+                Layout.fillWidth: true
+                spacing: 8
 
-                // Gradient Type Section (vertical)
                 Text {
                     text: "Gradient Type"
                     font.family: Styling.defaultFont
@@ -140,41 +138,124 @@ StyledRect {
                     color: Colors.primary
                 }
 
-                Repeater {
-                    model: ["linear", "radial", "halftone"]
+                StyledRect {
+                    id: typeSelector
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+                    variant: "bg"
 
-                    delegate: Button {
-                        id: typeButton
-                        required property string modelData
-                        required property int index
+                    readonly property int buttonCount: 3
+                    readonly property int spacing: 2
+                    readonly property int padding: 2
 
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 44
+                    readonly property int currentIndex: {
+                        if (!root.variantConfig) return 0;
+                        const idx = root.gradientTypes.indexOf(root.variantConfig.gradientType);
+                        return idx >= 0 ? idx : 0;
+                    }
 
-                        readonly property bool isSelected: root.variantConfig && root.variantConfig.gradientType === modelData
+                    Item {
+                        anchors.fill: parent
+                        anchors.margins: typeSelector.padding
 
-                        background: StyledRect {
-                            variant: typeButton.isSelected ? "primary" : (typeButton.hovered ? "focus" : "common")
+                        // Sliding highlight
+                        StyledRect {
+                            id: typeHighlight
+                            variant: "primary"
+                            z: 0
+                            radius: Styling.radius(-2)
+
+                            readonly property real buttonWidth: (parent.width - (typeSelector.buttonCount - 1) * typeSelector.spacing) / typeSelector.buttonCount
+
+                            width: buttonWidth
+                            height: parent.height
+                            x: typeSelector.currentIndex * (buttonWidth + typeSelector.spacing)
+
+                            Behavior on x {
+                                enabled: Config.animDuration > 0
+                                NumberAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
                         }
 
-                        contentItem: Text {
-                            text: typeButton.modelData.charAt(0).toUpperCase() + typeButton.modelData.slice(1)
-                            font.family: Styling.defaultFont
-                            font.pixelSize: Config.theme.fontSize
-                            color: typeButton.isSelected ? Colors.overPrimary : Colors.overBackground
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
+                        // Buttons
+                        RowLayout {
+                            anchors.fill: parent
+                            spacing: typeSelector.spacing
+                            z: 1
 
-                        onClicked: root.updateProp("gradientType", modelData)
+                            Repeater {
+                                model: root.gradientTypes
+
+                                Rectangle {
+                                    id: typeButton
+                                    required property string modelData
+                                    required property int index
+
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    color: "transparent"
+
+                                    readonly property bool isSelected: typeSelector.currentIndex === index
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: typeButton.modelData.charAt(0).toUpperCase() + typeButton.modelData.slice(1)
+                                        font.family: Styling.defaultFont
+                                        font.pixelSize: Config.theme.fontSize
+                                        color: typeButton.isSelected ? Colors.overPrimary : Colors.overBackground
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+
+                                        Behavior on color {
+                                            enabled: Config.animDuration > 0
+                                            ColorAnimation {
+                                                duration: Config.animDuration / 2
+                                                easing.type: Easing.OutQuart
+                                            }
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.updateProp("gradientType", typeButton.modelData)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+            }
 
-                Item {
-                    Layout.preferredHeight: 20
+            // === ITEM COLOR ===
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 4
+
+                Text {
+                    text: "Item Color"
+                    font.family: Styling.defaultFont
+                    font.pixelSize: Config.theme.fontSize
+                    font.bold: true
+                    color: Colors.primary
                 }
 
-                // Opacity Section
+                ColorSelector {
+                    Layout.fillWidth: true
+                    colorNames: root.colorNames
+                    currentValue: root.variantConfig ? root.variantConfig.itemColor : ""
+                    onColorChanged: newColor => root.updateProp("itemColor", newColor)
+                }
+            }
+
+            // === OPACITY ===
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 4
+
                 Text {
                     text: "Opacity"
                     font.family: Styling.defaultFont
@@ -185,7 +266,7 @@ StyledRect {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: 10
+                    spacing: 8
 
                     StyledSlider {
                         id: opacitySlider
@@ -209,480 +290,239 @@ StyledRect {
                         font.family: Styling.defaultFont
                         font.pixelSize: Config.theme.fontSize
                         color: Colors.overBackground
-                        Layout.preferredWidth: 45
+                        Layout.preferredWidth: 40
                         horizontalAlignment: Text.AlignRight
                     }
                 }
-
-                Item {
-                    Layout.fillHeight: true
-                }
             }
 
-            // === CENTER COLUMN: Options ===
-            ScrollView {
+            // === BORDER SECTION ===
+            ColumnLayout {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                contentWidth: availableWidth
-                clip: true
+                spacing: 8
 
-                ColumnLayout {
-                    width: parent.width
-                    spacing: 16
-
-                    // Item Color Section
-                    GroupBox {
-                        Layout.fillWidth: true
-                        title: "Item Color (Icons/Text)"
-
-                        background: StyledRect {
-                            variant: "common"
-                        }
-
-                        label: Text {
-                            text: parent.title
-                            font.family: Styling.defaultFont
-                            font.pixelSize: Config.theme.fontSize
-                            font.bold: true
-                            color: Colors.primary
-                            leftPadding: 10
-                        }
-
-                        ColorSelector {
-                            anchors.fill: parent
-                            colorNames: root.colorNames
-                            currentValue: root.variantConfig ? root.variantConfig.itemColor : ""
-                            onColorChanged: newColor => root.updateProp("itemColor", newColor)
-                        }
-                    }
-
-                    // Border Section
-                    GroupBox {
-                        Layout.fillWidth: true
-                        title: "Border"
-
-                        background: StyledRect {
-                            variant: "common"
-                        }
-
-                        label: Text {
-                            text: parent.title
-                            font.family: Styling.defaultFont
-                            font.pixelSize: Config.theme.fontSize
-                            font.bold: true
-                            color: Colors.primary
-                            leftPadding: 10
-                        }
-
-                        ColumnLayout {
-                            anchors.fill: parent
-                            spacing: 14
-
-                            // Border width
-                            RowLayout {
-                                Layout.fillWidth: true
-                                spacing: 10
-
-                                Text {
-                                    text: "Width:"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 70
-                                }
-
-                                StyledSlider {
-                                    id: borderWidthSlider
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 24
-                                    value: root.variantConfig ? root.variantConfig.border[1] / 16 : 0
-                                    resizeParent: false
-                                    scroll: false
-                                    tooltip: true
-                                    tooltipText: Math.round(value * 16) + "px"
-                                    onValueChanged: {
-                                        if (root.variantConfig) {
-                                            const newWidth = Math.round(value * 16);
-                                            if (newWidth !== root.variantConfig.border[1]) {
-                                                root.updateProp("border", [root.variantConfig.border[0], newWidth]);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    text: root.variantConfig ? root.variantConfig.border[1] + "px" : "0px"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 40
-                                    horizontalAlignment: Text.AlignRight
-                                }
-                            }
-
-                            // Border color
-                            RowLayout {
-                                Layout.fillWidth: true
-                                spacing: 10
-
-                                Text {
-                                    text: "Color:"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 70
-                                }
-
-                                ColorSelector {
-                                    Layout.fillWidth: true
-                                    colorNames: root.colorNames
-                                    currentValue: root.variantConfig ? root.variantConfig.border[0] : ""
-                                    onColorChanged: newColor => {
-                                        if (!root.variantConfig)
-                                            return;
-                                        let border = [newColor, root.variantConfig.border[1]];
-                                        root.updateProp("border", border);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Type-specific settings
-                    GroupBox {
-                        Layout.fillWidth: true
-                        title: {
-                            if (!root.variantConfig)
-                                return "Type Settings";
-                            switch (root.variantConfig.gradientType) {
-                            case "linear":
-                                return "Linear Settings";
-                            case "radial":
-                                return "Radial Settings";
-                            case "halftone":
-                                return "Halftone Settings";
-                            default:
-                                return "Type Settings";
-                            }
-                        }
-                        visible: root.variantConfig !== null
-
-                        background: StyledRect {
-                            variant: "common"
-                        }
-
-                        label: Text {
-                            text: parent.title
-                            font.family: Styling.defaultFont
-                            font.pixelSize: Config.theme.fontSize
-                            font.bold: true
-                            color: Colors.primary
-                            leftPadding: 10
-                        }
-
-                        ColumnLayout {
-                            anchors.fill: parent
-                            spacing: 14
-
-                            // Angle (for linear)
-                            RowLayout {
-                                visible: root.variantConfig && root.variantConfig.gradientType === "linear"
-                                Layout.fillWidth: true
-                                spacing: 10
-
-                                Text {
-                                    text: "Angle:"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 70
-                                }
-
-                                StyledSlider {
-                                    id: angleSlider
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 24
-                                    value: root.variantConfig ? root.variantConfig.gradientAngle / 360 : 0
-                                    resizeParent: false
-                                    scroll: false
-                                    tooltip: true
-                                    tooltipText: Math.round(value * 360) + "°"
-                                    onValueChanged: {
-                                        if (root.variantConfig) {
-                                            const newAngle = Math.round(value * 360);
-                                            if (newAngle !== root.variantConfig.gradientAngle) {
-                                                root.updateProp("gradientAngle", newAngle);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    text: root.variantConfig ? root.variantConfig.gradientAngle + "°" : "0°"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 45
-                                    horizontalAlignment: Text.AlignRight
-                                }
-                            }
-
-                            // Center X/Y (for radial)
-                            RowLayout {
-                                visible: root.variantConfig && root.variantConfig.gradientType === "radial"
-                                Layout.fillWidth: true
-                                spacing: 10
-
-                                Text {
-                                    text: "Center X:"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 70
-                                }
-
-                                StyledSlider {
-                                    id: centerXSlider
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 24
-                                    value: root.variantConfig ? root.variantConfig.gradientCenterX : 0.5
-                                    resizeParent: false
-                                    scroll: false
-                                    tooltip: true
-                                    tooltipText: (value * 100).toFixed(0) + "%"
-                                    onValueChanged: {
-                                        if (root.variantConfig && Math.abs(value - root.variantConfig.gradientCenterX) > 0.001) {
-                                            root.updateProp("gradientCenterX", value);
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    text: root.variantConfig ? root.variantConfig.gradientCenterX.toFixed(2) : "0.50"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 45
-                                }
-                            }
-
-                            RowLayout {
-                                visible: root.variantConfig && root.variantConfig.gradientType === "radial"
-                                Layout.fillWidth: true
-                                spacing: 10
-
-                                Text {
-                                    text: "Center Y:"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 70
-                                }
-
-                                StyledSlider {
-                                    id: centerYSlider
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 24
-                                    value: root.variantConfig ? root.variantConfig.gradientCenterY : 0.5
-                                    resizeParent: false
-                                    scroll: false
-                                    tooltip: true
-                                    tooltipText: (value * 100).toFixed(0) + "%"
-                                    onValueChanged: {
-                                        if (root.variantConfig && Math.abs(value - root.variantConfig.gradientCenterY) > 0.001) {
-                                            root.updateProp("gradientCenterY", value);
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    text: root.variantConfig ? root.variantConfig.gradientCenterY.toFixed(2) : "0.50"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 45
-                                }
-                            }
-
-                            // === HALFTONE OPTIONS ===
-                            // Angle
-                            RowLayout {
-                                visible: root.variantConfig && root.variantConfig.gradientType === "halftone"
-                                Layout.fillWidth: true
-                                spacing: 10
-
-                                Text {
-                                    text: "Angle:"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 110
-                                }
-
-                                StyledSlider {
-                                    id: halftoneAngleSlider
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 24
-                                    value: root.variantConfig ? root.variantConfig.gradientAngle / 360 : 0
-                                    resizeParent: false
-                                    scroll: false
-                                    tooltip: true
-                                    tooltipText: Math.round(value * 360) + "°"
-                                    onValueChanged: {
-                                        if (root.variantConfig) {
-                                            const newAngle = Math.round(value * 360);
-                                            if (newAngle !== root.variantConfig.gradientAngle) {
-                                                root.updateProp("gradientAngle", newAngle);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    text: root.variantConfig ? root.variantConfig.gradientAngle + "°" : "0°"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 45
-                                }
-                            }
-
-                            // Dot Min
-                            RowLayout {
-                                visible: root.variantConfig && root.variantConfig.gradientType === "halftone"
-                                Layout.fillWidth: true
-                                spacing: 10
-
-                                Text {
-                                    text: "Dot Min:"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 110
-                                }
-
-                                StyledSlider {
-                                    id: dotMinSlider
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 24
-                                    value: root.variantConfig ? root.variantConfig.halftoneDotMin / 20 : 0.1
-                                    resizeParent: false
-                                    scroll: false
-                                    tooltip: true
-                                    tooltipText: (value * 20).toFixed(1)
-                                    onValueChanged: {
-                                        if (root.variantConfig) {
-                                            const newVal = value * 20;
-                                            if (Math.abs(newVal - root.variantConfig.halftoneDotMin) > 0.01) {
-                                                root.updateProp("halftoneDotMin", newVal);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    text: root.variantConfig ? root.variantConfig.halftoneDotMin.toFixed(1) : "2.0"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 45
-                                }
-                            }
-
-                            // Dot Max
-                            RowLayout {
-                                visible: root.variantConfig && root.variantConfig.gradientType === "halftone"
-                                Layout.fillWidth: true
-                                spacing: 10
-
-                                Text {
-                                    text: "Dot Max:"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 110
-                                }
-
-                                StyledSlider {
-                                    id: dotMaxSlider
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 24
-                                    value: root.variantConfig ? root.variantConfig.halftoneDotMax / 20 : 0.4
-                                    resizeParent: false
-                                    scroll: false
-                                    tooltip: true
-                                    tooltipText: (value * 20).toFixed(1)
-                                    onValueChanged: {
-                                        if (root.variantConfig) {
-                                            const newVal = value * 20;
-                                            if (Math.abs(newVal - root.variantConfig.halftoneDotMax) > 0.01) {
-                                                root.updateProp("halftoneDotMax", newVal);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    text: root.variantConfig ? root.variantConfig.halftoneDotMax.toFixed(1) : "8.0"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.overBackground
-                                    Layout.preferredWidth: 45
-                                }
-                            }
-                        }
-                    }
-
-                    // Spacer at the bottom
-                    Item {
-                        Layout.preferredHeight: 20
-                    }
-                }
-            }
-
-            // === RIGHT COLUMN: Gradient Stops / Halftone Options ===
-            // Gradient Stops (Linear/Radial)
-            GradientStopsEditor {
-                Layout.preferredWidth: 350
-                Layout.fillHeight: true
-                colorNames: root.colorNames
-                stops: root.variantConfig ? root.variantConfig.gradient : []
-                variantId: root.variantId
-                visible: root.variantConfig && root.variantConfig.gradientType !== "halftone"
-                onUpdateStops: newStops => root.updateProp("gradient", newStops)
-            }
-
-            // Halftone Options
-            GroupBox {
-                Layout.fillHeight: true
-                Layout.minimumWidth: 350
-                Layout.maximumWidth: 350
-                visible: root.variantConfig && root.variantConfig.gradientType === "halftone"
-                title: "Halftone Options"
-
-                background: StyledRect {
-                    variant: "common"
-                }
-
-                label: Text {
-                    text: parent.title
+                Text {
+                    text: "Border"
                     font.family: Styling.defaultFont
                     font.pixelSize: Config.theme.fontSize
                     font.bold: true
                     color: Colors.primary
-                    leftPadding: 10
                 }
 
-                ScrollView {
-                    anchors.fill: parent
-                    anchors.margins: 4
-                    clip: true
+                // Border color
+                ColorSelector {
+                    Layout.fillWidth: true
+                    colorNames: root.colorNames
+                    currentValue: root.variantConfig ? root.variantConfig.border[0] : ""
+                    onColorChanged: newColor => {
+                        if (!root.variantConfig)
+                            return;
+                        let border = [newColor, root.variantConfig.border[1]];
+                        root.updateProp("border", border);
+                    }
+                }
+
+                // Border width
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Text {
+                        text: "Width:"
+                        font.family: Styling.defaultFont
+                        font.pixelSize: Config.theme.fontSize
+                        color: Colors.overBackground
+                        opacity: 0.7
+                    }
+
+                    StyledSlider {
+                        id: borderWidthSlider
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 24
+                        value: root.variantConfig ? root.variantConfig.border[1] / 16 : 0
+                        resizeParent: false
+                        scroll: false
+                        tooltip: true
+                        tooltipText: Math.round(value * 16) + "px"
+                        onValueChanged: {
+                            if (root.variantConfig) {
+                                const newWidth = Math.round(value * 16);
+                                if (newWidth !== root.variantConfig.border[1]) {
+                                    root.updateProp("border", [root.variantConfig.border[0], newWidth]);
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        text: root.variantConfig ? root.variantConfig.border[1] + "px" : "0px"
+                        font.family: Styling.defaultFont
+                        font.pixelSize: Config.theme.fontSize
+                        color: Colors.overBackground
+                        Layout.preferredWidth: 35
+                        horizontalAlignment: Text.AlignRight
+                    }
+                }
+            }
+
+            // === TYPE-SPECIFIC SETTINGS ===
+            // Linear settings
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 4
+                visible: root.variantConfig && root.variantConfig.gradientType === "linear"
+
+                Text {
+                    text: "Angle"
+                    font.family: Styling.defaultFont
+                    font.pixelSize: Config.theme.fontSize
+                    font.bold: true
+                    color: Colors.primary
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    StyledSlider {
+                        id: angleSlider
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 24
+                        value: root.variantConfig ? root.variantConfig.gradientAngle / 360 : 0
+                        resizeParent: false
+                        scroll: false
+                        tooltip: true
+                        tooltipText: Math.round(value * 360) + "°"
+                        onValueChanged: {
+                            if (root.variantConfig) {
+                                const newAngle = Math.round(value * 360);
+                                if (newAngle !== root.variantConfig.gradientAngle) {
+                                    root.updateProp("gradientAngle", newAngle);
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        text: root.variantConfig ? root.variantConfig.gradientAngle + "°" : "0°"
+                        font.family: Styling.defaultFont
+                        font.pixelSize: Config.theme.fontSize
+                        color: Colors.overBackground
+                        Layout.preferredWidth: 40
+                        horizontalAlignment: Text.AlignRight
+                    }
+                }
+            }
+
+            // Radial settings
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 4
+                visible: root.variantConfig && root.variantConfig.gradientType === "radial"
+
+                Text {
+                    text: "Center Position"
+                    font.family: Styling.defaultFont
+                    font.pixelSize: Config.theme.fontSize
+                    font.bold: true
+                    color: Colors.primary
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 16
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Text {
+                            text: "X:"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            opacity: 0.7
+                        }
+
+                        StyledSlider {
+                            id: centerXSlider
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 24
+                            value: root.variantConfig ? root.variantConfig.gradientCenterX : 0.5
+                            resizeParent: false
+                            scroll: false
+                            tooltip: true
+                            tooltipText: (value * 100).toFixed(0) + "%"
+                            onValueChanged: {
+                                if (root.variantConfig && Math.abs(value - root.variantConfig.gradientCenterX) > 0.001) {
+                                    root.updateProp("gradientCenterX", value);
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: root.variantConfig ? root.variantConfig.gradientCenterX.toFixed(2) : "0.50"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            Layout.preferredWidth: 35
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Text {
+                            text: "Y:"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            opacity: 0.7
+                        }
+
+                        StyledSlider {
+                            id: centerYSlider
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 24
+                            value: root.variantConfig ? root.variantConfig.gradientCenterY : 0.5
+                            resizeParent: false
+                            scroll: false
+                            tooltip: true
+                            tooltipText: (value * 100).toFixed(0) + "%"
+                            onValueChanged: {
+                                if (root.variantConfig && Math.abs(value - root.variantConfig.gradientCenterY) > 0.001) {
+                                    root.updateProp("gradientCenterY", value);
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: root.variantConfig ? root.variantConfig.gradientCenterY.toFixed(2) : "0.50"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            Layout.preferredWidth: 35
+                        }
+                    }
+                }
+            }
+
+            // Halftone settings
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 8
+                visible: root.variantConfig && root.variantConfig.gradientType === "halftone"
+
+                // Colors row
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 16
 
                     ColumnLayout {
-                        width: 330
-                        spacing: 14
+                        Layout.fillWidth: true
+                        spacing: 4
 
-                        // Dot Color
                         Text {
                             text: "Dot Color"
                             font.family: Styling.defaultFont
@@ -697,10 +537,14 @@ StyledRect {
                             currentValue: root.variantConfig ? root.variantConfig.halftoneDotColor : ""
                             onColorChanged: newColor => root.updateProp("halftoneDotColor", newColor)
                         }
+                    }
 
-                        // BG Color
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+
                         Text {
-                            text: "Background Color"
+                            text: "Background"
                             font.family: Styling.defaultFont
                             font.pixelSize: Config.theme.fontSize
                             font.bold: true
@@ -713,88 +557,234 @@ StyledRect {
                             currentValue: root.variantConfig ? root.variantConfig.halftoneBackgroundColor : ""
                             onColorChanged: newColor => root.updateProp("halftoneBackgroundColor", newColor)
                         }
-
-                        // Start
-                        Text {
-                            text: "Start"
-                            font.family: Styling.defaultFont
-                            font.pixelSize: Config.theme.fontSize
-                            font.bold: true
-                            color: Colors.primary
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 10
-
-                            StyledSlider {
-                                id: halftoneStartSliderRight
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 24
-                                value: root.variantConfig ? root.variantConfig.halftoneStart : 0
-                                resizeParent: false
-                                scroll: false
-                                tooltip: true
-                                tooltipText: (value * 100).toFixed(0) + "%"
-                                onValueChanged: {
-                                    if (root.variantConfig && Math.abs(value - root.variantConfig.halftoneStart) > 0.001) {
-                                        root.updateProp("halftoneStart", value);
-                                    }
-                                }
-                            }
-
-                            Text {
-                                text: root.variantConfig ? root.variantConfig.halftoneStart.toFixed(2) : "0.00"
-                                font.family: Styling.defaultFont
-                                font.pixelSize: Config.theme.fontSize
-                                color: Colors.overBackground
-                                Layout.preferredWidth: 40
-                                horizontalAlignment: Text.AlignRight
-                            }
-                        }
-
-                        // End
-                        Text {
-                            text: "End"
-                            font.family: Styling.defaultFont
-                            font.pixelSize: Config.theme.fontSize
-                            font.bold: true
-                            color: Colors.primary
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 10
-
-                            StyledSlider {
-                                id: halftoneEndSliderRight
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 24
-                                value: root.variantConfig ? root.variantConfig.halftoneEnd : 1
-                                resizeParent: false
-                                scroll: false
-                                tooltip: true
-                                tooltipText: (value * 100).toFixed(0) + "%"
-                                onValueChanged: {
-                                    if (root.variantConfig && Math.abs(value - root.variantConfig.halftoneEnd) > 0.001) {
-                                        root.updateProp("halftoneEnd", value);
-                                    }
-                                }
-                            }
-
-                            Text {
-                                text: root.variantConfig ? root.variantConfig.halftoneEnd.toFixed(2) : "1.00"
-                                font.family: Styling.defaultFont
-                                font.pixelSize: Config.theme.fontSize
-                                color: Colors.overBackground
-                                Layout.preferredWidth: 40
-                                horizontalAlignment: Text.AlignRight
-                            }
-                        }
-
-                        Item { Layout.preferredHeight: 20 }
                     }
                 }
+
+                // Angle row
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Text {
+                        text: "Angle:"
+                        font.family: Styling.defaultFont
+                        font.pixelSize: Config.theme.fontSize
+                        color: Colors.overBackground
+                        opacity: 0.7
+                        Layout.preferredWidth: 50
+                    }
+
+                    StyledSlider {
+                        id: halftoneAngleSlider
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 24
+                        value: root.variantConfig ? root.variantConfig.gradientAngle / 360 : 0
+                        resizeParent: false
+                        scroll: false
+                        tooltip: true
+                        tooltipText: Math.round(value * 360) + "°"
+                        onValueChanged: {
+                            if (root.variantConfig) {
+                                const newAngle = Math.round(value * 360);
+                                if (newAngle !== root.variantConfig.gradientAngle) {
+                                    root.updateProp("gradientAngle", newAngle);
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        text: root.variantConfig ? root.variantConfig.gradientAngle + "°" : "0°"
+                        font.family: Styling.defaultFont
+                        font.pixelSize: Config.theme.fontSize
+                        color: Colors.overBackground
+                        Layout.preferredWidth: 40
+                        horizontalAlignment: Text.AlignRight
+                    }
+                }
+
+                // Dot size row
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 16
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Text {
+                            text: "Dot Min:"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            opacity: 0.7
+                        }
+
+                        StyledSlider {
+                            id: dotMinSlider
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 24
+                            value: root.variantConfig ? root.variantConfig.halftoneDotMin / 20 : 0.1
+                            resizeParent: false
+                            scroll: false
+                            tooltip: true
+                            tooltipText: (value * 20).toFixed(1)
+                            onValueChanged: {
+                                if (root.variantConfig) {
+                                    const newVal = value * 20;
+                                    if (Math.abs(newVal - root.variantConfig.halftoneDotMin) > 0.01) {
+                                        root.updateProp("halftoneDotMin", newVal);
+                                    }
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: root.variantConfig ? root.variantConfig.halftoneDotMin.toFixed(1) : "2.0"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            Layout.preferredWidth: 30
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Text {
+                            text: "Dot Max:"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            opacity: 0.7
+                        }
+
+                        StyledSlider {
+                            id: dotMaxSlider
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 24
+                            value: root.variantConfig ? root.variantConfig.halftoneDotMax / 20 : 0.4
+                            resizeParent: false
+                            scroll: false
+                            tooltip: true
+                            tooltipText: (value * 20).toFixed(1)
+                            onValueChanged: {
+                                if (root.variantConfig) {
+                                    const newVal = value * 20;
+                                    if (Math.abs(newVal - root.variantConfig.halftoneDotMax) > 0.01) {
+                                        root.updateProp("halftoneDotMax", newVal);
+                                    }
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: root.variantConfig ? root.variantConfig.halftoneDotMax.toFixed(1) : "8.0"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            Layout.preferredWidth: 30
+                        }
+                    }
+                }
+
+                // Start/End row
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 16
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Text {
+                            text: "Start:"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            opacity: 0.7
+                        }
+
+                        StyledSlider {
+                            id: halftoneStartSlider
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 24
+                            value: root.variantConfig ? root.variantConfig.halftoneStart : 0
+                            resizeParent: false
+                            scroll: false
+                            tooltip: true
+                            tooltipText: (value * 100).toFixed(0) + "%"
+                            onValueChanged: {
+                                if (root.variantConfig && Math.abs(value - root.variantConfig.halftoneStart) > 0.001) {
+                                    root.updateProp("halftoneStart", value);
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: root.variantConfig ? root.variantConfig.halftoneStart.toFixed(2) : "0.00"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            Layout.preferredWidth: 35
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Text {
+                            text: "End:"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            opacity: 0.7
+                        }
+
+                        StyledSlider {
+                            id: halftoneEndSlider
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 24
+                            value: root.variantConfig ? root.variantConfig.halftoneEnd : 1
+                            resizeParent: false
+                            scroll: false
+                            tooltip: true
+                            tooltipText: (value * 100).toFixed(0) + "%"
+                            onValueChanged: {
+                                if (root.variantConfig && Math.abs(value - root.variantConfig.halftoneEnd) > 0.001) {
+                                    root.updateProp("halftoneEnd", value);
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: root.variantConfig ? root.variantConfig.halftoneEnd.toFixed(2) : "1.00"
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overBackground
+                            Layout.preferredWidth: 35
+                        }
+                    }
+                }
+            }
+
+            // === GRADIENT STOPS (for linear/radial) ===
+            GradientStopsEditor {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 220
+                colorNames: root.colorNames
+                stops: root.variantConfig ? root.variantConfig.gradient : []
+                variantId: root.variantId
+                visible: root.variantConfig && root.variantConfig.gradientType !== "halftone"
+                onUpdateStops: newStops => root.updateProp("gradient", newStops)
+            }
+
+            // Spacer
+            Item {
+                Layout.fillHeight: true
+                Layout.preferredHeight: 20
             }
         }
     }

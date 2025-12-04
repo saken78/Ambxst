@@ -17,8 +17,8 @@ GroupBox {
 
     signal updateStops(var newStops)
 
-    // Currently selected stop index for editing
-    property int selectedStopIndex: -1
+    // Currently selected stop index for editing (default to first stop)
+    property int selectedStopIndex: 0
 
     // Drag state (kept at root level to survive delegate recreation)
     property int draggingIndex: -1
@@ -349,7 +349,7 @@ GroupBox {
 
                 onClicked: {
                     root.updateStops(root.defaultGradient.slice());
-                    root.selectedStopIndex = -1;
+                    root.selectedStopIndex = 0;
                 }
 
                 ToolTip.visible: hovered
