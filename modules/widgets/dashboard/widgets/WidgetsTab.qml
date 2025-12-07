@@ -14,6 +14,7 @@ import "../clipboard"
 import "../emoji"
 import "../tmux"
 import "../wallpapers"
+import "../notes"
 import "calendar"
 
 Rectangle {
@@ -56,14 +57,15 @@ Rectangle {
         let emojiPrefix = Config.prefix.emoji + " ";
         let tmuxPrefix = Config.prefix.tmux + " ";
         let wallPrefix = Config.prefix.wallpapers + " ";
+        let notesPrefix = Config.prefix.notes + " ";
 
         // If prefix was manually disabled, don't re-enable until conditions are met
         if (prefixDisabled) {
             // Only re-enable prefix if user deletes the prefix text or adds valid content
-            if (text === clipPrefix || text === emojiPrefix || text === tmuxPrefix || text === wallPrefix) {
+            if (text === clipPrefix || text === emojiPrefix || text === tmuxPrefix || text === wallPrefix || text === notesPrefix) {
                 // Still at exact prefix - keep disabled
                 return 0;
-            } else if (!text.startsWith(clipPrefix) && !text.startsWith(emojiPrefix) && !text.startsWith(tmuxPrefix) && !text.startsWith(wallPrefix)) {
+            } else if (!text.startsWith(clipPrefix) && !text.startsWith(emojiPrefix) && !text.startsWith(tmuxPrefix) && !text.startsWith(wallPrefix) && !text.startsWith(notesPrefix)) {
                 // User deleted the prefix - re-enable detection
                 prefixDisabled = false;
                 return 0;
@@ -82,6 +84,8 @@ Rectangle {
             return 3;
         } else if (text === wallPrefix) {
             return 4;
+        } else if (text === notesPrefix) {
+            return 5;
         }
         return 0;
     }
@@ -185,6 +189,8 @@ Rectangle {
                             prefixLength = Config.prefix.tmux.length + 1;
                         else if (searchText.startsWith(Config.prefix.wallpapers + " "))
                             prefixLength = Config.prefix.wallpapers.length + 1;
+                        else if (searchText.startsWith(Config.prefix.notes + " "))
+                            prefixLength = Config.prefix.notes.length + 1;
 
                         let remainingText = searchText.substring(prefixLength);
 
@@ -201,6 +207,8 @@ Rectangle {
                                 targetLoader = tmuxLoader;
                             } else if (detectedTab === 4) {
                                 targetLoader = wallpapersLoader;
+                            } else if (detectedTab === 5) {
+                                targetLoader = notesLoader;
                             }
 
                             // If loader is ready, use it immediately
@@ -1073,6 +1081,32 @@ Rectangle {
                 }
                 onLoaded: {
                     if (currentTab === 4 && item && item.focusSearchInput) {
+                        Qt.callLater(() => item.focusSearchInput());
+                    }
+                }
+            }
+
+            // Tab 5: Notes (with prefix from config)
+            Loader {
+                id: notesLoader
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                active: currentTab === 5
+                sourceComponent: Component {
+                    NotesTab {
+                        anchors.fill: parent
+                        leftPanelWidth: root.leftPanelWidth
+                        prefixIcon: Icons.note
+                        onBackspaceOnEmpty: {
+                            prefixDisabled = true;
+                            currentTab = 0;
+                            GlobalStates.launcherSearchText = Config.prefix.notes + " ";
+                            appLauncher.focusSearchInput();
+                        }
+                    }
+                }
+                onLoaded: {
+                    if (currentTab === 5 && item && item.focusSearchInput) {
                         Qt.callLater(() => item.focusSearchInput());
                     }
                 }

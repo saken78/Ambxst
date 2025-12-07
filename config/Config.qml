@@ -535,6 +535,7 @@ Singleton {
                 property string emoji: "ee"
                 property string tmux: "tt"
                 property string wallpapers: "ww"
+                property string notes: "nn"
             }
 
             property JsonObject system: JsonObject {
@@ -600,6 +601,12 @@ Singleton {
                         property string key: "A"
                         property string dispatcher: "global"
                         property string argument: "ambxst:dashboard-assistant"
+                    }
+                    property JsonObject notes: JsonObject {
+                        property list<string> modifiers: ["SUPER", "SHIFT"]
+                        property string key: "N"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:dashboard-notes"
                     }
                 }
                 property JsonObject system: JsonObject {

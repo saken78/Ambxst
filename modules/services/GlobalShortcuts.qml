@@ -157,6 +157,14 @@ Item {
 
     GlobalShortcut {
         appid: root.appId
+        name: "dashboard-notes"
+        description: "Open dashboard notes (via prefix)"
+
+        onPressed: toggleDashboardWithPrefix(Config.prefix.notes + " ")
+    }
+
+    GlobalShortcut {
+        appid: root.appId
         name: "dashboard-assistant"
         description: "Open dashboard assistant tab"
 

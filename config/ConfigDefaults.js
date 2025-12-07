@@ -397,7 +397,8 @@ var data = {
         "clipboard": "cc",
         "emoji": "ee",
         "tmux": "tt",
-        "wallpapers": "ww"
+        "wallpapers": "ww",
+        "notes": "nn"
     },
     "system": {
         "disks": ["/"]
