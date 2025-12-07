@@ -185,4 +185,5 @@ QtObject {
     readonly property string alignCenter: ""
     readonly property string alignRight: ""
     readonly property string alignJustify: ""
+    readonly property string markdown: ""
 }
