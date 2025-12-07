@@ -163,14 +163,6 @@ Item {
                     height: implicitHeight
                     clip: true
 
-                    Behavior on implicitHeight {
-                        enabled: Config.animDuration > 0
-                        NumberAnimation {
-                            duration: Config.animDuration
-                            easing.type: Easing.OutQuart
-                        }
-                    }
-
                     // Crear componente inicial
                     Component.onCompleted: {
                         if (Notifications.popupList.length > 0) {
@@ -406,25 +398,18 @@ Item {
                                         // App icon
                                         NotificationAppIcon {
                                             id: appIcon
-                                            Layout.preferredWidth: hovered ? 48 : 32
-                                            Layout.preferredHeight: hovered ? 48 : 32
+                                            property int iconSize: hovered ? 48 : 32
+                                            Layout.preferredWidth: iconSize
+                                            Layout.preferredHeight: iconSize
                                             Layout.alignment: Qt.AlignTop
-                                            size: hovered ? 48 : 32
+                                            size: iconSize
                                             radius: Styling.radius(4)
                                             appIcon: notification ? (notification.cachedAppIcon || notification.appIcon) : ""
                                             image: notification ? (notification.cachedImage || notification.image) : ""
                                             summary: notification ? notification.summary : ""
                                             urgency: notification ? notification.urgency : NotificationUrgency.Normal
 
-                                            Behavior on Layout.preferredWidth {
-                                                enabled: Config.animDuration > 0
-                                                NumberAnimation {
-                                                    duration: Config.animDuration
-                                                    easing.type: Easing.OutQuart
-                                                }
-                                            }
-
-                                            Behavior on Layout.preferredHeight {
+                                            Behavior on iconSize {
                                                 enabled: Config.animDuration > 0
                                                 NumberAnimation {
                                                     duration: Config.animDuration
@@ -590,20 +575,13 @@ Item {
 
                                     // Botón de descartar
                                     Item {
-                                        Layout.preferredWidth: hovered ? 24 : 0
-                                        Layout.preferredHeight: hovered ? 24 : 0
+                                        property int buttonSize: hovered ? 24 : 0
+                                        Layout.preferredWidth: buttonSize
+                                        Layout.preferredHeight: buttonSize
                                         Layout.alignment: Qt.AlignTop
                                         z: 200
 
-                                        Behavior on Layout.preferredWidth {
-                                            enabled: Config.animDuration > 0
-                                            NumberAnimation {
-                                                duration: Config.animDuration
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-
-                                        Behavior on Layout.preferredHeight {
+                                        Behavior on buttonSize {
                                             enabled: Config.animDuration > 0
                                             NumberAnimation {
                                                 duration: Config.animDuration
@@ -677,14 +655,6 @@ Item {
                                 height: implicitHeight
                                 clip: true
                                 z: 200
-
-                                Behavior on implicitHeight {
-                                    enabled: Config.animDuration > 0
-                                    NumberAnimation {
-                                        duration: Config.animDuration
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
 
                                 RowLayout {
                                     anchors.fill: parent
