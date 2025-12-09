@@ -31,7 +31,7 @@ fi
 
 if command -v wl-clip-persist >/dev/null; then
   echo "Starting wl-clip-persist from Ambxst environment..."
-  nohup wl-clip-persist >/dev/null 2>&1 &
+  nohup wl-clip-persist --clipboard regular >/dev/null 2>&1 &
 else
   echo "Warning: wl-clip-persist not found in PATH"
 fi
