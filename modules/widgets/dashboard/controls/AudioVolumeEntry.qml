@@ -53,7 +53,8 @@ Item {
                 Text {
                     anchors.centerIn: parent
                     text: {
-                        if (root.icon) return root.icon;
+                        if (root.icon)
+                            return root.icon;
                         // For app nodes, try to get an appropriate icon
                         return Icons.speakerHigh;
                     }
@@ -64,7 +65,9 @@ Item {
 
                     Behavior on opacity {
                         enabled: Config.animDuration > 0
-                        NumberAnimation { duration: Config.animDuration / 2 }
+                        NumberAnimation {
+                            duration: Config.animDuration / 2
+                        }
                     }
                 }
 
@@ -89,9 +92,7 @@ Item {
 
             StyledToolTip {
                 visible: muteButton.hovered
-                text: root.isMainDevice 
-                    ? (root.isMuted ? "Unmute" : "Mute")
-                    : Audio.appNodeDisplayName(root.node)
+                tooltipText: root.isMainDevice ? (root.isMuted ? "Unmute" : "Mute") : Audio.appNodeDisplayName(root.node)
             }
         }
 
@@ -103,8 +104,10 @@ Item {
             value: root.volume
             scroll: false
             progressColor: {
-                if (root.isMuted) return Colors.outline;
-                if (Audio.protectionTriggered && root.isMainDevice) return Colors.warning;
+                if (root.isMuted)
+                    return Colors.outline;
+                if (Audio.protectionTriggered && root.isMainDevice)
+                    return Colors.warning;
                 return Colors.primary;
             }
 
@@ -117,7 +120,9 @@ Item {
 
             Behavior on progressColor {
                 enabled: Config.animDuration > 0
-                ColorAnimation { duration: Config.animDuration / 2 }
+                ColorAnimation {
+                    duration: Config.animDuration / 2
+                }
             }
         }
 
@@ -138,7 +143,7 @@ Item {
 
                 StyledToolTip {
                     visible: parent.visible && protectionIndicatorMa.containsMouse
-                    text: "Volume protection active"
+                    tooltipText: "Volume protection active"
                 }
 
                 MouseArea {
