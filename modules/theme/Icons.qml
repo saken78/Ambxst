@@ -192,6 +192,7 @@ QtObject {
     readonly property string arrowFatLinesDown: ""
     readonly property string arrowsOutCardinal: ""
     readonly property string dotsNine: ""
+    readonly property string circleHalf: ""
 
     // Theme editor icons
     readonly property string arrowRightLine: ""  // Arrow right line icon

@@ -175,219 +175,143 @@ Item {
                 }
             }
 
-            // Opacity & Border
+            // Opacity Control
             StyledRect {
-                variant: "common"
-                Layout.preferredWidth: 140
+                id: opacityControl
+                variant: "pane"
+                Layout.fillWidth: true
                 Layout.preferredHeight: 56
-                radius: Styling.radius(-2)
+                radius: Styling.radius(-1)
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 8
-                    spacing: 12
+                    anchors.leftMargin: 4
+                    anchors.rightMargin: 12
+                    spacing: 8
 
-                    // Opacity
+                    // CircularControl
+                    CircularControl {
+                        icon: Icons.circleHalf
+                        value: root.variantConfig ? root.variantConfig.opacity : 1.0
+                        accentColor: Colors.primary
+                        isToggleable: false
+                        isToggled: false
+                        onControlValueChanged: newValue => root.updateProp("opacity", newValue)
+                    }
+
+                    // Label + Value
                     ColumnLayout {
+                        Layout.fillWidth: true
                         spacing: 2
 
                         Text {
+                            Layout.fillWidth: true
                             text: "Opacity"
                             font.family: Styling.defaultFont
                             font.pixelSize: Styling.fontSize(-2)
                             font.bold: true
-                            color: Colors.overBackground
+                            color: opacityControl.itemColor
                             opacity: 0.6
                         }
 
                         Text {
+                            Layout.fillWidth: true
                             text: root.variantConfig ? (root.variantConfig.opacity * 100).toFixed(0) + "%" : "100%"
                             font.family: Styling.defaultFont
                             font.pixelSize: Styling.fontSize(1)
                             font.bold: true
-                            color: Colors.overBackground
+                            color: opacityControl.itemColor
+                        }
+                    }
+                }
+            }
+
+            // Border Control
+            StyledRect {
+                id: borderControl
+                variant: "pane"
+                Layout.fillWidth: true
+                Layout.preferredHeight: 56
+                radius: Styling.radius(-1)
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 4
+                    anchors.rightMargin: 12
+                    spacing: 8
+
+                    // CircularControl with ColorButton as center
+                    Item {
+                        width: 48
+                        height: 48
+
+                        CircularControl {
+                            id: borderCircular
+                            anchors.fill: parent
+                            icon: ""
+                            value: root.variantConfig ? root.variantConfig.border[1] / 16 : 0
+                            accentColor: root.variantConfig ? Colors.getColor(root.variantConfig.border[0]) : Colors.outline
+                            isToggleable: false
+                            isToggled: false
+                            onControlValueChanged: newValue => {
+                                if (root.variantConfig) {
+                                    const newWidth = Math.round(newValue * 16);
+                                    root.updateProp("border", [root.variantConfig.border[0], newWidth]);
+                                }
+                            }
+                        }
+
+                        // Color button in center
+                        Rectangle {
+                            id: borderColorButton
+                            anchors.centerIn: parent
+                            width: 20
+                            height: 20
+                            radius: width / 2
+                            color: root.variantConfig ? Colors.getColor(root.variantConfig.border[0]) : Colors.outline
+                            border.width: 2
+                            border.color: Colors.overBackground
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    root.openColorPickerRequested(
+                                        root.colorNames,
+                                        root.variantConfig ? root.variantConfig.border[0] : "outline",
+                                        "Select Border Color",
+                                        function(color) {
+                                            if (!root.variantConfig) return;
+                                            root.updateProp("border", [color, root.variantConfig.border[1]]);
+                                        }
+                                    );
+                                }
+                            }
                         }
                     }
 
-                    // Separator
-                    Rectangle {
-                        Layout.preferredWidth: 1
-                        Layout.fillHeight: true
-                        Layout.topMargin: 4
-                        Layout.bottomMargin: 4
-                        color: Colors.outline
-                        opacity: 0.3
-                    }
-
-                    // Border
+                    // Label + Value
                     ColumnLayout {
+                        Layout.fillWidth: true
                         spacing: 2
 
                         Text {
+                            Layout.fillWidth: true
                             text: "Border"
                             font.family: Styling.defaultFont
                             font.pixelSize: Styling.fontSize(-2)
                             font.bold: true
-                            color: Colors.overBackground
+                            color: borderControl.itemColor
                             opacity: 0.6
                         }
 
                         Text {
+                            Layout.fillWidth: true
                             text: root.variantConfig ? root.variantConfig.border[1] + "px" : "0px"
                             font.family: Styling.defaultFont
                             font.pixelSize: Styling.fontSize(1)
                             font.bold: true
-                            color: Colors.overBackground
-                        }
-                    }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: opacityBorderPopup.open()
-                }
-
-                Popup {
-                    id: opacityBorderPopup
-                    x: parent.width - width
-                    y: parent.height + 4
-                    width: 260
-                    padding: 12
-
-                    background: Rectangle {
-                        color: Colors.surfaceContainerLow
-                        radius: Styling.radius(-1)
-                        border.color: Colors.outlineVariant
-                        border.width: 1
-                    }
-
-                    ColumnLayout {
-                        width: parent.width
-                        spacing: 16
-
-                        // Opacity slider
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 8
-
-                            RowLayout {
-                                Layout.fillWidth: true
-
-                                Text {
-                                    text: "Opacity"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Styling.fontSize(0)
-                                    font.bold: true
-                                    color: Colors.overBackground
-                                }
-
-                                Item { Layout.fillWidth: true }
-
-                                Text {
-                                    text: root.variantConfig ? (root.variantConfig.opacity * 100).toFixed(0) + "%" : "100%"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Styling.fontSize(0)
-                                    color: Colors.primary
-                                    font.bold: true
-                                }
-                            }
-
-                            StyledSlider {
-                                id: opacitySlider
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 24
-                                vertical: false
-                                resizeParent: false
-                                scroll: false
-                                tooltip: false
-
-                                readonly property real configValue: root.variantConfig ? root.variantConfig.opacity : 1.0
-                                onConfigValueChanged: if (Math.abs(value - configValue) > 0.001) value = configValue
-                                Component.onCompleted: value = configValue
-
-                                onValueChanged: {
-                                    if (root.variantConfig && Math.abs(value - root.variantConfig.opacity) > 0.001) {
-                                        root.updateProp("opacity", value);
-                                    }
-                                }
-                            }
-                        }
-
-                        // Border section
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 8
-
-                            RowLayout {
-                                Layout.fillWidth: true
-
-                                Text {
-                                    text: "Border Width"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Styling.fontSize(0)
-                                    font.bold: true
-                                    color: Colors.overBackground
-                                }
-
-                                Item { Layout.fillWidth: true }
-
-                                Text {
-                                    text: root.variantConfig ? root.variantConfig.border[1] + "px" : "0px"
-                                    font.family: Styling.defaultFont
-                                    font.pixelSize: Styling.fontSize(0)
-                                    color: Colors.primary
-                                    font.bold: true
-                                }
-                            }
-
-                            StyledSlider {
-                                id: borderWidthSlider
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 24
-                                resizeParent: false
-                                scroll: false
-                                tooltip: false
-
-                                readonly property real configValue: root.variantConfig ? root.variantConfig.border[1] / 16 : 0
-                                onConfigValueChanged: if (Math.abs(value - configValue) > 0.001) value = configValue
-                                Component.onCompleted: value = configValue
-
-                                onValueChanged: {
-                                    if (root.variantConfig) {
-                                        const newWidth = Math.round(value * 16);
-                                        if (newWidth !== root.variantConfig.border[1]) {
-                                            root.updateProp("border", [root.variantConfig.border[0], newWidth]);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // Border color
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 8
-
-                            Text {
-                                text: "Border Color"
-                                font.family: Styling.defaultFont
-                                font.pixelSize: Styling.fontSize(0)
-                                font.bold: true
-                                color: Colors.overBackground
-                            }
-
-                            ColorSelector {
-                                Layout.fillWidth: true
-                                colorNames: root.colorNames
-                                currentValue: root.variantConfig ? root.variantConfig.border[0] : ""
-                                onColorChanged: newColor => {
-                                    if (!root.variantConfig)
-                                        return;
-                                    let border = [newColor, root.variantConfig.border[1]];
-                                    root.updateProp("border", border);
-                                }
-                            }
+                            color: borderControl.itemColor
                         }
                     }
                 }
