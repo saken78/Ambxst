@@ -17,6 +17,7 @@ StyledRect {
     property bool handleTabNavigation: false  // Si true, captura Tab y emite señales. Si false, usa navegación normal.
     property bool passwordMode: false  // Si true, muestra círculos en lugar del texto
     property bool centerText: false  // Si true, centra el texto horizontalmente
+    property bool disableCursorNavigation: false  // Si true, Left/Right siempre emiten señales sin mover el cursor
 
     signal searchTextChanged(string text)
     signal accepted
@@ -143,14 +144,14 @@ StyledRect {
                     root.upPressed();
                     event.accepted = true;
                 } else if (event.key === Qt.Key_Left) {
-                    // Only emit signal if cursor is at the beginning or text is empty
-                    if (textField.cursorPosition === 0 || textField.text.length === 0) {
+                    // Only emit signal if cursor is at the beginning, text is empty, or cursor navigation is disabled
+                    if (root.disableCursorNavigation || textField.cursorPosition === 0 || textField.text.length === 0) {
                         root.leftPressed();
                         event.accepted = true;
                     }
                 } else if (event.key === Qt.Key_Right) {
-                    // Only emit signal if cursor is at the end or text is empty
-                    if (textField.cursorPosition === textField.text.length || textField.text.length === 0) {
+                    // Only emit signal if cursor is at the end, text is empty, or cursor navigation is disabled
+                    if (root.disableCursorNavigation || textField.cursorPosition === textField.text.length || textField.text.length === 0) {
                         root.rightPressed();
                         event.accepted = true;
                     }

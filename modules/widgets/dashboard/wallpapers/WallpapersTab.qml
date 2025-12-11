@@ -394,6 +394,7 @@ FocusScope {
                 iconText: ""
                 clearOnEscape: false
                 handleTabNavigation: true
+                disableCursorNavigation: true
                 radius: Styling.radius(4)
 
                 // Manejo de eventos de búsqueda y teclado.
