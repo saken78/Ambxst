@@ -115,7 +115,9 @@ ClippingRectangle {
         readonly property real sinAbs: Math.abs(Math.sin(angleRad))
         readonly property real scaleX: (parent.width * cosAbs + parent.height * sinAbs) / maxDim
         readonly property real scaleY: (parent.height * cosAbs + parent.width * sinAbs) / maxDim
-        
+
+        antialiasing: true
+
         width: maxDim
         height: maxDim
         x: (parent.width - width) / 2
@@ -123,14 +125,14 @@ ClippingRectangle {
         visible: gradientType === "linear"
         rotation: gradientAngle
         transformOrigin: Item.Center
-        
+
         transform: Scale {
             xScale: linearGrad.scaleX
             yScale: linearGrad.scaleY
             origin.x: linearGrad.width / 2
             origin.y: linearGrad.height / 2
         }
-        
+
         gradient: Gradient {
             orientation: gradientOrientation === "horizontal" ? Gradient.Horizontal : Gradient.Vertical
 

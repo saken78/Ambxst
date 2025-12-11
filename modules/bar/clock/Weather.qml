@@ -83,7 +83,7 @@ StyledRect {
 
         Separator {
             id: separatorV
-            vert: true
+            vert: false
             Layout.alignment: Qt.AlignHCenter
         }
 
