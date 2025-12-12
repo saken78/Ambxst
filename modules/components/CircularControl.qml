@@ -39,6 +39,7 @@ StyledRect {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton
+        preventStealing: true
 
         property real dragStartY: 0
         property real dragStartValue: 0

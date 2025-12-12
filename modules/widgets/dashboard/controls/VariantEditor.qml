@@ -257,24 +257,7 @@ Item {
                             width: 48
                             height: 48
 
-                            CircularControl {
-                                id: borderCircular
-                                anchors.fill: parent
-                                icon: ""
-                                value: root.variantConfig ? root.variantConfig.border[1] / 16 : 0
-                                accentColor: root.variantConfig ? Config.resolveColor(root.variantConfig.border[0]) : Colors.outline
-                                isToggleable: false
-                                isToggled: false
-                                showBackground: false
-                                onControlValueChanged: newValue => {
-                                    if (root.variantConfig) {
-                                        const newWidth = Math.round(newValue * 16);
-                                        root.updateProp("border", [root.variantConfig.border[0], newWidth]);
-                                    }
-                                }
-                            }
-
-                            // Color button in center
+                            // Color button in center (behind CircularControl for visual, but we handle click separately)
                             Rectangle {
                                 id: borderColorButton
                                 anchors.centerIn: parent
@@ -284,17 +267,31 @@ Item {
                                 color: root.variantConfig ? Config.resolveColor(root.variantConfig.border[0]) : Colors.outline
                                 border.width: 2
                                 border.color: Colors.overBackground
+                                z: 0
+                            }
 
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        root.openColorPickerRequested(root.colorNames, root.variantConfig ? root.variantConfig.border[0] : "outline", "Select Border Color", function (color) {
-                                            if (!root.variantConfig)
-                                                return;
-                                            root.updateProp("border", [color, root.variantConfig.border[1]]);
-                                        });
+                            CircularControl {
+                                id: borderCircular
+                                anchors.fill: parent
+                                icon: ""
+                                value: root.variantConfig ? root.variantConfig.border[1] / 16 : 0
+                                accentColor: root.variantConfig ? Config.resolveColor(root.variantConfig.border[0]) : Colors.outline
+                                isToggleable: true
+                                isToggled: false
+                                showBackground: false
+                                z: 1
+                                onControlValueChanged: newValue => {
+                                    if (root.variantConfig) {
+                                        const newWidth = Math.round(newValue * 16);
+                                        root.updateProp("border", [root.variantConfig.border[0], newWidth]);
                                     }
+                                }
+                                onToggled: {
+                                    root.openColorPickerRequested(root.colorNames, root.variantConfig ? root.variantConfig.border[0] : "outline", "Select Border Color", function (color) {
+                                        if (!root.variantConfig)
+                                            return;
+                                        root.updateProp("border", [color, root.variantConfig.border[1]]);
+                                    });
                                 }
                             }
                         }
