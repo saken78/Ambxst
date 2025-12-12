@@ -393,6 +393,7 @@ QtObject {
     // Link preview metadata fetcher
     property Process linkPreviewProcess: Process {
         property string requestUrl: ""
+        property string requestItemId: ""
         running: false
         
         stdout: StdioCollector {
@@ -401,14 +402,20 @@ QtObject {
             onStreamFinished: {
                 try {
                     var metadata = JSON.parse(text);
-                    // Cache the result if successful
-                    if (!metadata.error) {
-                        root.linkPreviewCache[linkPreviewProcess.requestUrl] = metadata;
+                    // Use request_url from the response - this is the original URL we requested
+                    // This is crucial because requestUrl property may have been overwritten
+                    // by a subsequent request before this response arrived
+                    var responseUrl = metadata.request_url || metadata.url || linkPreviewProcess.requestUrl;
+                    
+                    // Cache the result if successful, using the URL from the response
+                    if (!metadata.error && responseUrl) {
+                        root.linkPreviewCache[responseUrl] = metadata;
                     }
-                    root.linkPreviewFetched(linkPreviewProcess.requestUrl, metadata);
+                    // Note: requestItemId may also be stale, but the receiver validates it
+                    root.linkPreviewFetched(responseUrl, metadata, linkPreviewProcess.requestItemId);
                 } catch (e) {
                     console.warn("ClipboardService: Failed to parse link preview:", e);
-                    root.linkPreviewFetched(linkPreviewProcess.requestUrl, {'error': 'Failed to parse response'});
+                    root.linkPreviewFetched(linkPreviewProcess.requestUrl, {'error': 'Failed to parse response'}, linkPreviewProcess.requestItemId);
                 }
             }
         }
@@ -423,13 +430,13 @@ QtObject {
         
         onExited: function(code) {
             if (code !== 0) {
-                root.linkPreviewFetched(linkPreviewProcess.requestUrl, {'error': 'Failed to fetch preview'});
+                root.linkPreviewFetched(linkPreviewProcess.requestUrl, {'error': 'Failed to fetch preview'}, linkPreviewProcess.requestItemId);
             }
         }
     }
 
     signal fullContentRetrieved(string itemId, string content)
-    signal linkPreviewFetched(string url, var metadata)
+    signal linkPreviewFetched(string url, var metadata, string itemId)
     
     // Function to decode URL-encoded strings
     function decodeUriString(str) {
@@ -600,18 +607,19 @@ QtObject {
         return imageDataById[id] || "";
     }
     
-    function fetchLinkPreview(url) {
+    function fetchLinkPreview(url, itemId) {
         if (!_initialized) return;
         
         // Check cache first
         if (linkPreviewCache[url]) {
             Qt.callLater(function() {
-                root.linkPreviewFetched(url, linkPreviewCache[url]);
+                root.linkPreviewFetched(url, linkPreviewCache[url], itemId);
             });
             return;
         }
         
         linkPreviewProcess.requestUrl = url;
+        linkPreviewProcess.requestItemId = itemId;
         linkPreviewProcess.command = ["python3", linkPreviewScriptPath, url, "5"];
         linkPreviewProcess.running = true;
     }

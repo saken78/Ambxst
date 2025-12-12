@@ -58,6 +58,7 @@ def fetch_youtube_metadata(url, timeout=5):
             "description": f"{data.get('author_name', 'Unknown')}",
             "image": thumbnail,
             "url": url,
+            "request_url": url,
             "site_name": "YouTube",
             "type": "video",
             "favicon": "https://www.youtube.com/s/desktop/9c0f82da/img/favicon_144x144.png",
@@ -83,6 +84,7 @@ def fetch_twitter_metadata(url, timeout=5):
             "description": re.sub(r"<[^>]+>", "", data.get("html", "")),  # Strip HTML
             "image": "",
             "url": url,
+            "request_url": url,
             "site_name": "X (Twitter)",
             "type": "article",
             "favicon": "https://abs.twimg.com/favicons/twitter.3.ico",
@@ -316,6 +318,9 @@ def fetch_preview(url, timeout=5):
         if not metadata["url"]:
             metadata["url"] = url  # Keep original URL, not redirected
 
+        # Always include the request URL for cache keying purposes
+        metadata["request_url"] = url
+
         # Set site name from domain if not present
         if not metadata["site_name"]:
             metadata["site_name"] = final_parsed.netloc
@@ -323,11 +328,15 @@ def fetch_preview(url, timeout=5):
         return metadata
 
     except urllib.error.HTTPError as e:
-        return {"error": f"HTTP {e.code}", "url": url}
+        return {"error": f"HTTP {e.code}", "url": url, "request_url": url}
     except urllib.error.URLError as e:
-        return {"error": f"Connection failed: {e.reason}", "url": url}
+        return {
+            "error": f"Connection failed: {e.reason}",
+            "url": url,
+            "request_url": url,
+        }
     except Exception as e:
-        return {"error": f"Failed to parse: {str(e)}", "url": url}
+        return {"error": f"Failed to parse: {str(e)}", "url": url, "request_url": url}
 
 
 def main():

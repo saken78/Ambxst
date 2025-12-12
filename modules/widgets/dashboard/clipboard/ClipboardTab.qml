@@ -113,10 +113,71 @@ Item {
     }
 
     property int previewImageSize: 200
+    
+    // Track the item ID for which we have loaded content/preview
+    // This ensures we never show data from a different item
+    property string currentItemId: ""
     property string currentFullContent: ""
-    property var linkPreviewData: null
     property bool loadingLinkPreview: false
     property int linkPreviewCacheRevision: 0  // Increments when cache updates, triggers favicon rebinding
+    
+    // Get the currently selected item (convenience property)
+    readonly property var currentSelectedItem: {
+        if (selectedIndex < 0 || selectedIndex >= allItems.length)
+            return null;
+        return allItems[selectedIndex];
+    }
+    
+    // Check if the loaded content matches the currently selected item
+    readonly property bool contentMatchesSelection: {
+        if (!currentSelectedItem)
+            return false;
+        return currentItemId === currentSelectedItem.id;
+    }
+    
+    // Safe accessor for full content - returns content only if it matches selection
+    // Falls back to item.preview if content not yet loaded
+    readonly property string safeCurrentContent: {
+        if (!currentSelectedItem)
+            return "";
+        if (contentMatchesSelection && currentFullContent)
+            return currentFullContent;
+        return currentSelectedItem.preview || "";
+    }
+    
+    // Get link preview data for the currently selected item from cache
+    // Only returns data if we have confirmed the content is for this item
+    property var linkPreviewData: {
+        var _rev = linkPreviewCacheRevision;  // Depend on cache revision for reactivity
+        
+        // Must have a selected item
+        if (!currentSelectedItem)
+            return null;
+        
+        // Must be a text item (not image or file)
+        if (currentSelectedItem.isImage || currentSelectedItem.isFile)
+            return null;
+        
+        // Determine the URL to look up
+        var urlToLookup = "";
+        
+        // If we have loaded content for THIS item, use it
+        if (contentMatchesSelection && currentFullContent) {
+            urlToLookup = currentFullContent.trim();
+        } else {
+            // Otherwise, try item.preview but ONLY if it looks like a complete URL
+            // (not truncated - doesn't end with "...")
+            var preview = currentSelectedItem.preview || "";
+            if (preview && !preview.endsWith("...")) {
+                urlToLookup = preview.trim();
+            }
+        }
+        
+        if (!urlToLookup || !ClipboardUtils.isUrl(urlToLookup))
+            return null;
+        
+        return ClipboardService.linkPreviewCache[urlToLookup] || null;
+    }
 
     // Helper function to get file path from URI
     function getFilePathFromUri(content) {
@@ -472,7 +533,7 @@ Item {
 
     function openItem(itemId) {
         console.log("DEBUG: ClipboardTab.openItem called for itemId:", itemId);
-        requestOpenItem(itemId, root.allItems, root.currentFullContent, getFilePathFromUri, ClipboardUtils.isUrl);
+        requestOpenItem(itemId, root.allItems, root.safeCurrentContent, getFilePathFromUri, ClipboardUtils.isUrl);
     }
 
     // MouseArea global para detectar clicks en cualquier espacio vacío
@@ -501,18 +562,20 @@ Item {
     Connections {
         target: root
         function onSelectedIndexChanged() {
+            // Reset content state when selection changes
+            // Setting currentItemId to "" ensures linkPreviewData won't use stale content
+            root.currentItemId = "";
+            root.currentFullContent = "";
+            root.loadingLinkPreview = false;
+            
             if (root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
                 let item = root.allItems[root.selectedIndex];
                 if (item.isImage && !ClipboardService.getImageData(item.id)) {
                     ClipboardService.decodeToDataUrl(item.id, item.mime);
                 } else if (!item.isImage) {
                     // Obtener contenido completo para texto
-                    root.currentFullContent = "";
-                    root.linkPreviewData = null;
                     ClipboardService.getFullContent(item.id);
                 }
-            } else {
-                root.linkPreviewData = null;
             }
         }
     }
@@ -521,30 +584,27 @@ Item {
     Connections {
         target: ClipboardService
         function onFullContentRetrieved(itemId, content) {
-            if (root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
-                let item = root.allItems[root.selectedIndex];
-                if (item.id === itemId) {
-                    root.currentFullContent = content;
+            // Only update if this is for the currently selected item
+            if (root.currentSelectedItem && root.currentSelectedItem.id === itemId) {
+                // Set both the item ID and content atomically
+                root.currentItemId = itemId;
+                root.currentFullContent = content;
 
-                    // Si es una URL, obtener preview
-                    if (ClipboardUtils.isUrl(content)) {
-                        root.loadingLinkPreview = true;
-                        ClipboardService.fetchLinkPreview(content.trim());
-                    }
+                // Si es una URL, obtener preview
+                if (ClipboardUtils.isUrl(content)) {
+                    root.loadingLinkPreview = true;
+                    ClipboardService.fetchLinkPreview(content.trim(), itemId);
                 }
             }
         }
 
-        function onLinkPreviewFetched(url, metadata) {
-            root.loadingLinkPreview = false;
-            // Increment cache revision to trigger favicon rebinding in list items
+        function onLinkPreviewFetched(url, metadata, requestItemId) {
+            // Increment cache revision to trigger rebinding of linkPreviewData and favicons
             root.linkPreviewCacheRevision++;
-            if (root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
-                let item = root.allItems[root.selectedIndex];
-                let currentContent = root.currentFullContent || item.preview;
-                if (ClipboardUtils.isUrl(currentContent) && currentContent.trim() === url) {
-                    root.linkPreviewData = metadata;
-                }
+            
+            // Only clear loading state if this response is for the currently selected item
+            if (root.currentSelectedItem && root.currentSelectedItem.id === requestItemId) {
+                root.loadingLinkPreview = false;
             }
         }
     }
@@ -2315,7 +2375,7 @@ Item {
                                     ClipboardService.revision;
                                     return ClipboardService.getImageData(previewPanel.currentItem.id);
                                 } else if (isImageFile && !isGifImage) {
-                                    var content = root.currentFullContent || previewPanel.currentItem.preview;
+                                    var content = root.safeCurrentContent;
                                     var filePath = root.getFilePathFromUri(content);
                                     return filePath ? "file://" + filePath : "";
                                 }
@@ -2329,7 +2389,7 @@ Item {
                         property bool isImageFile: {
                             if (!previewPanel.currentItem || !previewPanel.currentItem.isFile)
                                 return false;
-                            var content = root.currentFullContent || previewPanel.currentItem.preview;
+                            var content = root.safeCurrentContent;
                             var filePath = root.getFilePathFromUri(content);
                             return root.isImageFile(filePath);
                         }
@@ -2342,7 +2402,7 @@ Item {
                                 return true;
                             // Check file extension for text/uri-list
                             if (previewPanel.currentItem.isFile) {
-                                var content = root.currentFullContent || previewPanel.currentItem.preview;
+                                var content = root.safeCurrentContent;
                                 var filePath = root.getFilePathFromUri(content);
                                 if (filePath) {
                                     var ext = filePath.split('.').pop().toLowerCase();
@@ -2365,7 +2425,7 @@ Item {
                                     ClipboardService.revision;
                                     return ClipboardService.getImageData(previewPanel.currentItem.id);
                                 } else if (isImageFile) {
-                                    var content = root.currentFullContent || previewPanel.currentItem.preview;
+                                    var content = root.safeCurrentContent;
                                     var filePath = root.getFilePathFromUri(content);
                                     return filePath ? "file://" + filePath : "";
                                 }
@@ -2380,7 +2440,7 @@ Item {
                         property bool isImageFile: {
                             if (!previewPanel.currentItem || !previewPanel.currentItem.isFile)
                                 return false;
-                            var content = root.currentFullContent || previewPanel.currentItem.preview;
+                            var content = root.safeCurrentContent;
                             var filePath = root.getFilePathFromUri(content);
                             return root.isImageFile(filePath);
                         }
@@ -2393,7 +2453,7 @@ Item {
                                 return true;
                             // Check file extension for text/uri-list
                             if (previewPanel.currentItem.isFile) {
-                                var content = root.currentFullContent || previewPanel.currentItem.preview;
+                                var content = root.safeCurrentContent;
                                 var filePath = root.getFilePathFromUri(content);
                                 if (filePath) {
                                     var ext = filePath.split('.').pop().toLowerCase();
@@ -2484,10 +2544,8 @@ Item {
                                     cursorShape: Qt.PointingHandCursor
 
                                     onClicked: {
-                                        if (root.currentFullContent) {
-                                            Qt.openUrlExternally(root.currentFullContent.trim());
-                                        } else if (previewPanel.currentItem) {
-                                            Qt.openUrlExternally(previewPanel.currentItem.preview.trim());
+                                        if (root.safeCurrentContent) {
+                                            Qt.openUrlExternally(root.safeCurrentContent.trim());
                                         }
                                     }
                                 }
@@ -2554,7 +2612,7 @@ Item {
                                                 anchors.fill: parent
                                                 sourceSize.width: 40
                                                 sourceSize.height: 40
-                                                source: parent.triedFallback && root.currentFullContent ? root.getUsableFaviconFallback(root.currentFullContent) : ""
+                                                source: parent.triedFallback && root.safeCurrentContent ? root.getUsableFaviconFallback(root.safeCurrentContent) : ""
                                                 fillMode: Image.PreserveAspectFit
                                                 asynchronous: true
                                                 cache: true
@@ -2724,7 +2782,7 @@ Item {
                                                     anchors.fill: parent
                                                     sourceSize.width: 40
                                                     sourceSize.height: 40
-                                                    source: parent.triedFallback && root.currentFullContent ? root.getUsableFaviconFallback(root.currentFullContent) : ""
+                                                    source: parent.triedFallback && root.safeCurrentContent ? root.getUsableFaviconFallback(root.safeCurrentContent) : ""
                                                     fillMode: Image.PreserveAspectFit
                                                     asynchronous: true
                                                     cache: true
@@ -2813,7 +2871,7 @@ Item {
                                 id: linkPreviewLoadingRect
                                 width: parent.width
                                 height: 60
-                                visible: root.loadingLinkPreview && previewPanel.currentItem && ClipboardUtils.isUrl(root.currentFullContent || previewPanel.currentItem.preview)
+                                visible: root.loadingLinkPreview && previewPanel.currentItem && ClipboardUtils.isUrl(root.safeCurrentContent)
                                 color: Colors.surface
                                 radius: Styling.radius(4)
 
@@ -2850,7 +2908,7 @@ Item {
                             Item {
                                 width: parent.width
                                 height: urlPreview.visible ? 60 : 0
-                                visible: previewPanel.currentItem && ClipboardUtils.isUrl(root.currentFullContent || previewPanel.currentItem.preview) && !root.loadingLinkPreview && (!root.linkPreviewData || (!root.linkPreviewData.title && !root.linkPreviewData.description && !root.linkPreviewData.image))
+                                visible: previewPanel.currentItem && ClipboardUtils.isUrl(root.safeCurrentContent) && !root.loadingLinkPreview && (!root.linkPreviewData || (!root.linkPreviewData.title && !root.linkPreviewData.description && !root.linkPreviewData.image))
 
                                 Rectangle {
                                     id: urlPreview
@@ -2902,7 +2960,7 @@ Item {
                                                 source: {
                                                     if (!previewPanel.currentItem)
                                                         return "";
-                                                    return ClipboardUtils.getFaviconUrl(root.currentFullContent || previewPanel.currentItem.preview);
+                                                    return ClipboardUtils.getFaviconUrl(root.safeCurrentContent);
                                                 }
                                                 fillMode: Image.PreserveAspectFit
                                                 asynchronous: true
@@ -2943,7 +3001,7 @@ Item {
                                                 text: {
                                                     if (!previewPanel.currentItem)
                                                         return "";
-                                                    var url = root.currentFullContent || previewPanel.currentItem.preview;
+                                                    var url = root.safeCurrentContent;
                                                     try {
                                                         var urlObj = new URL(url.trim());
                                                         return urlObj.hostname;
@@ -2965,7 +3023,7 @@ Item {
 
                             Text {
                                 id: previewText
-                                text: root.currentFullContent || (previewPanel.currentItem ? previewPanel.currentItem.preview : "")
+                                text: root.safeCurrentContent
                                 font.family: Config.theme.font
                                 font.pixelSize: Config.theme.fontSize
                                 color: Colors.overBackground
@@ -2988,7 +3046,7 @@ Item {
                         property string filePath: {
                             if (!previewPanel.currentItem)
                                 return "";
-                            var content = root.currentFullContent || previewPanel.currentItem.preview;
+                            var content = root.safeCurrentContent;
                             return root.getFilePathFromUri(content);
                         }
 
@@ -3035,7 +3093,7 @@ Item {
                                     text: {
                                         if (!previewPanel.currentItem)
                                             return "";
-                                        var content = root.currentFullContent || previewPanel.currentItem.preview;
+                                        var content = root.safeCurrentContent;
                                         if (content.startsWith("file://")) {
                                             var filePath = content.substring(7).trim();
                                             var fileName = filePath.split('/').pop();
@@ -3057,7 +3115,7 @@ Item {
                                     text: {
                                         if (!previewPanel.currentItem)
                                             return "";
-                                        var content = root.currentFullContent || previewPanel.currentItem.preview;
+                                        var content = root.safeCurrentContent;
                                         if (content.startsWith("file://")) {
                                             var filePath = content.substring(7).trim();
                                             var parts = filePath.split('/');
@@ -3256,7 +3314,7 @@ Item {
                                     if (!previewPanel.currentItem)
                                         return false;
                                     var item = previewPanel.currentItem;
-                                    return item.isFile || item.isImage || ClipboardUtils.isUrl(root.currentFullContent || item.preview);
+                                    return item.isFile || item.isImage || ClipboardUtils.isUrl(root.safeCurrentContent);
                                 }
 
                                 Behavior on color {
@@ -3328,7 +3386,7 @@ Item {
                                             return {};
 
                                         var item = previewPanel.currentItem;
-                                        var content = (root.currentFullContent || item.preview).trim();
+                                        var content = root.safeCurrentContent.trim();
 
                                         if (item.isFile) {
                                             // File: send as URI list
