@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import qs.modules.bar.workspaces
 import qs.modules.services
 
 Singleton {
@@ -71,13 +70,12 @@ Singleton {
         return notches[screenName] || null;
     }
 
-    function setActiveModule(moduleName, skipFocusRestore) {
+    function setActiveModule(moduleName) {
         const focusedMonitor = Hyprland.focusedMonitor;
         if (!focusedMonitor)
             return;
 
         const focusedScreenName = focusedMonitor.name;
-        const wasOpen = currentActiveModule !== "";
 
         clearAll();
 
@@ -86,27 +84,6 @@ Singleton {
             applyActiveModuleToScreen(focusedScreenName);
         } else {
             currentActiveModule = "";
-
-            if (wasOpen && !skipFocusRestore) {
-                Qt.callLater(() => {
-                    const monitor = Hyprland.focusedMonitor;
-                    if (!monitor)
-                        return;
-
-                    const currentWorkspace = monitor.activeWorkspace?.id;
-                    if (!currentWorkspace)
-                        return;
-
-                    const windowInWorkspace = HyprlandData.windowList.find(win =>
-                        win?.workspace?.id === currentWorkspace &&
-                        monitor?.id === win.monitor
-                    );
-
-                    if (windowInWorkspace) {
-                        Hyprland.dispatch(`focuswindow address:${windowInWorkspace.address}`);
-                    }
-                });
-            }
         }
 
         lastFocusedScreen = focusedScreenName;
