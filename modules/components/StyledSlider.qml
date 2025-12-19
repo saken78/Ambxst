@@ -50,6 +50,16 @@ Item {
     property bool sliderVisible: true
     property bool iconClickable: true
 
+    // Step and snap properties
+    property real stepSize: 0  // 0 means no stepping
+    property string snapMode: "none"  // "none", "always", "release"
+
+    // Helper function to apply step snapping
+    function applyStep(val: real): real {
+        if (stepSize <= 0) return val;
+        return Math.round(val / stepSize) * stepSize;
+    }
+
     property real animatedProgress: progressRatio
     Behavior on animatedProgress {
         enabled: root.smoothDrag && Config.animDuration > 0
@@ -356,7 +366,7 @@ Item {
             if (root.vertical) {
                 ratio = 1 - ratio; // Invert for vertical
             }
-            return Math.round(ratio * 100) / 100;
+            return ratio;
         }
 
         onPressed: mouse => {
@@ -365,26 +375,37 @@ Item {
                 return;
             }
             root.isDragging = true;
-            root.dragPosition = calculatePosition(mouse.x, mouse.y);
+            let pos = calculatePosition(mouse.x, mouse.y);
+            if (root.snapMode === "always") {
+                pos = root.applyStep(pos);
+            }
+            root.dragPosition = pos;
             if (!root.updateOnRelease) {
-                root.value = root.dragPosition;
+                root.value = root.snapMode === "always" ? pos : root.dragPosition;
             }
         }
 
         onPositionChanged: mouse => {
             if (root.isDragging) {
-                root.dragPosition = calculatePosition(mouse.x, mouse.y);
+                let pos = calculatePosition(mouse.x, mouse.y);
+                if (root.snapMode === "always") {
+                    pos = root.applyStep(pos);
+                }
+                root.dragPosition = pos;
                 if (!root.updateOnRelease) {
-                    root.value = root.dragPosition;
+                    root.value = root.snapMode === "always" ? pos : root.dragPosition;
                 }
             }
         }
 
         onReleased: mouse => {
             if (root.isDragging) {
-                if (root.updateOnRelease) {
-                    root.value = root.dragPosition;
+                let finalValue = root.dragPosition;
+                if (root.snapMode === "always" || root.snapMode === "release") {
+                    finalValue = root.applyStep(finalValue);
                 }
+                root.value = finalValue;
+                root.dragPosition = finalValue;
                 root.isDragging = false;
             }
         }
@@ -395,10 +416,11 @@ Item {
 
         onWheel: wheel => {
             if (root.scroll) {
+                const scrollStep = root.stepSize > 0 ? root.stepSize : 0.1;
                 if (wheel.angleDelta.y > 0) {
-                    root.value = Math.round(Math.min(1, root.value + 0.1) * 100) / 100;
+                    root.value = root.applyStep(Math.min(1, root.value + scrollStep));
                 } else {
-                    root.value = Math.round(Math.max(0, root.value - 0.1) * 100) / 100;
+                    root.value = root.applyStep(Math.max(0, root.value - scrollStep));
                 }
             } else {
                 wheel.accepted = false;

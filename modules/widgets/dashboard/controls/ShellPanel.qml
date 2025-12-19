@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Quickshell
 import qs.modules.theme
 import qs.modules.components
 import qs.modules.globals
@@ -330,6 +331,90 @@ Item {
         }
     }
 
+    // Inline component for screen list selection
+    component ScreenListRow: ColumnLayout {
+        id: screenListRowRoot
+        property string label: "Screens"
+        property var selectedScreens: []  // Array of screen names
+        signal screensChanged(var newList)
+
+        Layout.fillWidth: true
+        spacing: 4
+
+        Text {
+            text: screenListRowRoot.label
+            font.family: Config.theme.font
+            font.pixelSize: Styling.fontSize(-1)
+            font.weight: Font.Medium
+            color: Colors.overSurfaceVariant
+        }
+
+        Text {
+            text: "Empty = all screens"
+            font.family: Config.theme.font
+            font.pixelSize: Styling.fontSize(-2)
+            color: Colors.outline
+            Layout.bottomMargin: 4
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: 4
+
+            Repeater {
+                model: Quickshell.screens
+
+                delegate: StyledRect {
+                    id: screenButton
+                    required property var modelData
+                    required property int index
+
+                    readonly property string screenName: modelData.name
+                    readonly property bool isSelected: {
+                        const list = screenListRowRoot.selectedScreens;
+                        return list && list.length > 0 && list.includes(screenName);
+                    }
+                    property bool isHovered: false
+
+                    variant: isSelected ? "primary" : (isHovered ? "focus" : "common")
+                    width: screenLabel.implicitWidth + 24
+                    height: 32
+                    radius: Styling.radius(-2)
+
+                    Text {
+                        id: screenLabel
+                        anchors.centerIn: parent
+                        text: screenButton.screenName
+                        font.family: Config.theme.font
+                        font.pixelSize: Styling.fontSize(-1)
+                        font.bold: screenButton.isSelected
+                        color: screenButton.itemColor
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+
+                        onEntered: screenButton.isHovered = true
+                        onExited: screenButton.isHovered = false
+
+                        onClicked: {
+                            let currentList = screenListRowRoot.selectedScreens ? [...screenListRowRoot.selectedScreens] : [];
+                            const idx = currentList.indexOf(screenButton.screenName);
+                            if (idx >= 0) {
+                                currentList.splice(idx, 1);
+                            } else {
+                                currentList.push(screenButton.screenName);
+                            }
+                            screenListRowRoot.screensChanged(currentList);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Main content
     Flickable {
         id: mainFlickable
@@ -500,6 +585,15 @@ Item {
                                     GlobalStates.markShellChanged();
                                     Config.bar.enableFirefoxPlayer = value;
                                 }
+                            }
+                        }
+
+                        ScreenListRow {
+                            label: "Screens"
+                            selectedScreens: Config.bar.screenList ?? []
+                            onScreensChanged: newList => {
+                                GlobalStates.markShellChanged();
+                                Config.bar.screenList = newList;
                             }
                         }
                     }
@@ -690,9 +784,11 @@ Item {
                                 Layout.preferredHeight: 20
                                 progressColor: Colors.primary
                                 tooltipText: `${(value * 0.2).toFixed(2)}`
-                                scroll: false
+                                scroll: true
+                                stepSize: 0.05  // 0.05 * 0.2 = 0.01 scale steps
+                                snapMode: "always"
 
-                                readonly property real configValue: (Config.overview.scale ?? 0.1) / 0.2
+                                readonly property real configValue: (Config.overview.scale ?? 0.15) / 0.2
 
                                 onConfigValueChanged: {
                                     if (Math.abs(value - configValue) > 0.001) {
@@ -703,8 +799,8 @@ Item {
                                 Component.onCompleted: value = configValue
 
                                 onValueChanged: {
-                                    let newScale = value * 0.2;
-                                    if (Math.abs(newScale - (Config.overview.scale ?? 0.1)) > 0.001) {
+                                    let newScale = Math.round(value * 0.2 * 100) / 100;  // Round to 2 decimals
+                                    if (Math.abs(newScale - (Config.overview.scale ?? 0.15)) > 0.001) {
                                         GlobalStates.markShellChanged();
                                         Config.overview.scale = newScale;
                                     }
@@ -712,7 +808,7 @@ Item {
                             }
 
                             Text {
-                                text: ((Config.overview.scale ?? 0.1)).toFixed(2)
+                                text: ((Config.overview.scale ?? 0.15)).toFixed(2)
                                 font.family: Config.theme.font
                                 font.pixelSize: Styling.fontSize(0)
                                 color: Colors.overBackground
@@ -932,6 +1028,16 @@ Item {
                                     GlobalStates.markShellChanged();
                                     Config.dock.showOverviewButton = value;
                                 }
+                            }
+                        }
+
+                        ScreenListRow {
+                            label: "Screens"
+                            visible: (Config.dock.theme ?? "default") !== "integrated"
+                            selectedScreens: Config.dock.screenList ?? []
+                            onScreensChanged: newList => {
+                                GlobalStates.markShellChanged();
+                                Config.dock.screenList = newList;
                             }
                         }
                     }

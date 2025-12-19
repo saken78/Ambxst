@@ -202,11 +202,11 @@ Singleton {
 
     // Shell config sections and their properties
     readonly property var _shellSections: {
-        "bar": ["position", "launcherIcon", "launcherIconTint", "launcherIconFullTint", "launcherIconSize", "enableFirefoxPlayer"],
+        "bar": ["position", "launcherIcon", "launcherIconTint", "launcherIconFullTint", "launcherIconSize", "enableFirefoxPlayer", "screenList"],
         "notch": ["theme", "hoverRegionHeight"],
         "workspaces": ["shown", "showAppIcons", "alwaysShowNumbers", "showNumbers", "dynamic"],
         "overview": ["rows", "columns", "scale", "workspaceSpacing"],
-        "dock": ["enabled", "theme", "position", "height", "iconSize", "spacing", "margin", "hoverRegionHeight", "pinnedOnStartup", "hoverToReveal", "showRunningIndicators", "showPinButton", "showOverviewButton"],
+        "dock": ["enabled", "theme", "position", "height", "iconSize", "spacing", "margin", "hoverRegionHeight", "pinnedOnStartup", "hoverToReveal", "showRunningIndicators", "showPinButton", "showOverviewButton", "screenList"],
         "lockscreen": ["position"],
         "desktop": ["enabled", "iconSize", "spacingVertical", "textColor"]
     }
@@ -221,7 +221,13 @@ Singleton {
             snapshot[section] = {};
             for (var j = 0; j < props.length; j++) {
                 var prop = props[j];
-                snapshot[section][prop] = Config[section][prop];
+                var val = Config[section][prop];
+                // Deep copy arrays
+                if (Array.isArray(val)) {
+                    snapshot[section][prop] = JSON.parse(JSON.stringify(val));
+                } else {
+                    snapshot[section][prop] = val;
+                }
             }
         }
         return snapshot;
@@ -236,7 +242,13 @@ Singleton {
             var props = _shellSections[section];
             for (var j = 0; j < props.length; j++) {
                 var prop = props[j];
-                Config[section][prop] = snapshot[section][prop];
+                var val = snapshot[section][prop];
+                // Deep copy arrays
+                if (Array.isArray(val)) {
+                    Config[section][prop] = JSON.parse(JSON.stringify(val));
+                } else {
+                    Config[section][prop] = val;
+                }
             }
         }
     }
