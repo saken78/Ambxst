@@ -196,16 +196,17 @@ Rectangle {
 
             Rectangle {
                 id: ray
+                required property int index
                 property real angle: (index * 45) * Math.PI / 180
                 property real rayLength: 60 + Math.random() * 30
                 property real pulseSpeed: 3000 + Math.random() * 1500
 
-                x: sunRaysEffect.sunX + Math.cos(angle) * 15 - width / 2
-                y: sunRaysEffect.sunY + Math.sin(angle) * 15 - 1
+                x: sunRaysEffect.sunX + Math.cos(ray.angle) * 15 - width / 2
+                y: sunRaysEffect.sunY + Math.sin(ray.angle) * 15 - 1
                 width: rayLength
                 height: 2
                 radius: 1
-                rotation: angle * 180 / Math.PI
+                rotation: ray.angle * 180 / Math.PI
                 transformOrigin: Item.Left
                 
                 gradient: Gradient {
@@ -277,6 +278,7 @@ Rectangle {
 
             Item {
                 id: bgCloud
+                required property int index
                 property real startX: -width + (index * parent.width * 0.6)
                 property real speed: 0.15 + (index * 0.05)
 
@@ -326,6 +328,7 @@ Rectangle {
 
             Item {
                 id: fgCloud
+                required property int index
                 property real startX: -width + (index * parent.width * 0.35)
                 property real speed: 0.25 + (index * 0.1)
 
@@ -340,7 +343,7 @@ Rectangle {
                     width: parent.width * 0.7
                     height: parent.height * 0.7
                     radius: height / 2
-                    color: Qt.rgba(cloudEffect.cloudColorDark.r, cloudEffect.cloudColorDark.g, cloudEffect.cloudColorDark.b, 0.65 - (index * 0.08))
+                    color: Qt.rgba(cloudEffect.cloudColorDark.r, cloudEffect.cloudColorDark.g, cloudEffect.cloudColorDark.b, 0.65 - (fgCloud.index * 0.08))
                 }
                 Rectangle {
                     x: parent.width * 0.05
@@ -348,7 +351,7 @@ Rectangle {
                     width: parent.width * 0.35
                     height: parent.height * 0.5
                     radius: height / 2
-                    color: Qt.rgba(cloudEffect.cloudColorLight.r, cloudEffect.cloudColorLight.g, cloudEffect.cloudColorLight.b, 0.55 - (index * 0.06))
+                    color: Qt.rgba(cloudEffect.cloudColorLight.r, cloudEffect.cloudColorLight.g, cloudEffect.cloudColorLight.b, 0.55 - (fgCloud.index * 0.06))
                 }
                 Rectangle {
                     x: parent.width * 0.55
@@ -356,7 +359,7 @@ Rectangle {
                     width: parent.width * 0.4
                     height: parent.height * 0.55
                     radius: height / 2
-                    color: Qt.rgba(cloudEffect.cloudColorLight.r, cloudEffect.cloudColorLight.g, cloudEffect.cloudColorLight.b, 0.55 - (index * 0.06))
+                    color: Qt.rgba(cloudEffect.cloudColorLight.r, cloudEffect.cloudColorLight.g, cloudEffect.cloudColorLight.b, 0.55 - (fgCloud.index * 0.06))
                 }
 
                 NumberAnimation on x {
@@ -388,6 +391,8 @@ Rectangle {
             model: 4
 
             Rectangle {
+                id: fogWisp
+                required property int index
                 property real baseY: index * (parent.height / 4)
 
                 x: -width / 2
@@ -398,9 +403,9 @@ Rectangle {
                 radius: height / 2
 
                 NumberAnimation on x {
-                    from: -width / 2
+                    from: -fogWisp.width / 2
                     to: 0
-                    duration: 8000 + (index * 2000)
+                    duration: 8000 + (fogWisp.index * 2000)
                     loops: Animation.Infinite
                     running: fogEffect.visible
                     easing.type: Easing.InOutSine
@@ -409,7 +414,7 @@ Rectangle {
                 NumberAnimation on opacity {
                     from: 0.1
                     to: 0.25
-                    duration: 4000 + (index * 1000)
+                    duration: 4000 + (fogWisp.index * 1000)
                     loops: Animation.Infinite
                     running: fogEffect.visible
                     easing.type: Easing.InOutSine
