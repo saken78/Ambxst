@@ -211,10 +211,10 @@ PanelWindow {
                                     id: overviewButton
                                     enableShadow: false
                                 }
-                                Bar.LayoutSelector {
-                                    id: layoutSelector
-                                    orientation: "horizontal"
-                                    layer.enabled: false
+                                LayoutSelectorButton {
+                                    id: layoutSelectorButton
+                                    bar: panel
+                                    layerEnabled: false
                                 }
                                 // Integrated dock - left position (after layout selector)
                                 IntegratedDock {
@@ -380,10 +380,10 @@ PanelWindow {
                             Layout.preferredHeight: 36
                             enableShadow: false
                         }
-                        Bar.LayoutSelector {
-                            id: layoutSelectorVert
-                            orientation: "vertical"
-                            layer.enabled: false
+                        LayoutSelectorButton {
+                            id: layoutSelectorButtonVert
+                            bar: panel
+                            layerEnabled: false
                         }
                         // Integrated dock - left/top position (after layout selector)
                         IntegratedDock {

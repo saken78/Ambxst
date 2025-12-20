@@ -1,0 +1,178 @@
+pragma ComponentBehavior: Bound
+import QtQuick
+import QtQuick.Layouts
+import qs.modules.services
+import qs.modules.components
+import qs.modules.theme
+import qs.modules.globals
+import qs.config
+
+Item {
+    id: root
+
+    required property var bar
+
+    property bool vertical: bar.orientation === "vertical"
+    property bool isHovered: false
+    property bool layerEnabled: true
+
+    // Popup visibility state (tracks intent, not animation)
+    property bool popupOpen: layoutPopup.isOpen
+
+    Layout.preferredWidth: 36
+    Layout.preferredHeight: 36
+    Layout.fillWidth: vertical
+    Layout.fillHeight: !vertical
+
+    HoverHandler {
+        onHoveredChanged: root.isHovered = hovered
+    }
+
+    function getLayoutIcon(layout) {
+        switch (layout) {
+        case "dwindle":
+            return Icons.dwindle;
+        case "master":
+            return Icons.master;
+        case "scrolling":
+            return Icons.scrolling;
+        default:
+            return Icons.dwindle;
+        }
+    }
+
+    function getLayoutDisplayName(layout) {
+        switch (layout) {
+        case "dwindle":
+            return "Dwindle";
+        case "master":
+            return "Master";
+        case "scrolling":
+            return "Scrolling";
+        default:
+            return layout;
+        }
+    }
+
+    // Main button
+    StyledRect {
+        id: buttonBg
+        variant: "bg"
+        anchors.fill: parent
+        enableShadow: root.layerEnabled
+
+        Rectangle {
+            anchors.fill: parent
+            color: Colors.primary
+            opacity: root.popupOpen ? 0.5 : (root.isHovered ? 0.25 : 0)
+            radius: parent.radius ?? 0
+
+            Behavior on opacity {
+                enabled: Config.animDuration > 0
+                NumberAnimation {
+                    duration: Config.animDuration / 2
+                }
+            }
+        }
+
+        Text {
+            anchors.centerIn: parent
+            text: root.getLayoutIcon(GlobalStates.hyprlandLayout)
+            font.family: Icons.font
+            font.pixelSize: 18
+            color: root.popupOpen ? Colors.background : Colors.overBackground
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: false
+            cursorShape: Qt.PointingHandCursor
+            onClicked: layoutPopup.toggle()
+        }
+
+        StyledToolTip {
+            visible: root.isHovered && !root.popupOpen
+            tooltipText: "Layout: " + root.getLayoutDisplayName(GlobalStates.hyprlandLayout)
+        }
+    }
+
+    // Layout popup
+    BarPopup {
+        id: layoutPopup
+        anchorItem: buttonBg
+        bar: root.bar
+        visualMargin: 8
+        popupPadding: 16
+
+        contentWidth: layoutRow.implicitWidth + popupPadding * 2
+        contentHeight: 36 + popupPadding * 2
+
+        Row {
+            id: layoutRow
+            anchors.centerIn: parent
+            spacing: 4
+
+            readonly property int currentIndex: {
+                for (let i = 0; i < GlobalStates.availableLayouts.length; i++) {
+                    if (GlobalStates.availableLayouts[i] === GlobalStates.hyprlandLayout) {
+                        return i;
+                    }
+                }
+                return 0;
+            }
+
+            Repeater {
+                model: GlobalStates.availableLayouts
+
+                delegate: StyledRect {
+                    id: layoutButton
+                    required property string modelData
+                    required property int index
+
+                    readonly property bool isSelected: layoutRow.currentIndex === index
+                    property bool buttonHovered: false
+
+                    variant: isSelected ? "primary" : (buttonHovered ? "focus" : "common")
+                    enableShadow: false
+                    width: layoutLabel.implicitWidth + 48
+                    height: 36
+                    radius: isSelected ? Styling.radius(0) / 2 : Styling.radius(0)
+
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 8
+
+                        Text {
+                            text: root.getLayoutIcon(layoutButton.modelData)
+                            font.family: Icons.font
+                            font.pixelSize: 14
+                            color: layoutButton.itemColor
+                        }
+
+                        Text {
+                            id: layoutLabel
+                            text: root.getLayoutDisplayName(layoutButton.modelData)
+                            font.family: Styling.defaultFont
+                            font.pixelSize: Styling.fontSize(0)
+                            font.bold: true
+                            color: layoutButton.itemColor
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+
+                        onEntered: layoutButton.buttonHovered = true
+                        onExited: layoutButton.buttonHovered = false
+
+                        onClicked: {
+                            GlobalStates.setHyprlandLayout(layoutButton.modelData);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
