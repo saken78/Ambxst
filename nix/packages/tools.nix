@@ -4,12 +4,13 @@
 with pkgs; [
   brightnessctl
   ddcutil
-  wl-clipboard
-  wl-clip-persist
-  sqlite
-  hypridle
   fontconfig
+  hypridle
   imagemagick
+  jq
   matugen
+  sqlite
+  wl-clip-persist
+  wl-clipboard
   wtype
 ]
