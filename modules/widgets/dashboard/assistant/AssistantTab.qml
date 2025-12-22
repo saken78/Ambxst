@@ -406,15 +406,11 @@ Item {
                                     SequentialAnimation on opacity {
                                         loops: Animation.Infinite
                                         running: Ai.isLoading
+                                        
+                                        PauseAnimation { duration: index * 200 }
                                         PropertyAnimation { to: 1; duration: 400 }
                                         PropertyAnimation { to: 0.5; duration: 400 }
-                                        PauseAnimation { duration: 200 }
-                                    }
-                                    
-                                    // Stagger animations
-                                    Component.onCompleted: {
-                                        if (index === 1) animation.startDelay = 200
-                                        if (index === 2) animation.startDelay = 400
+                                        PauseAnimation { duration: 400 - (index * 200) }
                                     }
                                 }
                             }

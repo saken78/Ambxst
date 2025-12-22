@@ -279,7 +279,7 @@ Singleton {
             if (exitCode === 0) {
                 let responseText = curlStdout.text;
                 // Debug log
-                console.log("[Ai] Response: " + responseText);
+
                 
                 let reply = root.currentStrategy.parseResponse(responseText);
                 
