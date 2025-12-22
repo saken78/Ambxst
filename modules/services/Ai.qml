@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.config
+import qs.modules.services
 import "ai"
 import "ai/strategies"
 
@@ -51,7 +52,53 @@ Singleton {
     ]
 
     property AiModel currentModel: models[0]
-    property ApiStrategy currentStrategy: geminiStrategy
+    property bool persistenceReady: false
+
+    onCurrentModelChanged: {
+        if (persistenceReady && currentModel) {
+            StateService.set("lastAiModel", currentModel.model)
+        }
+    }
+    
+
+
+    function restoreModel() {
+        const lastModelId = StateService.get("lastAiModel", "gemini-pro");
+        for (let i = 0; i < models.length; i++) {
+            if (models[i].model === lastModelId) {
+                currentModel = models[i];
+                break;
+            }
+        }
+        persistenceReady = true;
+    }
+
+    Connections {
+        target: StateService
+        function onStateLoaded() {
+            restoreModel();
+        }
+    }
+
+    Component.onCompleted: {
+        // Try restoration immediately if possible, or wait for signal
+        if (StateService.initialized) {
+            restoreModel();
+        }
+        
+        // Initialize chat
+        reloadHistory();
+        createNewChat();
+    }
+
+    property ApiStrategy currentStrategy: {
+        if (!currentModel) return geminiStrategy;
+        switch (currentModel.api_format) {
+            case "openai": return openaiStrategy;
+            case "mistral": return mistralStrategy;
+            default: return geminiStrategy;
+        }
+    }
 
     // Strategies
     property GeminiApiStrategy geminiStrategy: GeminiApiStrategy {}
@@ -129,10 +176,7 @@ Singleton {
         deleteChatProcess.running = true;
     }
 
-    Component.onCompleted: {
-        reloadHistory();
-        createNewChat();
-    }
+
 
     // ============================================ 
     // LOGIC
