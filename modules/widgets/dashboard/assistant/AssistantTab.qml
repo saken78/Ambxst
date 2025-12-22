@@ -5,15 +5,23 @@ import qs.modules.theme
 import qs.config
 import qs.modules.components
 import qs.modules.services
+import Quickshell
+import Quickshell.Io
 
 Item {
     id: root
     implicitWidth: 800
     implicitHeight: 600
     
-    // State
     property bool sidebarExpanded: false
     property real sidebarWidth: 250
+    property var slashCommands: [
+        { name: "model", description: "Switch AI model" },
+        { name: "help", description: "Show help" },
+        { name: "clear", description: "Clear chat history" },
+        { name: "key", description: "Set API key" },
+        { name: "prompt", description: "Set system prompt" }
+    ]
     
     // Sidebar Animation
     Behavior on sidebarExpanded {
@@ -280,9 +288,49 @@ Item {
         // MAIN CHAT AREA
         // ============================================
         Item {
+            id: mainChatArea
             Layout.fillWidth: true
             Layout.fillHeight: true
             
+            property string username: ""
+
+            Process {
+                running: true
+                command: ["whoami"]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        let user = text.trim();
+                        if (user) {
+                            mainChatArea.username = user.charAt(0).toUpperCase() + user.slice(1);
+                        }
+                    }
+                }
+            }
+            property bool isWelcome: Ai.currentChat.length === 0
+
+            // Welcome Screen
+            ColumnLayout {
+                anchors.centerIn: parent
+                // Offset slightly up to make room for centered input
+                anchors.verticalCenterOffset: -50
+                visible: mainChatArea.isWelcome
+                spacing: 8
+                
+                Text {
+                    text: "Hello, " + mainChatArea.username
+                    font.family: Config.theme.font
+                    font.pixelSize: 32
+                    font.weight: Font.Bold
+                    Layout.alignment: Qt.AlignHCenter
+                    color: Colors.overBackground
+                }
+                
+                // Simplified Gradient Text using standard coloring for now to avoid complexity without LinearGradient check
+
+
+
+            }
+
             ColumnLayout {
                 anchors.fill: parent
                 spacing: 8
@@ -311,6 +359,7 @@ Item {
                 // Messages
                 ListView {
                     id: chatView
+                    visible: !mainChatArea.isWelcome
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
@@ -418,76 +467,164 @@ Item {
                     }
                 }
                 
-                // Input Area
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Math.min(150, Math.max(48, inputField.contentHeight + 24))
-                    Layout.margins: 10
+                // The original Input Area was here, now it's moved outside this ColumnLayout
+            }
+            
+            // Input Area (Floating)
+            Item {
+                id: inputContainer
+                height: Math.min(150, Math.max(48, inputField.contentHeight + 24))
+                
+                // State-based anchors
+                anchors.bottom: mainChatArea.isWelcome ? undefined : parent.bottom
+                anchors.bottomMargin: mainChatArea.isWelcome ? 0 : 20
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: mainChatArea.isWelcome ? parent.verticalCenter : undefined
+                
+                width: mainChatArea.isWelcome ? Math.min(600, parent.width - 40) : Math.min(800, parent.width - 20)
+                
+                StyledRect {
+                    anchors.fill: parent
+                    variant: "pane"
+                    radius: Styling.radius(inputContainer.height / 2) // Pill shape
+                    enableShadow: true
                     
-                    StyledRect {
-                        anchors.fill: parent
-                        variant: "pane"
-                        radius: Styling.radius(4)
-                        enableShadow: true
+                    // Suggestions Popup
+                    Popup {
+                        id: suggestionsPopup
+                        parent: inputContainer
+                        y: -height - 8
+                        x: 0
+                        width: parent.width
+                        height: Math.min(suggestionsList.contentHeight, 200)
+                        padding: 0
+                        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                        visible: inputField.text.startsWith("/") && suggestionsModel.count > 0
                         
-                        RowLayout {
+                        background: StyledRect {
+                            variant: "popup"
+                            radius: Styling.radius(8)
+                            enableShadow: true
+                        }
+                        
+                        ListView {
+                            id: suggestionsList
                             anchors.fill: parent
-                            anchors.margins: 8
-                            anchors.leftMargin: 16
-                            anchors.rightMargin: 8
+                            clip: true
+                            model: ListModel { id: suggestionsModel }
                             
-                            ScrollView {
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                
-                                TextArea {
-                                    id: inputField
-                                    placeholderText: "Ask AI or type /help..."
-                                    placeholderTextColor: Colors.outline
-                                    color: Colors.overBackground
-                                    font.family: Config.theme.font
-                                    font.pixelSize: 15
-                                    wrapMode: Text.Wrap
-                                    background: null
-                                    selectByMouse: true
-                                    verticalAlignment: Text.AlignVCenter
-                                    
-                                    Keys.onPressed: event => {
-                                        if (event.key === Qt.Key_Return && !(event.modifiers & Qt.ShiftModifier)) {
-                                            event.accepted = true;
-                                            if (inputField.text.trim() !== "") {
-                                                Ai.sendMessage(inputField.text);
-                                                inputField.text = "";
-                                            }
-                                        }
-                                        // History navigation could go here (up/down)
-                                    }
-                                }
-                            }
-                            
-                            Button {
-                                Layout.alignment: Qt.AlignBottom
+                            delegate: Button {
+                                width: suggestionsList.width
+                                height: 40
                                 flat: true
-                                width: 44
-                                height: 44
-                                enabled: !Ai.isLoading && inputField.text.trim() !== ""
                                 
-                                contentItem: Text {
-                                    text: Icons.arrowRight
-                                    font.family: Icons.font
-                                    font.pixelSize: 20
-                                    color: enabled ? Colors.primary : Colors.surfaceDim
-                                    horizontalAlignment: Text.AlignHCenter
-                                    verticalAlignment: Text.AlignVCenter
+                                contentItem: RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 12
+                                    anchors.rightMargin: 12
+                                    spacing: 8
+                                    
+                                    Text {
+                                        text: "/" + model.name
+                                        font.family: Config.theme.font
+                                        font.weight: Font.Bold
+                                        color: Colors.primary
+                                    }
+                                    
+                                    Text {
+                                        text: model.description
+                                        font.family: Config.theme.font
+                                        color: Colors.surfaceDim
+                                        Layout.fillWidth: true
+                                        elide: Text.ElideRight
+                                    }
                                 }
                                 
                                 background: Rectangle {
-                                    color: parent.hovered && enabled ? Colors.surfaceBright : "transparent"
-                                    radius: 22
+                                    color: parent.hovered ? Colors.surfaceBright : "transparent"
                                 }
                                 
                                 onClicked: {
-                                    Ai.sendMessage(inputField.text);
+                                    // Auto-complete
+                                    inputField.text = "/" + model.name + " ";
+                                    inputField.cursorPosition = inputField.text.length;
+                                    inputField.forceActiveFocus();
+                                }
+                            }
+                        }
+                    }
+                    
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16 // Balanced padding
+                        
+                        ScrollView {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            
+                            TextArea {
+                                id: inputField
+                                placeholderText: mainChatArea.isWelcome ? "Ask AI or type /help..." : "Message AI..."
+                                placeholderTextColor: Colors.outline
+                                font.pixelSize: 14
+                                color: Colors.overBackground
+                                wrapMode: TextEdit.Wrap
+                                
+                                onTextChanged: {
+                                    if (text.startsWith("/")) {
+                                        const query = text.substring(1).toLowerCase();
+                                        suggestionsModel.clear();
+                                        root.slashCommands.forEach(cmd => {
+                                            if (cmd.name.startsWith(query)) {
+                                                suggestionsModel.append(cmd);
+                                            }
+                                        });
+                                    } else {
+                                        suggestionsModel.clear();
+                                    }
+                                }
+                                
+                                background: null
+                                
+                                Keys.onReturnPressed: (event) => {
+                                    if (event.modifiers & Qt.ShiftModifier) {
+                                        event.accepted = false;
+                                    } else {
+                                        if (text.trim().length > 0) {
+                                            Ai.sendMessage(text.trim());
+                                            text = "";
+                                        }
+                                        event.accepted = true;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        Button {
+                            Layout.preferredWidth: 32
+                            Layout.preferredHeight: 32
+                            flat: true
+                            visible: inputField.text.length > 0
+                            
+                            contentItem: Text {
+                                text: Icons.arrowRight
+                                font.family: Icons.font
+                                font.pixelSize: 20
+                                color: Colors.primary
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            
+                            background: Rectangle {
+                                color: parent.hovered ? Colors.surfaceBright : "transparent"
+                                radius: 16
+                            }
+                            
+                            onClicked: {
+                                if (inputField.text.trim().length > 0) {
+                                    Ai.sendMessage(inputField.text.trim());
                                     inputField.text = "";
                                 }
                             }
