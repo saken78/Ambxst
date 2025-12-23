@@ -31,3 +31,24 @@ model_list:
     litellm_params:
       model: openrouter/anthropic/claude-3.5-sonnet
       api_key: os.environ/OPENROUTER_API_KEY
+  
+  # Wildcards for dynamic discovery
+  - model_name: gemini/*
+    litellm_params:
+      model: gemini/*
+      api_key: os.environ/GEMINI_API_KEY
+  - model_name: openai/*
+    litellm_params:
+      model: openai/*
+      api_key: os.environ/OPENAI_API_KEY
+  - model_name: mistral/*
+    litellm_params:
+      model: mistral/*
+      api_key: os.environ/MISTRAL_API_KEY
+  - model_name: openrouter/*
+    litellm_params:
+      model: openrouter/*
+      api_key: os.environ/OPENROUTER_API_KEY
+  - model_name: ollama/*
+    litellm_params:
+      model: ollama/*
