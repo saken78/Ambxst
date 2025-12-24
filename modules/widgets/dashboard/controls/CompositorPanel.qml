@@ -27,9 +27,12 @@ Item {
     property var colorPickerCallback: null
 
     function openColorPicker(colorNames, currentColor, dialogTitle, callback) {
+        // Ensure colorNames is a valid array for QML
         colorPickerColorNames = colorNames;
-        colorPickerCurrentColor = currentColor;
-        colorPickerDialogTitle = dialogTitle;
+        // Ensure currentColor is a string
+        colorPickerCurrentColor = currentColor.toString();
+        // Ensure dialogTitle is a string
+        colorPickerDialogTitle = dialogTitle ? dialogTitle.toString() : "";
         colorPickerCallback = callback;
         colorPickerActive = true;
     }
@@ -257,6 +260,134 @@ Item {
         }
     }
 
+    // Inline component for Border Gradients (Multi-color list)
+    component BorderGradientRow: ColumnLayout {
+        id: gradientRow
+        property string label: ""
+        property var colors: []
+        property string dialogTitle: ""
+        property bool enabled: true
+        signal colorsEdited(var newColors)
+
+        spacing: 8
+        Layout.fillWidth: true
+        opacity: enabled ? 1.0 : 0.5
+
+        // Header
+        RowLayout {
+            Layout.fillWidth: true
+            Text {
+                text: gradientRow.label
+                font.family: Config.theme.font
+                font.pixelSize: Styling.fontSize(0)
+                color: Colors.overBackground
+                Layout.fillWidth: true
+            }
+            Text {
+                text: "Right click to remove"
+                font.family: Config.theme.font
+                font.pixelSize: Styling.fontSize(-2)
+                color: Colors.overSurfaceVariant
+                visible: gradientRow.colors.length > 1
+            }
+        }
+
+        // Color List
+        Flow {
+            Layout.fillWidth: true
+            spacing: 8
+
+            Repeater {
+                id: colorsRepeater
+                model: gradientRow.colors
+                delegate: MouseArea {
+                    width: 32
+                    height: 32
+                    hoverEnabled: true
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                    required property int index
+                    required property var modelData
+
+                    // Swatch
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: width / 2
+                        color: Config.resolveColor(parent.modelData)
+                        border.width: 2
+                        border.color: parent.containsMouse ? Colors.primary : Colors.outline
+                        
+                        // Inner check for visual depth
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: parent.width - 4
+                            height: width
+                            radius: width / 2
+                            color: "transparent"
+                            border.width: 1
+                            border.color: Colors.surface
+                            opacity: 0.3
+                        }
+                    }
+
+                    // Tooltip
+                    StyledToolTip {
+                        text: parent.modelData.toString()
+                        visible: parent.containsMouse && !contextMenu.visible
+                    }
+
+                    onClicked: (mouse) => {
+                        if (mouse.button === Qt.RightButton) {
+                            // Remove color (if more than 1)
+                            if (gradientRow.colors.length > 1) {
+                                let newColors = [...gradientRow.colors];
+                                newColors.splice(index, 1);
+                                gradientRow.colorsEdited(newColors);
+                            }
+                        } else {
+                            // Edit color
+                            root.openColorPicker(root.colorNames, modelData, gradientRow.dialogTitle, function(selectedColor) {
+                                let newColors = [...gradientRow.colors];
+                                newColors[index] = selectedColor;
+                                gradientRow.colorsEdited(newColors);
+                            });
+                        }
+                    }
+                }
+            }
+            StyledRect {
+                width: 32
+                height: 32
+                radius: 16
+                variant: "common"
+                color: mouseAreaAdd.containsMouse ? Colors.surfaceBright : Colors.surface
+                border.width: 1
+                border.color: Colors.outline
+
+                Text {
+                    anchors.centerIn: parent
+                    text: Icons.plus
+                    font.family: Icons.font
+                    font.pixelSize: 16
+                    color: Colors.overSurfaceVariant
+                }
+
+                MouseArea {
+                    id: mouseAreaAdd
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        let newColors = [...gradientRow.colors];
+                        // Duplicate last color or default to primary
+                        let colorToAdd = newColors.length > 0 ? newColors[newColors.length - 1] : "primary";
+                        newColors.push(colorToAdd);
+                        gradientRow.colorsEdited(newColors);
+                    }
+                }
+            }
+        }
+    }
+
     // Main content
     Flickable {
         id: mainFlickable
@@ -480,63 +611,20 @@ Item {
                         }
 
                         // Active Border Color
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 8
+                        BorderGradientRow {
+                            label: "Active Border"
+                            colors: Config.hyprland.activeBorderColor || ["primary"]
+                            dialogTitle: "Edit Active Border Color"
                             enabled: !Config.hyprland.syncBorderColor
-                            opacity: enabled ? 1.0 : 0.5
-
-                            Text {
-                                text: "Active Border"
-                                font.family: Config.theme.font
-                                font.pixelSize: Styling.fontSize(0)
-                                color: Colors.overBackground
-                                Layout.preferredWidth: 100
-                            }
-
-                            ColorButton {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 48
-                                colorNames: root.colorNames
-                                currentColor: (Config.hyprland.activeBorderColor && Config.hyprland.activeBorderColor.length > 0) ? Config.hyprland.activeBorderColor[0] : "primary"
-                                dialogTitle: "Active Border Color"
-                                compact: false
-
-                                onOpenColorPicker: (names, cur, title) => {
-                                    root.openColorPicker(names, cur, title, function(color) {
-                                        Config.hyprland.activeBorderColor = [color];
-                                    });
-                                }
-                            }
+                            onColorsEdited: newColors => Config.hyprland.activeBorderColor = newColors
                         }
 
                          // Inactive Border Color
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 8
-
-                            Text {
-                                text: "Inactive Border"
-                                font.family: Config.theme.font
-                                font.pixelSize: Styling.fontSize(0)
-                                color: Colors.overBackground
-                                Layout.preferredWidth: 100
-                            }
-
-                            ColorButton {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 48
-                                colorNames: root.colorNames
-                                currentColor: (Config.hyprland.inactiveBorderColor && Config.hyprland.inactiveBorderColor.length > 0) ? Config.hyprland.inactiveBorderColor[0] : "surface"
-                                dialogTitle: "Inactive Border Color"
-                                compact: false
-
-                                onOpenColorPicker: (names, cur, title) => {
-                                    root.openColorPicker(names, cur, title, function(color) {
-                                        Config.hyprland.inactiveBorderColor = [color];
-                                    });
-                                }
-                            }
+                        BorderGradientRow {
+                            label: "Inactive Border"
+                            colors: Config.hyprland.inactiveBorderColor || ["surface"]
+                            dialogTitle: "Edit Inactive Border Color"
+                            onColorsEdited: newColors => Config.hyprland.inactiveBorderColor = newColors
                         }
                     }
 
