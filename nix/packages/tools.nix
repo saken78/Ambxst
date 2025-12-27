@@ -10,6 +10,7 @@ with pkgs; [
   jq
   litellm
   matugen
+  slurp
   sqlite
   upower
   wl-clip-persist
