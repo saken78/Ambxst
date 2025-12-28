@@ -66,7 +66,7 @@ ActionGrid {
             command: ""
         },
         {
-            icon: Icons.webcam,
+            icon: GlobalStates.mirrorWindowVisible ? Icons.webcamSlash : Icons.webcam,
             tooltip: "Mirror",
             command: ""
         }
