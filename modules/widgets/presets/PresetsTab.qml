@@ -38,6 +38,11 @@ Item {
         id: presetsModel
     }
 
+    property alias flickable: resultsList
+    property bool needsScrollbar: resultsList.contentHeight > resultsList.height
+    property bool isManualScrolling: false
+    property alias searchQuery: root.searchText
+
     onSelectedIndexChanged: {
         if (selectedIndex === -1 && presetsModel.count > 0) {
             resultsList.positionViewAtIndex(0, ListView.Beginning);
@@ -53,6 +58,29 @@ Item {
         selectedIndex = -1;
         searchInput.focusInput();
         updateFilteredPresets();
+    }
+
+    function resetSearch() {
+        clearSearch();
+    }
+
+    function selectPreset() {
+        if (createMode) {
+            confirmCreatePreset();
+        } else {
+            if (selectedIndex >= 0 && selectedIndex < resultsList.count) {
+                let selectedPreset = presets[selectedIndex];
+                if (selectedPreset) {
+                    if (selectedPreset.isCreateSpecificButton) {
+                        enterCreateMode(selectedPreset.presetNameToCreate);
+                    } else if (selectedPreset.isCreateButton) {
+                        enterCreateMode();
+                    } else {
+                        loadPreset(selectedPreset.name);
+                    }
+                }
+            }
+        }
     }
 
     function focusSearchInput() {
@@ -189,8 +217,9 @@ Item {
             // Search input
             SearchInput {
                 id: searchInput
+                visible: false
                 width: parent.width
-                height: 48
+                height: 0
                 anchors.top: parent.top
                 text: root.searchText
                 placeholderText: createMode ? "Enter preset name..." : "Search or create preset..."
@@ -291,6 +320,7 @@ Item {
                 delegate: Rectangle {
                     required property string presetId
                     required property var presetData
+                    required property int index
 
                     property var modelData: presetData
 
@@ -310,7 +340,7 @@ Item {
 
                     property bool isExpanded: false
                     property color textColor: {
-                        if (resultsList.currentIndex === model.index) {
+                        if (resultsList.currentIndex === index) {
                             return Styling.styledRectItem("primary");
                         } else {
                             return Colors.overSurface;
@@ -358,7 +388,7 @@ Item {
                             Layout.preferredWidth: 32
                             Layout.preferredHeight: 32
                             variant: {
-                                if (resultsList.currentIndex === model.index) {
+                                if (resultsList.currentIndex === index) {
                                     return "overprimary";
                                 } else if (modelData.isCreateButton) {
                                     return "primary";

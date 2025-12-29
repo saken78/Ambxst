@@ -35,10 +35,31 @@ Singleton {
         console.log("Loading preset:", presetName)
         currentPreset = presetName
 
-        // For now, just show a message - full implementation needs restart
-        Quickshell.execDetached(["notify-send", "Preset Loaded", `Preset "${presetName}" loaded. Restart Ambxst to apply changes.`])
+        // Find the preset object to get its config files
+        const preset = presets.find(p => p.name === presetName)
+        if (!preset) {
+            console.warn("Preset not found in list:", presetName)
+            return
+        }
 
-        // TODO: Implement proper config loading without restart
+        // Build command to copy config files
+        const presetPath = presetsDir + "/" + presetName
+        let copyCmd = ""
+        
+        for (const configFile of preset.configFiles) {
+             const jsonFile = configFile.replace('.js', '.json')
+             const srcPath = presetPath + "/" + jsonFile
+             const dstPath = configDir + "/config/" + jsonFile
+             copyCmd += `cp "${srcPath}" "${dstPath}" && `
+        }
+        
+        if (copyCmd.length > 0) {
+            copyCmd = copyCmd.slice(0, -4) // Remove last " && "
+            loadProcess.command = ["sh", "-c", copyCmd]
+            loadProcess.running = true
+        } else {
+            console.warn("No config files found in preset:", presetName)
+        }
     }
 
     // Save current config as preset
@@ -62,7 +83,21 @@ Singleton {
         let copyCmd = ""
         for (const configFile of configFiles) {
             const jsonFile = configFile.replace('.js', '.json')
-            const srcPath = configDir + "/" + jsonFile
+            // The source is configDir (~/.config/Ambxst), NOT configDir/config
+            // But wait, the configDir property is defined as ~/.config/Ambxst below?
+            // Let's check the property definition.
+            // property string configDir: ... + "/Ambxst"
+            // But Config.qml says configDir is ... + "/Ambxst/config"
+            // We need to match Config.qml's path.
+            
+            // In Config.qml: property string configDir: ... + "/Ambxst/config"
+            // Here: readonly property string configDir: ... + "/Ambxst"
+            // This is a mismatch!
+            
+            // We should use the same path as Config.qml for reading/writing config files.
+            // Let's assume the files are in .../Ambxst/config based on Config.qml and ls output.
+            
+            const srcPath = configDir + "/config/" + jsonFile 
             const dstPath = presetPath + "/" + jsonFile
             copyCmd += `cp "${srcPath}" "${dstPath}" && `
         }
@@ -81,62 +116,53 @@ Singleton {
     // Scan presets process
     Process {
         id: scanProcess
-        command: ["find", presetsDir, "-mindepth", "1", "-maxdepth", "1", "-type", "d"]
+        // Find all JSON files in subdirectories of presetsDir (depth 2)
+        // Structure: presets/PresetName/config.json
+        command: ["find", presetsDir, "-mindepth", "2", "-maxdepth", "2", "-name", "*.json"]
         running: false
 
         stdout: StdioCollector {
             onStreamFinished: {
-                const lines = text.trim().split('\n').filter(line => line.length > 0)
-                const newPresets = []
+                const files = text.trim().split('\n').filter(line => line.length > 0)
+                const presetsMap = {}
 
-                for (const line of lines) {
-                    const presetName = line.split('/').pop()
-                    const presetPath = line
-
-                    // Find JSON files in preset directory
-                    const configFilesProcess = Qt.createQmlObject(`
-                        import Quickshell.Io
-                        Process {
-                            property string presetPath: ""
-                            property string presetName: ""
-                            command: ["find", presetPath, "-name", "*.json"]
-                            running: true
-                            stdout: StdioCollector {
-                                onStreamFinished: {
-                                    const files = text.trim().split('\n').filter(f => f.length > 0)
-                                    const configNames = files.map(f => f.split('/').pop().replace('.json', '.js'))
-                                    // Update the preset in the list
-                                    const updatedPresets = root.presets.map(p =>
-                                        p.name === presetName ?
-                                        {...p, configFiles: configNames} : p
-                                    )
-                                    root.presets = updatedPresets
-                                    root.presetsUpdated()
-                                }
-                            }
+                for (const file of files) {
+                    // file: /path/to/presets/PresetName/config.json
+                    const parts = file.split('/')
+                    const configName = parts.pop() // config.json
+                    const presetName = parts.pop() // PresetName
+                    
+                    if (!presetsMap[presetName]) {
+                        // Reconstruct path: /path/to/presets + / + PresetName
+                        // We can't trust parts.join('/') because parts is now missing the last two elements.
+                        // However, we know presetsDir and presetName.
+                        presetsMap[presetName] = {
+                            name: presetName,
+                            path: root.presetsDir + '/' + presetName,
+                            configFiles: []
                         }
-                    `, root)
-                    configFilesProcess.presetPath = presetPath
-                    configFilesProcess.presetName = presetName
-
-                    newPresets.push({
-                        name: presetName,
-                        path: presetPath,
-                        configFiles: [] // Will be filled by configFilesProcess
-                    })
+                    }
+                    
+                    // Convert .json to .js for UI display
+                    presetsMap[presetName].configFiles.push(configName.replace('.json', '.js'))
                 }
+
+                // Convert map to array
+                const newPresets = Object.values(presetsMap)
+                // Sort by name
+                newPresets.sort((a, b) => a.name.localeCompare(b.name))
 
                 root.presets = newPresets
                 root.presetsUpdated()
             }
         }
-
+        
         onExited: function(exitCode) {
-            if (exitCode !== 0) {
-                console.warn("Failed to scan presets directory")
-                root.presets = []
-                root.presetsUpdated()
-            }
+             if (exitCode !== 0) {
+                // If find fails, it might be empty or error.
+                // We keep existing presets or clear if needed.
+                // Usually find returns 0 even if empty.
+             }
         }
     }
 
@@ -149,12 +175,30 @@ Singleton {
             if (exitCode === 0) {
                 console.log("Preset saved successfully:", root.pendingPresetName)
                 Quickshell.execDetached(["notify-send", "Preset Saved", `Preset "${root.pendingPresetName}" saved successfully.`])
+                // Trigger scan
                 root.scanProcess.running = true
             } else {
                 console.warn("Failed to save preset:", root.pendingPresetName)
                 Quickshell.execDetached(["notify-send", "Error", `Failed to save preset "${root.pendingPresetName}".`])
             }
             root.pendingPresetName = ""
+        }
+    }
+
+    // Load process
+    Process {
+        id: loadProcess
+        running: false
+
+        onExited: function(exitCode) {
+            if (exitCode === 0) {
+                console.log("Preset loaded successfully:", root.currentPreset)
+                Quickshell.execDetached(["notify-send", "Preset Loaded", `Preset "${root.currentPreset}" loaded successfully.`])
+            } else {
+                console.warn("Failed to load preset:", root.currentPreset)
+                Quickshell.execDetached(["notify-send", "Error", `Failed to load preset "${root.currentPreset}".`])
+            }
+            root.currentPreset = ""
         }
     }
 
@@ -169,22 +213,22 @@ Singleton {
             scanProcess.running = true
         }
     }
+    
+    // Init process (create directory)
+    Process {
+        id: initProcess
+        command: ["mkdir", "-p", presetsDir]
+        running: false
+        onExited: function(exitCode) {
+            if (exitCode === 0) {
+                root.scanPresets()
+            }
+        }
+    }
 
     // Initialize
     Component.onCompleted: {
         console.log("PresetsService created, presetsDir:", presetsDir)
-        // Create presets directory if it doesn't exist
-        const initProcess = Qt.createQmlObject(`
-            import Quickshell.Io
-            Process {
-                command: ["mkdir", "-p", "${presetsDir}"]
-                running: true
-                onExited: function(exitCode) {
-                    if (exitCode === 0) {
-                        root.scanProcess.running = true
-                    }
-                }
-            }
-        `, root)
+        initProcess.running = true
     }
 }
