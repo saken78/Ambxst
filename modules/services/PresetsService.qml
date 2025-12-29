@@ -1,6 +1,7 @@
 pragma Singleton
 
 import QtQuick
+import QtQml
 import Quickshell
 import Quickshell.Io
 
@@ -202,7 +203,7 @@ Singleton {
         }
     }
 
-    // Directory watcher
+    // Directory watcher for the main presets directory (detects new/deleted presets)
     FileView {
         path: presetsDir
         watchChanges: true
@@ -211,6 +212,22 @@ Singleton {
         onFileChanged: {
             console.log("Presets directory changed, rescanning...")
             scanProcess.running = true
+        }
+    }
+
+    // Watch individual preset directories for content changes (added/removed files inside a preset)
+    Instantiator {
+        model: root.presets
+        delegate: FileView {
+            required property var modelData
+            path: modelData.path
+            watchChanges: true
+            printErrors: false
+            onFileChanged: {
+                console.log("Preset modified (content change):", modelData.name)
+                // Use a debouncer or simple timer to avoid spamming scans if multiple files change
+                root.scanProcess.running = true
+            }
         }
     }
     
