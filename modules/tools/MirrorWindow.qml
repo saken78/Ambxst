@@ -66,17 +66,14 @@ PanelWindow {
         VideoOutput {
             id: videoOutput
             anchors.fill: parent
-            // Siempre Crop para evitar barras negras
             fillMode: VideoOutput.PreserveAspectCrop
 
-            // Transformación de espejo
             transform: Scale {
                 origin.x: videoOutput.width / 2
                 xScale: root.isFlipped ? -1 : 1
             }
         }
 
-        // Drag Handler (Mover ventana)
         MouseArea {
             id: dragArea
             anchors.fill: parent
@@ -108,7 +105,7 @@ PanelWindow {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottomMargin: 20
                 spacing: 16
-                z: 3 // Encima de todo
+                z: 3
 
                 // Show only on hover or when buttons are pressed
                 opacity: (dragArea.containsMouse || controlHover.containsMouse) ? 1.0 : 0.0
@@ -181,17 +178,17 @@ PanelWindow {
                 }
 
                 // Close Button
-                Rectangle {
+                StyledRect {
                     width: 40
                     height: 40
                     radius: 20
-                    color: Colors.red
+                    variant: "error"
 
                     Text {
                         anchors.centerIn: parent
                         text: Icons.cancel
                         font.family: Icons.font
-                        color: "white" // Always white on red
+                        color: Colors.overError
                         font.pixelSize: 20
                     }
 
