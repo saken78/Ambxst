@@ -167,169 +167,53 @@ PanelWindow {
                 id: launcherButton
             }
 
+            Workspaces {
+                orientation: panel.orientation
+                bar: QtObject {
+                    property var screen: panel.screen
+                }
+                layer.enabled: false
+            }
+
+            LayoutSelectorButton {
+                id: layoutSelectorButton
+                bar: panel
+                layerEnabled: false
+            }
+
+            Item {
+                Layout.fillWidth: true
+            }
+
             PresetsButton {
                 id: presetsButton
             }
 
-            RowLayout {
-                id: leftSection
-                Layout.fillWidth: true
-                Layout.preferredWidth: 0
-                spacing: 4
-
-                ClippingRectangle {
-                    id: leftRect
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 36
-                    color: "transparent"
-                    radius: Styling.radius(0)
-                    layer.enabled: Config.showBackground
-                    layer.effect: Shadow {}
-
-                    Flickable {
-                        id: leftFlickable
-                        width: parent.width
-                        height: parent.height
-                        anchors.left: parent.left
-                        contentWidth: leftContent.width
-                        contentHeight: 36
-                        flickableDirection: Flickable.HorizontalFlick
-                        clip: true
-                        pressDelay: 100
-
-                        RowLayout {
-                            id: leftContent
-                            spacing: 4
-
-                            RowLayout {
-                                id: leftWidgets
-                                spacing: 4
-
-                                Workspaces {
-                                    orientation: panel.orientation
-                                    bar: QtObject {
-                                        property var screen: panel.screen
-                                    }
-                                    layer.enabled: false
-                                }
-                                LayoutSelectorButton {
-                                    id: layoutSelectorButton
-                                    bar: panel
-                                    layerEnabled: false
-                                }
-                                // Integrated dock - left position (after layout selector)
-                                IntegratedDock {
-                                    id: integratedDockLeft
-                                    bar: panel
-                                    orientation: "horizontal"
-                                    visible: panel.integratedDockEnabled && panel.integratedDockPosition === "left"
-                                    layer.enabled: false
-                                }
-                            }
-
-                            Item {
-                                Layout.preferredWidth: Math.max(0, leftRect.width - leftWidgets.width - 4)
-                            }
-                        }
-                    }
-                }
+            ToolsButton {
+                id: toolsButton
             }
 
-            // Espaciador sincronizado con el ancho del notch (oculto cuando dock integrated está activo)
-            Item {
-                visible: !panel.integratedDockEnabled
-                Layout.preferredWidth: horizontalLayout.notchContainer ? horizontalLayout.notchContainer.implicitWidth - 40 : 0
-                Layout.fillHeight: true
-            }
-
-            // Integrated dock - center position
-            IntegratedDock {
-                id: integratedDockCenter
+            SysTray {
                 bar: panel
-                orientation: "horizontal"
-                visible: panel.integratedDockEnabled && panel.integratedDockPosition === "center"
                 layer.enabled: Config.showBackground
-                layer.effect: Shadow {}
             }
 
-            RowLayout {
-                id: rightSection
-                Layout.fillWidth: true
-                Layout.preferredWidth: 0
-                spacing: 4
+            ControlsButton {
+                id: controlsButton
+                bar: panel
+                layerEnabled: false
+            }
 
-                ClippingRectangle {
-                    id: rightRect
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 36
-                    color: "transparent"
-                    radius: Styling.radius(0)
-                    layer.enabled: Config.showBackground
-                    layer.effect: Shadow {}
+            Bar.BatteryIndicator {
+                id: batteryIndicator
+                bar: panel
+                layerEnabled: false
+            }
 
-                    Flickable {
-                        id: rightFlickable
-                        width: parent.width
-                        height: parent.height
-                        anchors.right: parent.right
-                        contentWidth: rightContent.width
-                        contentHeight: 36
-                        contentX: Math.max(0, rightContent.width - width)
-                        flickableDirection: Flickable.HorizontalFlick
-                        clip: true
-                        pressDelay: 100
-
-                        RowLayout {
-                            id: rightContent
-                            spacing: 4
-
-                            Item {
-                                Layout.preferredWidth: Math.max(0, rightRect.width - rightWidgets.width - 4)
-                            }
-
-                            RowLayout {
-                                id: rightWidgets
-                                spacing: 4
-
-                                // Integrated dock - right position (before power profile)
-                                IntegratedDock {
-                                    id: integratedDockRight
-                                    bar: panel
-                                    orientation: "horizontal"
-                                    visible: panel.integratedDockEnabled && panel.integratedDockPosition === "right"
-                                    layer.enabled: false
-                                }
-
-                                Bar.BatteryIndicator {
-                                    id: batteryIndicator
-                                    bar: panel
-                                    layerEnabled: false
-                                }
-
-                                ToolsButton {
-                                    id: toolsButton
-                                }
-
-                                ControlsButton {
-                                    id: controlsButton
-                                    bar: panel
-                                    layerEnabled: false
-                                }
-                            }
-                        }
-                    }
-                }
-
-                SysTray {
-                    bar: panel
-                    layer.enabled: Config.showBackground
-                }
-
-                Clock {
-                    id: clockComponent
-                    bar: panel
-                    layer.enabled: Config.showBackground
-                }
+            Clock {
+                id: clockComponent
+                bar: panel
+                layer.enabled: Config.showBackground
             }
 
             PowerButton {
@@ -349,124 +233,57 @@ PanelWindow {
                 Layout.preferredHeight: 36
             }
 
-            ColumnLayout {
-                id: topSection
-                spacing: 4
-
-                ClippingRectangle {
-                    id: topRect
-                    Layout.preferredHeight: topWidgets.height
-                    Layout.preferredWidth: 36
-                    color: "transparent"
-                    radius: Styling.radius(0)
-                    layer.enabled: Config.showBackground
-                    layer.effect: Shadow {}
-
-                    ColumnLayout {
-                        id: topWidgets
-                        spacing: 4
-
-                        Workspaces {
-                            orientation: panel.orientation
-                            bar: QtObject {
-                                property var screen: panel.screen
-                            }
-                            layer.enabled: false
-                        }
-                        LayoutSelectorButton {
-                            id: layoutSelectorButtonVert
-                            bar: panel
-                            layerEnabled: false
-                        }
-                        // Integrated dock - left/top position (after layout selector)
-                        IntegratedDock {
-                            id: integratedDockTop
-                            bar: panel
-                            orientation: "vertical"
-                            visible: panel.integratedDockEnabled && panel.integratedDockPosition === "left"
-                            layer.enabled: false
-                        }
-                    }
-                }
+            SysTray {
+                bar: panel
+                layer.enabled: Config.showBackground
             }
 
-            ColumnLayout {
-                id: bottomSection
+            ControlsButton {
+                id: controlsButtonVert
+                bar: panel
+                layerEnabled: false
+            }
+
+            ToolsButton {
+                id: toolsButtonVert
+            }
+
+            LayoutSelectorButton {
+                id: layoutSelectorButtonVert
+                bar: panel
+                layerEnabled: false
+            }
+
+            Item {
                 Layout.fillHeight: true
-                spacing: 4
+            }
 
-                ClippingRectangle {
-                    id: bottomRect
-                    Layout.fillHeight: true
-                    Layout.preferredWidth: 36
-                    color: "transparent"
-                    radius: Styling.radius(0)
-                    layer.enabled: Config.showBackground
-                    layer.effect: Shadow {}
-
-                    Flickable {
-                        id: bottomFlickable
-                        width: parent.width
-                        height: parent.height
-                        anchors.bottom: parent.bottom
-                        contentWidth: 36
-                        contentHeight: bottomContent.height
-                        contentY: Math.max(0, bottomContent.height - height)
-                        flickableDirection: Flickable.VerticalFlick
-                        clip: true
-                        pressDelay: 100
-
-                        ColumnLayout {
-                            id: bottomContent
-                            spacing: 4
-
-                            Item {
-                                Layout.preferredHeight: Math.max(0, bottomRect.height - bottomWidgets.height - 4)
-                            }
-
-                            ColumnLayout {
-                                id: bottomWidgets
-                                spacing: 4
-
-                                // Integrated dock - right/bottom position (before power profile)
-                                IntegratedDock {
-                                    id: integratedDockBottomInner
-                                    bar: panel
-                                    orientation: "vertical"
-                                    visible: panel.integratedDockEnabled && panel.integratedDockPosition === "right"
-                                    layer.enabled: false
-                                }
-
-                                Bar.BatteryIndicator {
-                                    id: batteryIndicatorVert
-                                    bar: panel
-                                    layerEnabled: false
-                                }
-
-                                ToolsButton {
-                                    id: toolsButtonVert
-                                }
-
-                                ControlsButton {
-                                    id: controlsButtonVert
-                                    bar: panel
-                                    layerEnabled: false
-                                }
-                            }
-                        }
-                    }
+            Workspaces {
+                orientation: panel.orientation
+                bar: QtObject {
+                    property var screen: panel.screen
                 }
+                layer.enabled: false
+            }
 
-                SysTray {
-                    bar: panel
-                    layer.enabled: Config.showBackground
-                }
+            Item {
+                Layout.fillHeight: true
+            }
 
-                Clock {
-                    id: clockComponentVert
-                    bar: panel
-                    layer.enabled: Config.showBackground
-                }
+            PresetsButton {
+                id: presetsButtonVert
+            }
+
+            Bar.BatteryIndicator {
+                id: batteryIndicatorVert
+                bar: panel
+                layerEnabled: false
+            }
+
+            Clock {
+                id: clockComponentVert
+                bar: panel
+                layer.enabled: Config.showBackground
             }
 
             PowerButton {
