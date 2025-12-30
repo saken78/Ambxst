@@ -94,8 +94,8 @@ PanelWindow {
     Item {
         id: mainContainer
         anchors.centerIn: parent
-        width: Math.max(searchContainer.width, presetsContainer.width + (scrollbarContainer.visible ? scrollbarContainer.width + 8 : 0))
-        height: searchContainer.height + 8 + presetsContainer.height
+        width: presetsContainer.width + (scrollbarContainer.visible ? scrollbarContainer.width + 8 : 0)
+        height: presetsContainer.height
 
         opacity: presetsOpen ? 1 : 0
         scale: presetsOpen ? 1 : 0.9
@@ -117,84 +117,10 @@ PanelWindow {
             }
         }
 
-        // Search input container
-        StyledRect {
-            id: searchContainer
-            variant: "bg"
-            anchors.top: parent.top
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: Math.min(400, presetsContainer.width)
-            height: 80
-            radius: height / 2
-
-            layer.enabled: true
-            layer.effect: Shadow {}
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 8
-
-                // Icon container
-                Rectangle {
-                    Layout.preferredWidth: 48
-                    Layout.preferredHeight: 48
-                    Layout.alignment: Qt.AlignVCenter
-                    color: "transparent"
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: Icons.magicWand
-                        font.family: Icons.font
-                        font.pixelSize: 24
-                        color: Styling.styledRectItem("overprimary")
-                    }
-                }
-
-                // Search input
-                SearchInput {
-                    id: searchInput
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 48
-                    Layout.alignment: Qt.AlignVCenter
-
-                    variant: "common"
-                    placeholderText: qsTr("Search presets...")
-                    handleTabNavigation: true
-                    clearOnEscape: false
-
-                    onSearchTextChanged: text => {
-                        if (presetsLoader.item) {
-                            presetsLoader.item.searchQuery = text;
-                        }
-                    }
-
-                    onAccepted: {
-                        if (presetsLoader.item) {
-                            presetsLoader.item.selectPreset();
-                        }
-                    }
-
-                    onEscapePressed: {
-                        if (searchInput.text.length > 0) {
-                            searchInput.clear();
-                            if (presetsLoader.item) {
-                                presetsLoader.item.searchQuery = "";
-                            }
-                        } else {
-                            Visibilities.setActiveModule("");
-                        }
-                    }
-                }
-            }
-        }
-
         // Presets container
         Item {
             id: presetsContainer
-            anchors.top: searchContainer.bottom
-            anchors.topMargin: 8
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.centerIn: parent
             width: presetsLoader.item ? presetsLoader.item.implicitWidth + 48 : 400
             height: presetsLoader.item ? presetsLoader.item.implicitHeight + 48 : 300
 
@@ -299,11 +225,10 @@ PanelWindow {
     onPresetsOpenChanged: {
         if (presetsOpen) {
             Qt.callLater(() => {
-                searchInput.clear();
                 if (presetsLoader.item) {
                     presetsLoader.item.resetSearch();
+                    presetsLoader.item.focusSearchInput();
                 }
-                searchInput.focusInput();
             });
         }
     }
