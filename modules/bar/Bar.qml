@@ -193,8 +193,12 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     
                     // Calculate target position to be absolutely centered in the bar
-                    // parent.x is the container's position relative to the RowLayout (and thus the Bar)
-                    property real targetX: (bar.width - width) / 2 - parent.x
+                    // using mapToItem to account for layout margins and offsets
+                    property real targetX: {
+                        if (!parent || !bar) return 0;
+                        var parentPos = parent.mapToItem(bar, 0, 0);
+                        return (bar.width - width) / 2 - parentPos.x;
+                    }
                     
                     // Clamp the x position so it never leaves the container (preventing overlap)
                     x: Math.max(0, Math.min(parent.width - width, targetX))
@@ -277,7 +281,11 @@ PanelWindow {
                     anchors.horizontalCenter: parent.horizontalCenter
                     
                     // Calculate target position to be absolutely centered in the bar (vertically)
-                    property real targetY: (bar.height - height) / 2 - parent.y
+                    property real targetY: {
+                        if (!parent || !bar) return 0;
+                        var parentPos = parent.mapToItem(bar, 0, 0);
+                        return (bar.height - height) / 2 - parentPos.y;
+                    }
                     
                     // Clamp y position
                     y: Math.max(0, Math.min(parent.height - height, targetY))
