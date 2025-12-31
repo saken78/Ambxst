@@ -153,6 +153,13 @@ PanelWindow {
             position: panel.position
         }
 
+        Bar.IntegratedDock {
+            bar: panel
+            orientation: panel.orientation
+            anchors.centerIn: parent
+            visible: panel.orientation === "horizontal" && integratedDockEnabled && integratedDockPosition === "center"
+        }
+
         RowLayout {
             id: horizontalLayout
             visible: panel.orientation === "horizontal"
@@ -260,6 +267,12 @@ PanelWindow {
                     property var screen: panel.screen
                 }
                 layer.enabled: false
+            }
+
+            Bar.IntegratedDock {
+                bar: panel
+                orientation: panel.orientation
+                visible: integratedDockEnabled
             }
 
             ToolsButton {
