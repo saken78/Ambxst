@@ -19,4 +19,5 @@ with pkgs; [
   wlsunset
   wtype
   zbar
+  zenity
 ]

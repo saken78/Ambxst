@@ -86,7 +86,7 @@ install_dependencies() {
 			syntax-highlighting breeze-icons hicolor-icon-theme
 			# Tools
 			brightnessctl ddcutil fontconfig grim slurp imagemagick jq sqlite upower
-			wl-clipboard wlsunset wtype zbar unzip glib2 procps-ng python-pipx
+			wl-clipboard wlsunset wtype zbar unzip glib2 procps-ng python-pipx zenity
 			# Tesseract
 			tesseract tesseract-data-eng tesseract-data-spa tesseract-data-jpn tesseract-data-chi_sim tesseract-data-kor
 			# Fonts
