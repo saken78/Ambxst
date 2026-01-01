@@ -179,7 +179,7 @@ WlSessionLockSurface {
                 text: Qt.formatTime(new Date(), "hh")
                 font.family: "League Gothic"
                 font.pixelSize: 240
-                color: Styling.styledRectItem("overprimary")
+                color: Colors.primaryFixed
                 antialiasing: true
                 opacity: startAnim ? 1 : 0
 
@@ -214,7 +214,7 @@ WlSessionLockSurface {
                 text: Qt.formatTime(new Date(), "mm")
                 font.family: "League Gothic"
                 font.pixelSize: 240
-                color: Colors.overBackground
+                color: Colors.primaryFixedDim
                 antialiasing: true
                 anchors.verticalCenter: undefined
                 anchors.top: hoursText.top
