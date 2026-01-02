@@ -20,4 +20,5 @@ with pkgs; [
   wtype
   zbar
   zenity
+  inetutils
 ]

@@ -86,7 +86,7 @@ install_dependencies() {
 			syntax-highlighting breeze-icons hicolor-icon-theme
 			# Tools
 			brightnessctl ddcutil fontconfig grim slurp imagemagick jq sqlite upower
-			wl-clipboard wlsunset wtype zbar unzip glib2 procps-ng python-pipx zenity
+			wl-clipboard wlsunset wtype zbar unzip glib2 procps-ng python-pipx zenity inetutils
 			# Tesseract
 			tesseract tesseract-data-eng tesseract-data-spa tesseract-data-jpn tesseract-data-chi_sim tesseract-data-kor
 			# Fonts
@@ -193,8 +193,10 @@ install_python_tools() {
 configure_services() {
 	if [ "$DISTRO" == "nixos" ]; then return; fi
 
+	log_info "Configuring system services..."
+
 	if command -v systemctl >/dev/null; then
-		log_info "Configuring system services..."
+		log_info "Detected Init System: systemd"
 
 		# Disable iwd if active/enabled to prevent conflicts
 		if systemctl is-enabled --quiet iwd 2>/dev/null || systemctl is-active --quiet iwd 2>/dev/null; then
@@ -220,6 +222,52 @@ configure_services() {
 		else
 			log_info "Bluetooth is already enabled."
 		fi
+
+	elif command -v rc-service >/dev/null; then
+		log_info "Detected Init System: OpenRC"
+
+		# Disable iwd
+		if rc-update show | grep -q "iwd"; then
+			log_warn "Disabling iwd..."
+			sudo rc-service iwd stop 2>/dev/null || true
+			sudo rc-update del iwd default 2>/dev/null || true
+		fi
+
+		# Enable NetworkManager
+		log_info "Enabling NetworkManager..."
+		sudo rc-update add NetworkManager default 2>/dev/null || true
+		sudo rc-service NetworkManager start 2>/dev/null || true
+
+		# Enable Bluetooth
+		log_info "Enabling Bluetooth..."
+		sudo rc-update add bluetooth default 2>/dev/null || true
+		sudo rc-service bluetooth start 2>/dev/null || true
+
+	elif command -v sv >/dev/null; then
+		log_info "Detected Init System: Runit"
+		SERVICE_DIR="/var/service"
+
+		# Disable iwd
+		if [ -L "$SERVICE_DIR/iwd" ]; then
+			log_warn "Disabling iwd..."
+			sudo rm "$SERVICE_DIR/iwd"
+		fi
+
+		# Enable NetworkManager
+		if [ -d "/etc/sv/NetworkManager" ] && [ ! -L "$SERVICE_DIR/NetworkManager" ]; then
+			log_info "Enabling NetworkManager..."
+			sudo ln -s /etc/sv/NetworkManager "$SERVICE_DIR/"
+		fi
+
+		# Enable Bluetooth
+		if [ -d "/etc/sv/bluetooth" ] && [ ! -L "$SERVICE_DIR/bluetooth" ]; then
+			log_info "Enabling Bluetooth..."
+			sudo ln -s /etc/sv/bluetooth "$SERVICE_DIR/"
+		fi
+
+	else
+		log_warn "Could not detect a supported init system (systemd, openrc, runit)."
+		log_warn "Please manually enable NetworkManager and Bluetooth."
 	fi
 }
 
