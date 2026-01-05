@@ -193,7 +193,7 @@ Item {
                 onIconClicked: {}
 
                 Connections {
-                    target: brightnessRow.currentMonitor
+                    target: brightnessRow.currentMonitor ?? null
                     ignoreUnknownSignals: true
                     function onBrightnessChanged() {
                         if (brightnessRow.currentMonitor) {

@@ -962,6 +962,8 @@ PanelWindow {
         Component {
             id: staticImageComponent
             Image {
+                width: parent.width
+                height: parent.height
                 source: parent.sourceFile ? "file://" + parent.sourceFile : ""
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
