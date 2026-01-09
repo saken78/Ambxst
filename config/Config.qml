@@ -1284,7 +1284,7 @@ Singleton {
             }
 
             // Check system binds
-            const systemKeys = ["overview", "powermenu", "config", "lockscreen", "tools", "screenshot"];
+            const systemKeys = ["overview", "powermenu", "config", "lockscreen", "tools", "screenshot", "screenrecord"];
             for (const key of systemKeys) {
                 if (!current.ambxst.system[key] && adapter.ambxst.system && adapter.ambxst.system[key]) {
                     console.log("Adding missing system bind:", key);
@@ -1483,6 +1483,12 @@ Singleton {
                         property string key: "S"
                         property string dispatcher: "global"
                         property string argument: "ambxst:screenshot"
+                    }
+                    property JsonObject screenrecord: JsonObject {
+                        property list<string> modifiers: ["SUPER", "SHIFT"]
+                        property string key: "R"
+                        property string dispatcher: "global"
+                        property string argument: "ambxst:screenrecord"
                     }
                 }
             }

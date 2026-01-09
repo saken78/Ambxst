@@ -122,6 +122,14 @@ Item {
         onPressed: GlobalStates.screenshotToolVisible = true
     }
 
+    GlobalShortcut {
+        appid: root.appId
+        name: "screenrecord"
+        description: "Open screen record tool"
+
+        onPressed: GlobalStates.screenRecordToolVisible = true
+    }
+
     // Dashboard tab shortcuts
     GlobalShortcut {
         appid: root.appId
