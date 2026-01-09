@@ -544,10 +544,12 @@ PanelWindow {
                     layer.enabled: Config.showBackground
                 }
 
-                ControlsButton {
-                    id: controlsButtonVert
-                    bar: panel
-                    layerEnabled: Config.showBackground
+                ToolsButton {
+                    id: toolsButtonVert
+                }
+
+                PresetsButton {
+                    id: presetsButtonVert
                 }
 
                 // Center Group Container
@@ -577,6 +579,15 @@ PanelWindow {
                             id: layoutSelectorButtonVert
                             bar: panel
                             layerEnabled: Config.showBackground
+                            Layout.alignment: Qt.AlignHCenter
+                        }
+
+                        Workspaces {
+                            id: workspacesVert
+                            orientation: panel.orientation
+                            bar: QtObject {
+                                property var screen: panel.screen
+                            }
                             Layout.alignment: Qt.AlignHCenter
                         }
 
@@ -643,15 +654,6 @@ PanelWindow {
                             }
                         }
 
-                        Workspaces {
-                            id: workspacesVert
-                            orientation: panel.orientation
-                            bar: QtObject {
-                                property var screen: panel.screen
-                            }
-                            Layout.alignment: Qt.AlignHCenter
-                        }
-
                         Bar.IntegratedDock {
                             bar: panel
                             orientation: panel.orientation
@@ -659,16 +661,13 @@ PanelWindow {
                             Layout.fillHeight: true
                             Layout.fillWidth: true
                         }
-
-                        ToolsButton {
-                            id: toolsButtonVert
-                            Layout.alignment: Qt.AlignHCenter
-                        }
                     }
                 }
 
-                PresetsButton {
-                    id: presetsButtonVert
+                ControlsButton {
+                    id: controlsButtonVert
+                    bar: panel
+                    layerEnabled: Config.showBackground
                 }
 
                 Bar.BatteryIndicator {
