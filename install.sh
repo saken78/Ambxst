@@ -89,6 +89,8 @@ install_dependencies() {
 		yes | sudo dnf copr enable solopasha/hyprland
 		# Matugen
 		yes | sudo dnf copr enable zirconium/packages
+		# Phosphor Icons
+		yes | sudo dnf copr enable iucar/cran
 
 		log_info "Installing dependencies..."
 
@@ -123,7 +125,7 @@ install_dependencies() {
 			google-noto-fonts-common google-noto-cjk-fonts google-noto-emoji-fonts
 
 			# Special Packages
-			mpvpaper matugen
+			mpvpaper matugen R-CRAN-phosphoricons
 
 			# Quickshell
 			quickshell-git
