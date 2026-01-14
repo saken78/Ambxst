@@ -114,7 +114,7 @@ install_dependencies() {
 			# Tools
 			brightnessctl ddcutil fontconfig grim slurp ImageMagick jq sqlite upower
 			wl-clipboard wlsunset wtype zbar glib2 pipx zenity power-profiles-daemon
-			python3.12
+			python3.12 libnotify
 
 			# Tesseract (Fedora uses langpack naming)
 			tesseract tesseract-langpack-eng tesseract-langpack-spa tesseract-langpack-jpn
@@ -205,7 +205,7 @@ install_dependencies() {
 			# Tools
 			brightnessctl ddcutil fontconfig grim slurp imagemagick jq sqlite upower
 			wl-clipboard wlsunset wtype zbar glib2 python-pipx zenity inetutils power-profiles-daemon
-			python312
+			python312 libnotify
 
 			# Tesseract
 			tesseract tesseract-data-eng tesseract-data-spa tesseract-data-jpn tesseract-data-chi_sim tesseract-data-chi_tra tesseract-data-kor tesseract-data-lat

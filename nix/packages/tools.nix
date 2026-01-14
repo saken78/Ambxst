@@ -10,6 +10,7 @@ with pkgs; [
   imagemagick
   jq
   litellm
+  libnotify
   matugen
   python3
   slurp
