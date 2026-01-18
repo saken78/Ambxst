@@ -278,9 +278,9 @@ PanelWindow {
             ActionButton {
                 icon: Icons.edit
                 onTriggered: {
-                    // Open with Gradia detached
+                    // Open with Gradia (native or Flatpak for Fedora) detached
                     var proc = Qt.createQmlObject('import Quickshell; import Quickshell.Io; Process { }', root);
-                    proc.command = ["bash", "-c", "gradia \"" + root.imagePath + "\" & disown"];
+                    proc.command = ["bash", "-c", "if command -v gradia >/dev/null; then gradia \"" + root.imagePath + "\"; else flatpak run be.alexandervanhee.gradia \"" + root.imagePath + "\"; fi & disown"];
                     proc.running = true;
                     root.imagePath = "";
                 }
