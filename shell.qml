@@ -122,6 +122,14 @@ ShellRoot {
                 running: true
                 onTriggered: triggered = true
             }
+
+            Connections {
+                target: Config.bar
+                function onPositionChanged() {
+                    notchDelayTimer.triggered = false;
+                    notchDelayTimer.restart();
+                }
+            }
         }
     }
 
@@ -284,6 +292,13 @@ ShellRoot {
         id: mirrorLoader
         active: true
         source: "modules/tools/MirrorWindow.qml"
+    }
+
+    // Settings Window
+    Loader {
+        id: settingsWindowLoader
+        active: true
+        source: "modules/widgets/config/SettingsWindow.qml"
     }
 
     // Initialize clipboard service at startup to ensure clipboard watching starts immediately

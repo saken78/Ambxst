@@ -180,6 +180,9 @@ Singleton {
     // Mirror Tool state
     property bool mirrorWindowVisible: false
 
+    // Settings Window state
+    property bool settingsWindowVisible: false
+
     // Theme editor state - persists across tab switches
     property bool themeHasChanges: false
     property var themeSnapshot: null

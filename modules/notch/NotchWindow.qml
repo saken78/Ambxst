@@ -252,7 +252,7 @@ PanelWindow {
 
             // Slide animation (slide up when hidden)
             transform: Translate {
-                y: notchPanel.reveal ? 0 : -(notchContainer.height + 16)
+                y: notchPanel.reveal ? 0 : -(Math.max(notchContainer.height, 50) + 16)
                 Behavior on y {
                     enabled: Config.animDuration > 0 && notchPanel.shouldAutoHide
                     NumberAnimation {

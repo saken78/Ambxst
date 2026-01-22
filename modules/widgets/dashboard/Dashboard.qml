@@ -242,7 +242,7 @@ NotchAnimationBehavior {
                 variant: controlsButton.hovered ? "focus" : "common"
                 z: -1
 
-                opacity: root.state.currentTab === 4 ? 0 : 1
+                opacity: GlobalStates.settingsWindowVisible ? 0 : 1
 
                 Behavior on opacity {
                     enabled: Config.animDuration > 0
@@ -272,7 +272,7 @@ NotchAnimationBehavior {
                     font.family: Icons.font
                     font.pixelSize: 20
                     font.weight: Font.Medium
-                    color: root.state.currentTab === 4 ? Styling.srItem("primary") : Colors.overBackground
+                    color: GlobalStates.settingsWindowVisible ? Styling.srItem("primary") : Colors.overBackground
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
 
@@ -285,7 +285,7 @@ NotchAnimationBehavior {
                     }
                 }
 
-                onClicked: stack.navigateToTab(4)
+                onClicked: GlobalStates.settingsWindowVisible = !GlobalStates.settingsWindowVisible
             }
         }
 
@@ -405,13 +405,6 @@ NotchAnimationBehavior {
                     sourceComponent: assistantComponent
                     z: visible ? 1 : 0
                 }
-
-                // Tab 4: Settings
-                TabLoader {
-                    property int index: 4
-                    sourceComponent: quickSettingsComponent
-                    z: visible ? 1 : 0
-                }
                 
                 // Helper to access current item for focus
                 property var currentItem: {
@@ -420,7 +413,6 @@ NotchAnimationBehavior {
                         case 1: return children[1].item;
                         case 2: return children[2].item;
                         case 3: return children[3].item;
-                        case 4: return children[4].item;
                         default: return null;
                     }
                 }
@@ -535,11 +527,6 @@ NotchAnimationBehavior {
         WidgetsTab {
             leftPanelWidth: root.leftPanelWidth
         }
-    }
-
-    Component {
-        id: quickSettingsComponent
-        SettingsTab {}
     }
 
     Component {
