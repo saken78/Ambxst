@@ -5,6 +5,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
+import Quickshell.Services.Mpris
 import qs.modules.theme
 import qs.modules.components
 import qs.modules.globals
@@ -1294,8 +1295,10 @@ Rectangle {
 
                     Loader {
                         Layout.fillWidth: true
+                        // Estimate height: Margins(32) + TopRow(52) + Spacing(8) + BottomRow(~24) = 116
+                        Layout.preferredHeight: status === Loader.Ready ? -1 : (MprisController.activePlayer ? 116 : 0)
                         asynchronous: true
-                        visible: status === Loader.Ready
+                        visible: MprisController.activePlayer !== null
                         sourceComponent: Component {
                             FullPlayer { 
                                 width: parent.width 
@@ -1307,7 +1310,6 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: width
                         asynchronous: true
-                        visible: status === Loader.Ready
                         sourceComponent: Component {
                             Calendar { 
                                 anchors.fill: parent 
@@ -1328,7 +1330,7 @@ Rectangle {
         Loader {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            visible: currentTab === 0 && status === Loader.Ready
+            visible: currentTab === 0
             asynchronous: true
             sourceComponent: Component {
                 NotificationHistory {
