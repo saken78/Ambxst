@@ -995,23 +995,40 @@ PanelWindow {
         Component {
         id: staticImageComponent
         Item {
+            id: staticImageRoot
             width: parent.width
             height: parent.height
             property string sourceFile: parent.sourceFile
             property bool tint: wallpaper.tintEnabled
 
+            // Subset of colors for optimization (approx 25 colors vs 98)
+            readonly property var optimizedPalette: [
+                "background", "overBackground",
+                "surface", "surfaceBright", "surfaceDim",
+                "surfaceContainer", "surfaceContainerHigh", "surfaceContainerHighest", "surfaceContainerLow", "surfaceContainerLowest",
+                "primary", "secondary", "tertiary",
+                "red", "lightRed",
+                "green", "lightGreen",
+                "blue", "lightBlue",
+                "yellow", "lightYellow",
+                "cyan", "lightCyan",
+                "magenta", "lightMagenta"
+            ]
+
             // Palette generation for the shader
             Item {
                 id: paletteSourceItem
-                visible: false
-                width: Colors.availableColorNames.length
+                // Must be visible for ShaderEffectSource to capture it, 
+                // but we hide it visually by placing it behind or expecting ShaderEffectSource hideSource behavior.
+                visible: true 
+                width: staticImageRoot.optimizedPalette.length
                 height: 1
-                layer.enabled: true
+                opacity: 0 // Make invisible to eye but maintain presence for capture if needed (though hideSource usually handles this)
                 
                 Row {
                     anchors.fill: parent
                     Repeater {
-                        model: Colors.availableColorNames
+                        model: staticImageRoot.optimizedPalette
                         Rectangle {
                             width: 1
                             height: 1
@@ -1025,7 +1042,7 @@ PanelWindow {
                 id: paletteTextureSource
                 sourceItem: paletteSourceItem
                 hideSource: true
-                visible: false
+                visible: false // The source object itself doesn't need to be visible in the scene graph
                 smooth: false
                 recursive: false
             }
@@ -1040,7 +1057,7 @@ PanelWindow {
                 layer.enabled: parent.tint
                 layer.effect: ShaderEffect {
                     property var paletteTexture: paletteTextureSource
-                    property real paletteSize: Colors.availableColorNames.length
+                    property real paletteSize: staticImageRoot.optimizedPalette.length
                     property real texWidth: rawImage.width
                     property real texHeight: rawImage.height
 
