@@ -86,7 +86,7 @@ StyledRect {
         id: mainLayout
         anchors.fill: parent
         anchors.margins: 16
-        spacing: 12
+        spacing: 8
         opacity: player.playersListExpanded ? 0.3 : 1.0
         
         Behavior on opacity {
@@ -99,6 +99,7 @@ StyledRect {
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: 220
             Layout.preferredHeight: 220
+            Layout.bottomMargin: -32
             
             CircularSeekBar {
                 id: seekBar
@@ -207,6 +208,10 @@ StyledRect {
 
         // 2. Metadata Area
         ColumnLayout {
+            // Layout.topMargin: -12  <-- Removed to test the other approach cleaner, or I can keep both if needed. 
+            // The user said "No cambió", so maybe the -12 wasn't enough or wasn't working. 
+            // I'll stick to the user's specific request: "reduce margin bottom of the component above".
+            // So I will remove this one to avoid confusion and rely on the bottomMargin of discArea.
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
             spacing: 2
