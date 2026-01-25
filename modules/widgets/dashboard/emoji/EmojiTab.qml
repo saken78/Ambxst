@@ -543,16 +543,18 @@ Rectangle {
                                 }
                             }
 
-                            highlight: Item {
-                                z: -1
-                                StyledRect {
-                                    anchors.centerIn: parent
-                                    width: 40; height: 40
-                                    radius: Styling.radius(4)
-                                    variant: "primary"
+                            onContentXChanged: {
+                                if (root.selectedIndex === delegateRoot.index) {
+                                    root.recentContentX = contentX;
                                 }
                             }
-                            highlightMoveDuration: Config.animDuration / 2
+
+                            Binding {
+                                target: root
+                                property: "recentContentX"
+                                value: horizontalRecent.contentX
+                                when: root.selectedIndex === delegateRoot.index
+                            }
 
                             delegate: Rectangle {
                                 width: 56; height: 48; color: "transparent"
@@ -647,7 +649,8 @@ Rectangle {
             highlight: Item {
                 id: listHighlight
                 z: -1
-                width: emojiList.width
+                width: root.isAtRecent ? 40 : emojiList.width
+                x: root.isAtRecent ? root.recentX - root.recentContentX : 0
                 y: {
                     var yPos = 0;
                     for (var i = 0; i < emojiList.currentIndex && i < emojisModel.count; i++) {
@@ -658,28 +661,32 @@ Rectangle {
                         }
                         yPos += h;
                     }
+                    if (root.isAtRecent) yPos += 4;
                     return yPos;
                 }
                 height: {
                     if (emojiList.currentIndex === -1) return 0;
                     var item = emojisModel.get(emojiList.currentIndex);
-                    if (item && item.isRecentContainer) return 48;
+                    if (item && item.isRecentContainer) return 40;
                     if (item && item.emojiData && item.emojiData.skin_tone_support && emojiList.currentIndex === root.expandedItemIndex) {
                         return 48 + 4 + (36 * Math.min(3, root.skinTones.length)) + 8;
                     }
                     return 48;
                 }
 
+                Behavior on x {
+                    enabled: Config.animDuration > 0 && !emojiList.moving
+                    NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                }
                 Behavior on y { NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic } }
+                Behavior on width { NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic } }
                 Behavior on height { NumberAnimation { duration: Config.animDuration; easing.type: Easing.OutQuart } }
 
                 StyledRect {
                     anchors.fill: parent
                     radius: Styling.radius(4)
                     variant: root.expandedItemIndex === emojiList.currentIndex ? "pane" : "primary"
-                    visible: root.selectedIndex >= 0 && !root.isAtRecent
-                    opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: Config.animDuration / 2 } }
+                    visible: root.selectedIndex >= 0
                 }
             }
             highlightFollowsCurrentItem: false
