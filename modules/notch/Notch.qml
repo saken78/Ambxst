@@ -195,24 +195,29 @@ Item {
         property int defaultRadius: Config.roundness > 0 ? (screenNotchOpen || hasActiveNotifications ? Config.roundness + 20 : Config.roundness + 4) : 0
         property int islandRadius: Config.roundness > 0 ? (screenNotchOpen || hasActiveNotifications ? Config.roundness + 20 : Config.roundness + 4) : 0
 
+        // Helper function to check if we're actually showing the DefaultView
+        function isActuallyShowingDefault() {
+            return stackViewInternal.currentItem && stackViewInternal.depth === 1;
+        }
+
         property int topLeftRadius: Config.notchTheme === "default" 
             ? (notchContainer.position === "bottom" ? defaultRadius : 0) 
-            : (notchContainer.position === "top" && hasActiveNotifications 
-                ? (Config.roundness > 0 ? Config.roundness + 4 : 0)  // Small radius when at top with notifications
+            : (Config.notchTheme === "island" && hasActiveNotifications && isActuallyShowingDefault() && notchContainer.position === "top"
+                ? (Config.roundness > 0 ? Config.roundness + 4 : 0)  // Small radius only when in DefaultView with notifications at top
                 : islandRadius)  // Otherwise use dynamic islandRadius
         property int topRightRadius: Config.notchTheme === "default" 
             ? (notchContainer.position === "bottom" ? defaultRadius : 0) 
-            : (notchContainer.position === "top" && hasActiveNotifications 
-                ? (Config.roundness > 0 ? Config.roundness + 4 : 0)  // Small radius when at top with notifications
+            : (Config.notchTheme === "island" && hasActiveNotifications && isActuallyShowingDefault() && notchContainer.position === "top"
+                ? (Config.roundness > 0 ? Config.roundness + 4 : 0)  // Small radius only when in DefaultView with notifications at top
                 : islandRadius)  // Otherwise use dynamic islandRadius
         property int bottomLeftRadius: Config.notchTheme === "island" 
-            ? (notchContainer.position === "bottom" && hasActiveNotifications 
-                ? (Config.roundness > 0 ? Config.roundness + 4 : 0)  // Small radius when at bottom with notifications
+            ? (hasActiveNotifications && isActuallyShowingDefault() && notchContainer.position === "bottom"
+                ? (Config.roundness > 0 ? Config.roundness + 4 : 0)  // Small radius only when in DefaultView with notifications at bottom
                 : islandRadius)  // Otherwise use dynamic islandRadius
             : (notchContainer.position === "top" ? defaultRadius : 0)
         property int bottomRightRadius: Config.notchTheme === "island" 
-            ? (notchContainer.position === "bottom" && hasActiveNotifications 
-                ? (Config.roundness > 0 ? Config.roundness + 4 : 0)  // Small radius when at bottom with notifications
+            ? (hasActiveNotifications && isActuallyShowingDefault() && notchContainer.position === "bottom"
+                ? (Config.roundness > 0 ? Config.roundness + 4 : 0)  // Small radius only when in DefaultView with notifications at bottom
                 : islandRadius)  // Otherwise use dynamic islandRadius
             : (notchContainer.position === "top" ? defaultRadius : 0)
 
