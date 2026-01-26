@@ -60,9 +60,6 @@ Singleton {
     property var gpuTempHistories: []   // Array of arrays - one temp history per GPU
     property int maxHistoryPoints: 50
     
-    // Circular buffer tracking
-    property int historyIndex: 0        // Current write position in circular buffer
-    
     // Total data points collected (continues incrementing forever)
     property int totalDataPoints: 0
 
@@ -114,14 +111,6 @@ Singleton {
     }
 
     Component.onCompleted: {
-        // Pre-allocate circular buffers
-        cpuHistory = Array(maxHistoryPoints).fill(0);
-        ramHistory = Array(maxHistoryPoints).fill(0);
-        cpuTempHistory = Array(maxHistoryPoints).fill(-1);
-        gpuHistories = [];
-        gpuTempHistories = [];
-        historyIndex = 0;
-        
         detectGPU();
         cpuModelReader.running = true;
         
@@ -194,53 +183,68 @@ Singleton {
         validDisks = newValidDisks;
     }
 
-    // Update history arrays with current values using circular buffer pattern
+    // Update history arrays with current values
     function updateHistory() {
         // Increment total data points counter
         totalDataPoints++;
         
-        // Ensure buffers are initialized and sized correctly
-        if (cpuHistory.length === 0) {
-            cpuHistory = Array(maxHistoryPoints).fill(0);
+        // Add CPU history
+        let newCpuHistory = cpuHistory.slice();
+        newCpuHistory.push(cpuUsage / 100);
+        if (newCpuHistory.length > maxHistoryPoints) {
+            newCpuHistory.shift();
         }
-        if (ramHistory.length === 0) {
-            ramHistory = Array(maxHistoryPoints).fill(0);
+        cpuHistory = newCpuHistory;
+
+        // Add CPU temperature history
+        let newCpuTempHistory = cpuTempHistory.slice();
+        newCpuTempHistory.push(cpuTemp);
+        if (newCpuTempHistory.length > maxHistoryPoints) {
+            newCpuTempHistory.shift();
         }
-        if (cpuTempHistory.length === 0) {
-            cpuTempHistory = Array(maxHistoryPoints).fill(-1);
+        cpuTempHistory = newCpuTempHistory;
+
+        // Add RAM history
+        let newRamHistory = ramHistory.slice();
+        newRamHistory.push(ramUsage / 100);
+        if (newRamHistory.length > maxHistoryPoints) {
+            newRamHistory.shift();
         }
-        
-        // Write CPU history at current index
-        cpuHistory[historyIndex] = cpuUsage / 100;
-        cpuTempHistory[historyIndex] = cpuTemp;
-        ramHistory[historyIndex] = ramUsage / 100;
-        
-        // Maintain GPU histories if detected
+        ramHistory = newRamHistory;
+
+        // Add GPU histories if detected
         if (gpuDetected && gpuCount > 0) {
-            // Initialize GPU history arrays if needed
-            while (gpuHistories.length < gpuCount) {
-                gpuHistories.push(Array(maxHistoryPoints).fill(0));
+            let newGpuHistories = gpuHistories.slice();
+            let newGpuTempHistories = gpuTempHistories.slice();
+            
+            // Initialize histories array if needed
+            while (newGpuHistories.length < gpuCount) {
+                newGpuHistories.push([]);
             }
-            while (gpuTempHistories.length < gpuCount) {
-                gpuTempHistories.push(Array(maxHistoryPoints).fill(-1));
+            while (newGpuTempHistories.length < gpuCount) {
+                newGpuTempHistories.push([]);
             }
             
-            // Write each GPU's data at current index
+            // Update each GPU's history
             for (let i = 0; i < gpuCount; i++) {
-                gpuHistories[i][historyIndex] = (gpuUsages[i] || 0) / 100;
-                gpuTempHistories[i][historyIndex] = gpuTemps[i] !== undefined ? gpuTemps[i] : -1;
+                let gpuHist = newGpuHistories[i].slice();
+                gpuHist.push((gpuUsages[i] || 0) / 100);
+                if (gpuHist.length > maxHistoryPoints) {
+                    gpuHist.shift();
+                }
+                newGpuHistories[i] = gpuHist;
+
+                let gpuTempHist = newGpuTempHistories[i].slice();
+                gpuTempHist.push(gpuTemps[i] !== undefined ? gpuTemps[i] : -1);
+                if (gpuTempHist.length > maxHistoryPoints) {
+                    gpuTempHist.shift();
+                }
+                newGpuTempHistories[i] = gpuTempHist;
             }
+            
+            gpuHistories = newGpuHistories;
+            gpuTempHistories = newGpuTempHistories;
         }
-        
-        // Advance circular buffer index
-        historyIndex = (historyIndex + 1) % maxHistoryPoints;
-        
-        // Notify that history has changed (touch the array property to trigger binding updates)
-        cpuHistory = cpuHistory;
-        ramHistory = ramHistory;
-        gpuHistories = gpuHistories;
-        cpuTempHistory = cpuTempHistory;
-        gpuTempHistories = gpuTempHistories;
     }
 
     // CPU model detection

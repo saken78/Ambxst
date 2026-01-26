@@ -715,43 +715,13 @@ Rectangle {
 
                             // === DATA RENDERING ===
                             // Helper function to draw a line chart with gradient fill
-                            // Handles circular buffer: reconstructs proper chronological order
                             function drawLine(history, color) {
                                 if (history.length < 2)
                                     return;
 
-                                // Extract visible points from circular buffer
+                                // Get most recent data points based on zoom level
                                 const visiblePoints = Math.min(zoomedMaxPoints, history.length);
-                                const recentHistory = [];
-                                
-                                // Reconstruct chronological order from circular buffer
-                                // historyIndex points to the next write position
-                                let isFull = totalDataPoints >= maxHistoryPoints;
-                                let startIdx;
-                                
-                                if (isFull) {
-                                    // Buffer is full, start from historyIndex (oldest point)
-                                    startIdx = SystemResources.historyIndex;
-                                } else {
-                                    // Buffer not full yet, start from 0 (first valid point)
-                                    startIdx = 0;
-                                }
-                                
-                                // Collect visiblePoints in chronological order
-                                for (let i = 0; i < visiblePoints; i++) {
-                                    let bufferIdx;
-                                    if (isFull) {
-                                        // Skip oldest points if we want to see most recent
-                                        const totalToSkip = history.length - visiblePoints;
-                                        bufferIdx = (startIdx + totalToSkip + i) % history.length;
-                                    } else {
-                                        // For not-full buffer, take from the end (most recent)
-                                        const totalValid = Math.min(totalDataPoints, history.length);
-                                        const startPos = Math.max(0, totalValid - visiblePoints);
-                                        bufferIdx = startPos + i;
-                                    }
-                                    recentHistory.push(history[bufferIdx]);
-                                }
+                                const recentHistory = history.slice(-visiblePoints);
 
                                 // Use same offset as grid for perfect alignment
                                 const dataOffset = graphOffset;
