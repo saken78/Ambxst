@@ -124,6 +124,8 @@ PanelWindow {
         layer.effect: MultiEffect {
             maskEnabled: true
             maskInverted: true
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 0.1
             maskSource: ShaderEffectSource {
                 sourceItem: notchContent
                 hideSource: false
