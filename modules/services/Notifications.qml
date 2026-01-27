@@ -94,7 +94,6 @@ Singleton {
 
     component NotifTimer: Timer {
         required property int id
-        property int originalInterval: 5000
         property bool isPaused: false
         property real startTime: Date.now()
 
@@ -115,8 +114,8 @@ Singleton {
             onTriggered: if (!isPaused) parent.start()
         }
 
-        interval: originalInterval
-        running: !isPaused && !SuspendManager.isSuspending
+        running: !isPaused && !SuspendManager.isSuspending && interval > 0
+        onTriggered: root.timeoutNotification(id)
 
         function pause() {
             isPaused = true;
@@ -125,7 +124,7 @@ Singleton {
 
         function resume() {
             isPaused = false;
-            if (!SuspendManager.isSuspending) {
+            if (!SuspendManager.isSuspending && interval > 0) {
                 start();
             }
         }
