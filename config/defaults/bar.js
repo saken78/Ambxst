@@ -17,5 +17,7 @@ var data = {
     "hoverRegionHeight": 8,
     "showPinButton": true,
     "availableOnFullscreen": false,
-    "use12hFormat": false
+    "use12hFormat": false,
+    "containBar": false,
+    "keepBarShadow": false
 }

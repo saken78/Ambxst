@@ -602,6 +602,8 @@ Singleton {
             property bool showPinButton: true
             property bool availableOnFullscreen: false
             property bool use12hFormat: false
+            property bool containBar: false
+            property bool keepBarShadow: false
         }
     }
 

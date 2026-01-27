@@ -13,6 +13,15 @@ Item {
     readonly property alias actualFrameSize: frameContent.actualFrameSize
     readonly property alias innerRadius: frameContent.innerRadius
 
+    // Expose specific side thicknesses for reservation logic
+    readonly property alias topThickness: frameContent.topThickness
+    readonly property alias bottomThickness: frameContent.bottomThickness
+    readonly property alias leftThickness: frameContent.leftThickness
+    readonly property alias rightThickness: frameContent.rightThickness
+    
+    readonly property bool containBar: Config.bar?.containBar ?? false
+    readonly property string barPos: Config.bar?.position ?? "top"
+
     Item {
         id: noInputRegion
         width: 0
@@ -24,7 +33,7 @@ Item {
         id: topFrame
         screen: root.targetScreen
         visible: root.frameEnabled
-        implicitHeight: root.actualFrameSize
+        implicitHeight: root.topThickness
         color: "transparent"
         anchors {
             left: true
@@ -34,8 +43,8 @@ Item {
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "quickshell:screenFrame:top"
-        exclusionMode: ExclusionMode.Ignore
-        exclusiveZone: root.actualFrameSize
+        exclusionMode: (root.containBar && root.barPos === "top") ? ExclusionMode.Normal : ExclusionMode.Ignore
+        exclusiveZone: root.topThickness
         mask: Region { item: noInputRegion }
     }
 
@@ -43,7 +52,7 @@ Item {
         id: bottomFrame
         screen: root.targetScreen
         visible: root.frameEnabled
-        implicitHeight: root.actualFrameSize
+        implicitHeight: root.bottomThickness
         color: "transparent"
         anchors {
             left: true
@@ -53,8 +62,8 @@ Item {
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "quickshell:screenFrame:bottom"
-        exclusionMode: ExclusionMode.Ignore
-        exclusiveZone: root.actualFrameSize
+        exclusionMode: (root.containBar && root.barPos === "bottom") ? ExclusionMode.Normal : ExclusionMode.Ignore
+        exclusiveZone: root.bottomThickness
         mask: Region { item: noInputRegion }
     }
 
@@ -62,7 +71,7 @@ Item {
         id: leftFrame
         screen: root.targetScreen
         visible: root.frameEnabled
-        implicitWidth: root.actualFrameSize
+        implicitWidth: root.leftThickness
         color: "transparent"
         anchors {
             top: true
@@ -72,8 +81,8 @@ Item {
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "quickshell:screenFrame:left"
-        exclusionMode: ExclusionMode.Ignore
-        exclusiveZone: root.actualFrameSize
+        exclusionMode: (root.containBar && root.barPos === "left") ? ExclusionMode.Normal : ExclusionMode.Ignore
+        exclusiveZone: root.leftThickness
         mask: Region { item: noInputRegion }
     }
 
@@ -81,7 +90,7 @@ Item {
         id: rightFrame
         screen: root.targetScreen
         visible: root.frameEnabled
-        implicitWidth: root.actualFrameSize
+        implicitWidth: root.rightThickness
         color: "transparent"
         anchors {
             top: true
@@ -91,8 +100,8 @@ Item {
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "quickshell:screenFrame:right"
-        exclusionMode: ExclusionMode.Ignore
-        exclusiveZone: root.actualFrameSize
+        exclusionMode: (root.containBar && root.barPos === "right") ? ExclusionMode.Normal : ExclusionMode.Ignore
+        exclusiveZone: root.rightThickness
         mask: Region { item: noInputRegion }
     }
 

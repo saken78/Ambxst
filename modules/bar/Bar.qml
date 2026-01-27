@@ -27,7 +27,8 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
 
     // Reserve space only when revealed and pinned (not in auto-hide mode or fullscreen)
-    exclusiveZone: (reveal && pinned && !barContent.activeWindowFullscreen) ? (Config.showBackground ? 44 : 40) : 0
+    // If containBar is active, the frame handles reservation, so we reserve 0 to avoid double gap
+    exclusiveZone: (Config.bar.containBar) ? 0 : ((reveal && pinned && !barContent.activeWindowFullscreen) ? (Config.showBackground ? 44 : 40) : 0)
     exclusionMode: ExclusionMode.Ignore
 
     // Altura implicita incluye espacio extra para animaciones / futuros elementos.

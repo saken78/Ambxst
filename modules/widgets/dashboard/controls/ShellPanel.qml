@@ -876,6 +876,29 @@ Item {
                                 }
                             }
                         }
+
+                        ToggleRow {
+                            label: "Contain Bar"
+                            checked: Config.bar.containBar ?? false
+                            onToggled: value => {
+                                if (value !== Config.bar.containBar) {
+                                    GlobalStates.markShellChanged();
+                                    Config.bar.containBar = value;
+                                }
+                            }
+                        }
+
+                        ToggleRow {
+                            label: "Keep Bar Shadow"
+                            checked: Config.bar.keepBarShadow ?? false
+                            visible: Config.bar.containBar ?? false
+                            onToggled: value => {
+                                if (value !== Config.bar.keepBarShadow) {
+                                    GlobalStates.markShellChanged();
+                                    Config.bar.keepBarShadow = value;
+                                }
+                            }
+                        }
                     }
 
                     Separator {

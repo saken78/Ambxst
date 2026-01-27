@@ -11,7 +11,7 @@ Item {
 
     visible: Config.showBackground
 
-    readonly property int cornerSize: Config.theme.enableCorners ? Styling.radius(4) : 0
+    readonly property int cornerSize: (Config.theme.enableCorners && !Config.bar.containBar) ? Styling.radius(4) : 0
     readonly property bool isHorizontal: position === "top" || position === "bottom"
     readonly property bool cornersVisible: Config.theme.enableCorners && cornerSize > 0
 
@@ -19,7 +19,7 @@ Item {
     StyledRect {
         id: barBackground
         variant: "barbg"
-        radius: 0
+        radius: Config.bar.containBar ? Styling.radius(4) : 0
         enableBorder: false
 
         // Posicion y tamaño expandidos para cubrir corners
