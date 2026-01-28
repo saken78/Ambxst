@@ -61,16 +61,22 @@ Item {
     readonly property bool notchHoverActive: {
         if (barPosition !== "top")
             return false;
-        // Access the notch's specific hover property from the unified panel
-        if (notchPanelRef && typeof notchPanelRef.notch_hoverActive !== 'undefined') {
-            return notchPanelRef.notch_hoverActive;
+        
+        // Check if notch is being hovered (using the property we check in NotchContent.qml)
+        if (notchPanelRef) {
+            // First check if 'hoverActive' exists directly on the panel content
+            if (typeof notchPanelRef.hoverActive !== 'undefined')
+                return notchPanelRef.hoverActive;
+                
+            // Fallback to checking children or specific exported properties if needed
+            // But usually the panel content itself exposes hoverActive
         }
         return false;
     }
 
     // Check if notch is open (dashboard, powermenu, etc.)
     readonly property var screenVisibilities: Visibilities.getForScreen(screen.name)
-    readonly property bool notchOpen: screenVisibilities ? (screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools) : false
+    readonly property bool notchOpen: screenVisibilities ? (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools) : false
 
     // Radius logic for "Squished" style
     readonly property real outerRadius: Styling.radius(0)
@@ -89,6 +95,7 @@ Item {
         }
 
         // Show if: hovering, notch hovering (when at top), notch open
+        // IMPORTANT: notchHoverActive must be checked to synchronize with notch
         return isMouseOverBar || hoverActive || notchHoverActive || notchOpen;
     }
 

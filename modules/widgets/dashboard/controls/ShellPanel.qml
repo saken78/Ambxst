@@ -980,6 +980,17 @@ Item {
                                 }
                             }
                         }
+
+                        ToggleRow {
+                            label: "Keep Hidden"
+                            checked: Config.notch.keepHidden ?? false
+                            onToggled: value => {
+                                if (value !== Config.notch.keepHidden) {
+                                    GlobalStates.markShellChanged();
+                                    Config.notch.keepHidden = value;
+                                }
+                            }
+                        }
                     }
 
                     Separator {
@@ -1360,6 +1371,18 @@ Item {
                                 if (value !== Config.dock.hoverToReveal) {
                                     GlobalStates.markShellChanged();
                                     Config.dock.hoverToReveal = value;
+                                }
+                            }
+                        }
+
+                        ToggleRow {
+                            label: "Keep Hidden"
+                            checked: Config.dock.keepHidden ?? false
+                            visible: (Config.dock.theme ?? "default") !== "integrated"
+                            onToggled: value => {
+                                if (value !== Config.dock.keepHidden) {
+                                    GlobalStates.markShellChanged();
+                                    Config.dock.keepHidden = value;
                                 }
                             }
                         }

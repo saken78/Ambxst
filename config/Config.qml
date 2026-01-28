@@ -724,6 +724,7 @@ Singleton {
             property string theme: "default"
             property string position: "top"
             property int hoverRegionHeight: 8
+            property bool keepHidden: false
         }
     }
 
@@ -1124,6 +1125,7 @@ Singleton {
             property bool showOverviewButton: true
             property list<string> ignoredAppRegexes: ["quickshell.*", "xdg-desktop-portal.*"]
             property list<string> screenList: []
+            property bool keepHidden: false
         }
     }
 

@@ -19,5 +19,6 @@ var data = {
         "quickshell.*",
         "xdg-desktop-portal.*"
     ],
-    "screenList": []
+    "screenList": [],
+    "keepHidden": false
 }

@@ -34,9 +34,11 @@ Item {
 
     // Check if bar is pinned (use bar state directly)
     readonly property bool barPinned: {
+        // If barPanelRef exists, trust its pinned state explicitly
         if (barPanelRef && typeof barPanelRef.pinned !== 'undefined') {
             return barPanelRef.pinned;
         }
+        // Fallback to config only if panel ref is missing
         return Config.bar?.pinnedOnStartup ?? true;
     }
     
@@ -58,8 +60,8 @@ Item {
         return toplevel.fullscreen === true;
     }
 
-    // Should auto-hide: when bar is NOT same side (always), unpinned OR when fullscreen
-    readonly property bool shouldAutoHide: barPosition !== notchPosition || !barPinned || activeWindowFullscreen
+    // Should auto-hide: when bar is NOT same side (always), unpinned OR when fullscreen OR keepHidden
+    readonly property bool shouldAutoHide: (Config.notch?.keepHidden ?? false) || barPosition !== notchPosition || !barPinned || activeWindowFullscreen
 
     // Check if the bar for this screen is vertical
     readonly property bool isBarVertical: barPosition === "left" || barPosition === "right"
@@ -76,6 +78,11 @@ Item {
 
     // Reveal logic:
     readonly property bool reveal: {
+        // If keepHidden is true, ONLY show on interaction
+        if (Config.notch?.keepHidden ?? false) {
+            return (screenNotchOpen || hasActiveNotifications || hoverActive || barHoverActive);
+        }
+
         // If not auto-hiding (pinned and not fullscreen), always show
         if (!shouldAutoHide) return true;
         

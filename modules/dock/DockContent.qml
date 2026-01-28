@@ -20,6 +20,7 @@ Item {
     required property ShellScreen screen
     
     // Pass pinned state from parent or config
+    readonly property bool keepHidden: Config.dock?.keepHidden ?? false
     property bool pinned: Config.dock?.pinnedOnStartup ?? false
 
     // Theme configuration
@@ -88,9 +89,17 @@ Item {
 
     // Reveal logic
     property bool reveal: {
+        // Priority: Fullscreen check
         if (activeWindowFullscreen) {
             return (Config.dock?.availableOnFullscreen ?? false) && (Config.dock?.hoverToReveal && dockMouseArea.containsMouse);
         }
+
+        // If keepHidden is true, ONLY show on hover
+        // IMPORTANT: keepHidden overrides pinned and desktop mode
+        if (keepHidden) {
+            return (Config.dock?.hoverToReveal && dockMouseArea.containsMouse);
+        }
+
         return root.pinned || (Config.dock?.hoverToReveal && dockMouseArea.containsMouse) || !ToplevelManager.activeToplevel?.activated
     }
 
