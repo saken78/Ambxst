@@ -29,6 +29,7 @@ Item {
         sourceItem: root.maskSource
         hideSource: false
         live: true
+        smooth: true
         visible: false
         enabled: root.maskEnabled && root.maskSource
     }
@@ -39,6 +40,7 @@ Item {
         sourceItem: root.sourceItem
         hideSource: true
         live: true
+        smooth: true
         recursive: true
     }
     
@@ -60,6 +62,7 @@ Item {
         sourceItem: pass1
         live: true
         hideSource: false
+        smooth: true
     }
     
     // Pass 2: Vertical Blur + Dilation + Composition

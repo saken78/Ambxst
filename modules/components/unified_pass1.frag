@@ -22,7 +22,7 @@ void main() {
         float fi = float(i);
         if (fi < -r || fi > r) continue;
         
-        float weight = exp(-0.5 * (fi * fi) / (r * r * 0.25));
+        float weight = exp(-0.5 * pow(fi * 3.0 / r, 2.0));
         alpha += texture(source, qt_TexCoord0 + vec2(fi * ubuf.texelSize.x, 0.0)).a * weight;
         totalWeight += weight;
     }

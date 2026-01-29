@@ -35,7 +35,7 @@ void main() {
         float fi = float(i);
         if (fi < -r || fi > r) continue;
         
-        float weight = exp(-0.5 * (fi * fi) / (r * r * 0.25));
+        float weight = exp(-0.5 * pow(fi * 3.0 / r, 2.0));
         blurredAlpha += texture(intermediate, shadowCoord + vec2(0.0, fi * ubuf.texelSize.y)).a * weight;
         totalWeight += weight;
     }
@@ -45,40 +45,34 @@ void main() {
     float dilatedAlpha = 0.0;
     float bw = clamp(ubuf.borderWidth, 0.0, 8.0);
     if (bw > 0.0) {
-        for (int x = -8; x <= 8; x++) {
-            float fx = float(x);
-            if (fx < -bw || fx > bw) continue;
-            for (int y = -8; y <= 8; y++) {
-                float fy = float(y);
-                if (fy < -bw || fy > bw) continue;
-                
-                if (fx*fx + fy*fy <= (bw + 0.5)*(bw + 0.5)) {
-                    dilatedAlpha = max(dilatedAlpha, texture(source, qt_TexCoord0 + vec2(fx, fy) * ubuf.texelSize).a);
-                }
-            }
+        for (int i = 0; i < 24; i++) {
+            float angle = float(i) * (2.0 * 3.14159265 / 24.0);
+            vec2 offset = vec2(cos(angle), sin(angle)) * bw;
+            dilatedAlpha = max(dilatedAlpha, texture(source, qt_TexCoord0 + offset * ubuf.texelSize).a);
         }
     } else {
         dilatedAlpha = srcAlpha;
     }
     
-    float cutoff = 0.02;
-    float aa = 0.01; 
-    float inside = smoothstep(cutoff - aa, cutoff + aa, srcAlpha);
+    // Composition using 'over' blending principles
+    vec4 result = srcColor;
     
-    float shadowMask = clamp(blurredAlpha - srcAlpha, 0.0, 1.0) * (1.0 - inside);
-    float borderMask = clamp(dilatedAlpha - srcAlpha, 0.0, 1.0) * (1.0 - inside);
+    // Border: Only outside the source
+    float borderMask = clamp(dilatedAlpha - srcAlpha, 0.0, 1.0);
+    vec4 border = ubuf.borderColor * borderMask;
+    result = result + border * (1.0 - result.a);
     
+    // Shadow: Only outside the dilated border
+    float shadowMask = clamp(blurredAlpha - dilatedAlpha, 0.0, 1.0);
+    vec4 shadow = ubuf.shadowColor * shadowMask;
+    result = result + shadow * (1.0 - result.a);
+    
+    // Handle external mask if enabled
     if (ubuf.maskEnabled > 0.5) {
         float m = texture(maskSource, qt_TexCoord0).a;
         if (ubuf.maskInverted > 0.5) m = 1.0 - m;
-        shadowMask *= m;
-        borderMask *= m;
+        result *= m; // Apply mask to final result
     }
-    
-    vec4 shadow = ubuf.shadowColor * shadowMask;
-    vec4 border = ubuf.borderColor * borderMask;
-    
-    vec4 result = srcColor + border + shadow;
     
     fragColor = result * ubuf.qt_Opacity;
 }
