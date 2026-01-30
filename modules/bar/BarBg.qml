@@ -38,7 +38,7 @@ Item {
         id: barBackground
         variant: "barbg"
         visible: Config.showBackground
-        radius: Config.bar.containBar ? Styling.radius(4) : 0
+        radius: Styling.radius(Config.bar.frameEnabled && !Config.bar.containBar ? 0 : 4)
         enableBorder: true
 
         // Position and size expanded to cover corners
