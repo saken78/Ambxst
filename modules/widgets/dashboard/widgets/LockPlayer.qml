@@ -23,6 +23,7 @@ StyledRect {
         return frame ? "file://" + frame : "";
     }
 
+    visible: MprisController.activePlayer !== null
     height: 96
     radius: Config.roundness > 0 ? (height / 2) * (Config.roundness / 16) : 0
     backgroundOpacity: (MprisController.activePlayer || wallpaperPath !== "") ? 0.0 : 1.0

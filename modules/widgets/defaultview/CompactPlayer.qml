@@ -86,7 +86,7 @@ Item {
             height: 24
             lineWidth: 2
             fullLength: width
-            visible: compactPlayer.player === null && wallpaperPath === ""
+            visible: compactPlayer.player === null
             opacity: 1.0
             Behavior on color {
                 enabled: Config.animDuration > 0
@@ -153,6 +153,7 @@ Item {
             spacing: (compactPlayer.player !== null && compactPlayer.notchHovered) ? 4 : 0
             layer.enabled: true
             layer.effect: BgShadow {}
+            visible: compactPlayer.player !== null
             Behavior on spacing {
                 enabled: Config.animDuration > 0
                 NumberAnimation {
