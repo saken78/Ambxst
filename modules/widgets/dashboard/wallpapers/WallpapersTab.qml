@@ -38,6 +38,13 @@ FocusScope {
             }
         },
         {
+            id: "tintCheckbox",
+            focusFunc: function () {
+                tintCheckboxContainer.keyboardNavigationActive = true;
+                tintCheckbox.forceActiveFocus();
+            }
+        },
+        {
             id: "schemeSelector",
             focusFunc: function () {
                 schemeSelector.openAndFocus();
@@ -204,10 +211,95 @@ FocusScope {
             spacing: 8
             z: 1000 // Asegurar que el menú desplegable se dibuje por encima del resto del contenido
 
-            // OLED Mode a la izquierda
+            // Barra de búsqueda centrada
+            SearchInput {
+                id: wallpaperSearchInput
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                text: searchText
+                placeholderText: "Search wallpapers..."
+                iconText: ""
+                clearOnEscape: false
+                handleTabNavigation: true
+                disableCursorNavigation: true
+                radius: Styling.radius(4)
+
+                // Manejo de eventos de búsqueda y teclado.
+                onSearchTextChanged: text => {
+                    searchText = text;
+                    if (text.length > 0 && filteredWallpapers.length > 0) {
+                        setSelectedIndex(0);
+                    } else {
+                        setSelectedIndex(-1);
+                    }
+                }
+
+                onEscapePressed: {
+                    Visibilities.setActiveModule("");
+                }
+
+                onTabPressed: {
+                    focusNextElement();
+                }
+
+                onShiftTabPressed: {
+                    focusPreviousElement();
+                }
+
+                onDownPressed: {
+                    if (filteredWallpapers.length > 0) {
+                        if (selectedIndex < filteredWallpapers.length - 1) {
+                            let newIndex = selectedIndex + wallpapersTabRoot.gridColumns;
+                            if (newIndex >= filteredWallpapers.length) {
+                                newIndex = filteredWallpapers.length - 1;
+                            }
+                            setSelectedIndex(newIndex);
+                        } else if (selectedIndex === -1) {
+                            setSelectedIndex(0);
+                        }
+                    }
+                }
+                onUpPressed: {
+                    if (filteredWallpapers.length > 0) {
+                        if (selectedIndex === -1) {
+                            setSelectedIndex(0);
+                        } else if (selectedIndex >= wallpapersTabRoot.gridColumns) {
+                            setSelectedIndex(selectedIndex - wallpapersTabRoot.gridColumns);
+                        }
+                    }
+                }
+                onLeftPressed: {
+                    if (filteredWallpapers.length > 0) {
+                        if (selectedIndex === -1) {
+                            setSelectedIndex(0);
+                        } else if (selectedIndex > 0) {
+                            setSelectedIndex(selectedIndex - 1);
+                        }
+                    }
+                }
+                onRightPressed: {
+                    if (filteredWallpapers.length > 0) {
+                        if (selectedIndex < filteredWallpapers.length - 1) {
+                            setSelectedIndex(selectedIndex + 1);
+                        } else if (selectedIndex === -1) {
+                            setSelectedIndex(0);
+                        }
+                    }
+                }
+                onAccepted: {
+                    if (selectedIndex >= 0 && selectedIndex < filteredWallpapers.length) {
+                        let selectedWallpaper = filteredWallpapers[selectedIndex];
+                        if (selectedWallpaper && GlobalStates.wallpaperManager) {
+                            GlobalStates.wallpaperManager.setWallpaper(selectedWallpaper);
+                        }
+                    }
+                }
+            }
+
+            // OLED Mode
             Item {
                 id: oledCheckboxContainer
-                Layout.preferredWidth: 200
+                Layout.preferredWidth: 100
                 Layout.preferredHeight: 48
 
                 property bool keyboardNavigationActive: false
@@ -239,7 +331,7 @@ FocusScope {
 
                             Text {
                                 anchors.fill: parent
-                                text: "OLED Mode"
+                                text: "OLED"
                                 color: Colors.overSurface
                                 font.family: Config.theme.font
                                 font.pixelSize: Config.theme.fontSize
@@ -359,98 +451,10 @@ FocusScope {
                 }
             }
 
-            // Spacer
-            // Item { Layout.fillWidth: true }
-
-            // Barra de búsqueda centrada
-            SearchInput {
-                id: wallpaperSearchInput
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter
-                text: searchText
-                placeholderText: "Search wallpapers..."
-                iconText: ""
-                clearOnEscape: false
-                handleTabNavigation: true
-                disableCursorNavigation: true
-                radius: Styling.radius(4)
-
-                // Manejo de eventos de búsqueda y teclado.
-                onSearchTextChanged: text => {
-                    searchText = text;
-                    if (text.length > 0 && filteredWallpapers.length > 0) {
-                        setSelectedIndex(0);
-                    } else {
-                        setSelectedIndex(-1);
-                    }
-                }
-
-                onEscapePressed: {
-                    Visibilities.setActiveModule("");
-                }
-
-                onTabPressed: {
-                    focusNextElement();
-                }
-
-                onShiftTabPressed: {
-                    focusPreviousElement();
-                }
-
-                onDownPressed: {
-                    if (filteredWallpapers.length > 0) {
-                        if (selectedIndex < filteredWallpapers.length - 1) {
-                            let newIndex = selectedIndex + wallpapersTabRoot.gridColumns;
-                            if (newIndex >= filteredWallpapers.length) {
-                                newIndex = filteredWallpapers.length - 1;
-                            }
-                            setSelectedIndex(newIndex);
-                        } else if (selectedIndex === -1) {
-                            setSelectedIndex(0);
-                        }
-                    }
-                }
-                onUpPressed: {
-                    if (filteredWallpapers.length > 0) {
-                        if (selectedIndex === -1) {
-                            setSelectedIndex(0);
-                        } else if (selectedIndex >= wallpapersTabRoot.gridColumns) {
-                            setSelectedIndex(selectedIndex - wallpapersTabRoot.gridColumns);
-                        }
-                    }
-                }
-                onLeftPressed: {
-                    if (filteredWallpapers.length > 0) {
-                        if (selectedIndex === -1) {
-                            setSelectedIndex(0);
-                        } else if (selectedIndex > 0) {
-                            setSelectedIndex(selectedIndex - 1);
-                        }
-                    }
-                }
-                onRightPressed: {
-                    if (filteredWallpapers.length > 0) {
-                        if (selectedIndex < filteredWallpapers.length - 1) {
-                            setSelectedIndex(selectedIndex + 1);
-                        } else if (selectedIndex === -1) {
-                            setSelectedIndex(0);
-                        }
-                    }
-                }
-                onAccepted: {
-                    if (selectedIndex >= 0 && selectedIndex < filteredWallpapers.length) {
-                        let selectedWallpaper = filteredWallpapers[selectedIndex];
-                        if (selectedWallpaper && GlobalStates.wallpaperManager) {
-                            GlobalStates.wallpaperManager.setWallpaper(selectedWallpaper);
-                        }
-                    }
-                }
-            }
-
             // Tint Toggle a la derecha del search
             Item {
                 id: tintCheckboxContainer
-                Layout.preferredWidth: 140
+                Layout.preferredWidth: 100
                 Layout.preferredHeight: 48
 
                 property bool keyboardNavigationActive: false
@@ -494,6 +498,27 @@ FocusScope {
                             onActiveFocusChanged: {
                                 if (!activeFocus) {
                                     tintCheckboxContainer.keyboardNavigationActive = false;
+                                }
+                            }
+
+                            Keys.onPressed: event => {
+                                if (event.key === Qt.Key_Tab) {
+                                    tintCheckboxContainer.keyboardNavigationActive = false;
+                                    if (event.modifiers & Qt.ShiftModifier) {
+                                        wallpapersTabRoot.focusPreviousElement();
+                                    } else {
+                                        wallpapersTabRoot.focusNextElement();
+                                    }
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                                    if (GlobalStates.wallpaperManager) {
+                                        GlobalStates.wallpaperManager.tintEnabled = !GlobalStates.wallpaperManager.tintEnabled;
+                                    }
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Escape) {
+                                    tintCheckboxContainer.keyboardNavigationActive = false;
+                                    focusSearch();
+                                    event.accepted = true;
                                 }
                             }
 
