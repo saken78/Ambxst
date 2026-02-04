@@ -121,11 +121,11 @@ I want to release this before the end of the year, so you'll have to wait a bit 
 
 For now, the most important things to know are:
 
-* The main configuration is located at `~/.config/Ambxst`
+* The main configuration is located at `~/.config/ambxst`
 * Removing Ambxst is as simple as:
 
   ```bash
-  nix profile remove Ambxst
+  ambxst goodbye
   ```
 * You can ask anything on the:
 

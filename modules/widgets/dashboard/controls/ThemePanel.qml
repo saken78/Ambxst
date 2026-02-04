@@ -93,7 +93,7 @@ Item {
 
     FileView {
         id: wallpaperConfig
-        path: Quickshell.dataPath("wallpapers.json")
+        path: Quickshell.cachePath("wallpapers.json")
 
         JsonAdapter {
             property string currentWall: ""

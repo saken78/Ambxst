@@ -9,7 +9,7 @@ if [ -e "$LOCKFILE" ]; then
 fi
 echo $$ >"$LOCKFILE"
 
-CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/Ambxst/config/system.json"
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ambxst/config/system.json"
 
 get_lock_cmd() {
 	if [ -f "$CONFIG_FILE" ]; then

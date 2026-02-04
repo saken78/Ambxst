@@ -72,7 +72,7 @@ PanelWindow {
         when: GlobalStates.wallpaperManager !== null && GlobalStates.wallpaperManager !== wallpaper
     }
 
-    property string colorPresetsDir: Quickshell.env("HOME") + "/.config/Ambxst/colors"
+    property string colorPresetsDir: Quickshell.env("HOME") + "/.config/ambxst/colors"
     property string officialColorPresetsDir: decodeURIComponent(Qt.resolvedUrl("../../../../assets/colors").toString().replace("file://", ""))
     onColorPresetsDirChanged: console.log("Color Presets Directory:", colorPresetsDir)
     property list<string> colorPresets: []
@@ -600,7 +600,7 @@ PanelWindow {
 
     FileView {
         id: wallpaperConfig
-        path: Quickshell.dataPath("wallpapers.json")
+        path: Quickshell.cachePath("wallpapers.json")
         watchChanges: true
 
         onLoaded: {
@@ -691,7 +691,7 @@ PanelWindow {
     Process {
         id: checkWallpapersJson
         running: false
-        command: ["test", "-f", Quickshell.dataPath("wallpapers.json")]
+        command: ["test", "-f", Quickshell.cachePath("wallpapers.json")]
 
         onExited: function (exitCode) {
             if (exitCode !== 0) {

@@ -3,7 +3,7 @@
 ## OVERVIEW
 The configuration system in Ambxst is a reactive, file-backed architecture built on `Quickshell.Io`. 
 It serves as the source of truth for all shell modules (Bar, AI, Theme, etc.), managing state through 
-synchronized JSON files stored in `~/.config/Ambxst/config/`. 
+synchronized JSON files stored in `~/.config/ambxst/config/`. 
 
 The system is designed for high availability; it gracefully handles missing or malformed configuration 
 files by falling back to hardcoded defaults without interrupting the user experience. This robustness 

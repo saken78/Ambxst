@@ -10,7 +10,7 @@ fi
 echo $$ >"$LOCKFILE"
 
 # Sleep Monitor - Executes commands before and after sleep
-CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/Ambxst/config/system.json"
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ambxst/config/system.json"
 
 get_cmd() {
 	local type=$1

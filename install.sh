@@ -3,7 +3,7 @@ set -e
 
 # === Configuration ===
 REPO_URL="https://github.com/Axenide/Ambxst.git"
-INSTALL_PATH="$HOME/Ambxst"
+INSTALL_PATH="$HOME/.local/src/ambxst"
 BIN_DIR="/usr/local/bin"
 QUICKSHELL_REPO="https://git.outfoxxed.me/outfoxxed/quickshell"
 
@@ -216,6 +216,43 @@ install_phosphor_fonts() {
 	log_success "Phosphor Icons installed"
 }
 
+# === Migration ===
+migrate_old_paths() {
+	log_info "Checking for old Ambxst paths..."
+
+	# Source migration (PascalCase -> lowercase)
+	local OLD_SRC="$HOME/Ambxst"
+	if [[ -d "$OLD_SRC" && ! -d "$INSTALL_PATH" ]]; then
+		log_info "Migrating source: $OLD_SRC -> $INSTALL_PATH"
+		mkdir -p "$(dirname "$INSTALL_PATH")"
+		cp -r "$OLD_SRC" "$INSTALL_PATH"
+	fi
+
+	# Config migration
+	local OLD_CONFIG="$HOME/.config/Ambxst"
+	local NEW_CONFIG="$HOME/.config/ambxst"
+	if [[ -d "$OLD_CONFIG" && ! -d "$NEW_CONFIG" ]]; then
+		log_info "Migrating config: $OLD_CONFIG -> $NEW_CONFIG"
+		mv "$OLD_CONFIG" "$NEW_CONFIG"
+	fi
+
+	# Share migration
+	local OLD_SHARE="$HOME/.local/share/Ambxst"
+	local NEW_SHARE="$HOME/.local/share/ambxst"
+	if [[ -d "$OLD_SHARE" && ! -d "$NEW_SHARE" ]]; then
+		log_info "Migrating share: $OLD_SHARE -> $NEW_SHARE"
+		mv "$OLD_SHARE" "$NEW_SHARE"
+	fi
+
+	# State migration
+	local OLD_STATE="$HOME/.local/state/Ambxst"
+	local NEW_STATE="$HOME/.local/state/ambxst"
+	if [[ -d "$OLD_STATE" && ! -d "$NEW_STATE" ]]; then
+		log_info "Migrating state: $OLD_STATE -> $NEW_STATE"
+		mv "$OLD_STATE" "$NEW_STATE"
+	fi
+}
+
 # === Repository Setup ===
 setup_repo() {
 	[[ "$DISTRO" == "nixos" ]] && return
@@ -358,6 +395,7 @@ setup_launcher() {
 }
 
 # === Main ===
+migrate_old_paths
 install_dependencies "$1"
 setup_repo
 install_quickshell

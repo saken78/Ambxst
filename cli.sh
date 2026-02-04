@@ -451,12 +451,12 @@ goodbye)
 		REMOVE_CONFIG=true
 	fi
 
-	rm -rf "$HOME/Ambxst"
-	rm -rf "$HOME/.local/share/Ambxst"
-	rm -rf "$HOME/.local/state/Ambxst"
+	rm -rf "$HOME/.local/src/ambxst"
+	rm -rf "$HOME/.local/share/ambxst"
+	rm -rf "$HOME/.local/state/ambxst"
 
 	if [ "$REMOVE_CONFIG" = true ]; then
-		rm -rf "$HOME/.config/Ambxst"
+		rm -rf "$HOME/.config/ambxst"
 		echo "Configuration files removed."
 	fi
 
