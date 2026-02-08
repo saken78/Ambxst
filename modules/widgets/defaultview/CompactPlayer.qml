@@ -49,7 +49,7 @@ Item {
     }
 
     Timer {
-        running: compactPlayer.isPlaying
+        running: compactPlayer.isPlaying && compactPlayer.visible
         interval: 1000
         repeat: true
         onTriggered: {

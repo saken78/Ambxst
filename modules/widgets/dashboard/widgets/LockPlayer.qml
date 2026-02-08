@@ -78,7 +78,7 @@ StyledRect {
     }
 
     Timer {
-        running: lockPlayer.isPlaying
+        running: lockPlayer.isPlaying && lockPlayer.visible
         interval: 1000
         repeat: true
         onTriggered: {

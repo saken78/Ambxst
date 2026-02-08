@@ -69,7 +69,7 @@ StyledRect {
     }
 
     Timer {
-        running: player.isPlaying
+        running: player.isPlaying && player.visible
         interval: 1000
         repeat: true
         onTriggered: {
@@ -261,7 +261,7 @@ StyledRect {
                     to: 360
                     duration: 8000
                     loops: Animation.Infinite
-                    running: player.isPlaying
+                    running: player.isPlaying && player.visible
                 }
 
                 Behavior on rotation {
