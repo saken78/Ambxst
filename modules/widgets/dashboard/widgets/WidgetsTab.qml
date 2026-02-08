@@ -20,7 +20,6 @@ Rectangle {
 
     property int leftPanelWidth: 0
 
-    // GPU ISOLATION TEST: FullPlayer restored from git
     RowLayout {
         anchors.fill: parent
         spacing: 8

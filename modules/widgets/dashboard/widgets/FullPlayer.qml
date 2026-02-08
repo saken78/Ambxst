@@ -20,17 +20,9 @@ StyledRect {
     visible: true
     radius: playerRadius
 
-    // GPU TEST: Dummy for implicitHeight since innerPlayer is commented
     implicitHeight: 400
 
-    // GPU TEST: Dummy seekBar to avoid errors
-    QtObject {
-        id: seekBar
-        property real value: 0
-        property bool isDragging: false
-    }
-
-    readonly property bool isDragging: realSeekBar.isDragging ?? seekBar.isDragging
+    readonly property bool isDragging: realSeekBar.isDragging
 
     property bool isPlaying: MprisController.activePlayer?.playbackState === MprisPlaybackState.Playing
     property real position: MprisController.activePlayer?.position ?? 0.0
@@ -67,12 +59,11 @@ StyledRect {
 
     // Function to sync seekBar with current media position
     function syncSeekBarPosition() {
-        let sb = realSeekBar ?? seekBar;
-        if (!sb.isDragging && !player.isSeeking) {
+        if (!realSeekBar.isDragging && !player.isSeeking) {
             if (player.hasActivePlayer) {
-                sb.value = player.length > 0 ? player.position / player.length : 0;
+                realSeekBar.value = player.length > 0 ? player.position / player.length : 0;
             } else {
-                sb.value = 0;
+                realSeekBar.value = 0;
             }
         }
     }
@@ -114,9 +105,7 @@ StyledRect {
         }
     }
 
-    // ============================================================
-    // GPU TEST: Background (RESTORED)
-    // ============================================================
+    // Background with blur effect
 
     Image {
         id: backgroundArtBlurred
@@ -189,17 +178,13 @@ StyledRect {
         }
     }
 
-    // ============================================================
-    // GPU TEST: Playback Controls (RESTORED)
-    // ============================================================
+    // Playback Controls
 
     ColumnLayout {
         anchors.centerIn: parent
         spacing: 8
 
-        // ============================================================
-        // GPU TEST: Disc Area (RESTORED)
-        // ============================================================
+        // Disc Area (SeekBar + Cover Art)
 
         Item {
             id: discArea
@@ -234,66 +219,67 @@ StyledRect {
                 }
             }
 
-            // Cover Art Disc
+            // Cover Art Disc - with layer caching for GPU efficiency
             Item {
                 id: coverDiscContainer
                 anchors.centerIn: parent
                 width: parent.width - 52
                 height: parent.height - 52
 
-                Item {
-                    id: rotatingWrapper
+                // Layer caches the circular clip, rotation happens on cached texture
+                layer.enabled: true
+                layer.smooth: true
+
+                ClippingRectangle {
+                    id: clippedDisc
                     anchors.fill: parent
+                    radius: width / 2
+                    color: Colors.surface
 
-                    ClippingRectangle {
+                    Image {
+                        id: coverArt
                         anchors.fill: parent
-                        radius: width / 2
-                        color: Colors.surface
+                        source: (MprisController.activePlayer?.trackArtUrl ?? "") !== "" ? MprisController.activePlayer.trackArtUrl : player.wallpaperPath
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
 
-                        Image {
-                            id: coverArt
+                        // Placeholder (sin WavyLine)
+                        Rectangle {
                             anchors.fill: parent
-                            source: (MprisController.activePlayer?.trackArtUrl ?? "") !== "" ? MprisController.activePlayer.trackArtUrl : player.wallpaperPath
-                            fillMode: Image.PreserveAspectCrop
-                            asynchronous: true
+                            color: Colors.surface
+                            visible: !player.hasArtwork && player.wallpaperPath === ""
+                        }
+                    }
+                }
 
-                            RotationAnimation on rotation {
-                                id: rotateAnim
-                                from: 0
-                                to: 360
-                                duration: 8000
-                                loops: Animation.Infinite
-                                running: player.isPlaying
-                            }
+                // RotationAnimator runs on render thread - much more GPU efficient
+                RotationAnimator on rotation {
+                    id: rotateAnim
+                    from: 0
+                    to: 360
+                    duration: 8000
+                    loops: Animation.Infinite
+                    running: player.isPlaying
+                }
 
-                            Behavior on rotation {
-                                enabled: !player.isPlaying
-                                SpringAnimation {
-                                    spring: 0.8
-                                    damping: 0.05
-                                    epsilon: 0.25
-                                }
-                            }
+                Behavior on rotation {
+                    enabled: !player.isPlaying
+                    SpringAnimation {
+                        spring: 0.8
+                        damping: 0.05
+                        epsilon: 0.25
+                    }
+                }
 
-                            Connections {
-                                target: player
-                                function onIsPlayingChanged() {
-                                    if (!player.isPlaying) {
-                                        let currentRotation = coverArt.rotation % 360;
-                                        if (currentRotation > 180) {
-                                            coverArt.rotation = 360;
-                                        } else {
-                                            coverArt.rotation = 0;
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Placeholder (sin WavyLine)
-                            Rectangle {
-                                anchors.fill: parent
-                                color: Colors.surface
-                                visible: !player.hasArtwork && player.wallpaperPath === ""
+                Connections {
+                    target: player
+                    function onIsPlayingChanged() {
+                        if (!player.isPlaying) {
+                            let currentRotation = coverDiscContainer.rotation % 360;
+                            if (currentRotation > 180) {
+                                coverDiscContainer.rotation = 360;
+                            } else {
+                                coverDiscContainer.rotation = 0;
                             }
                         }
                     }
@@ -301,9 +287,7 @@ StyledRect {
             }
         }
 
-        // ============================================================
-        // GPU TEST: Metadata (RESTORED)
-        // ============================================================
+        // Metadata
 
         ColumnLayout {
             Layout.fillWidth: true
