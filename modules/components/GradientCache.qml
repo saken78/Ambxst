@@ -6,29 +6,25 @@ import qs.config
 import qs.modules.theme
 
 /**
- * GradientCache - Singleton that caches gradient textures for StyledRect.
+ * GradientCache - Singleton that caches resolved gradient data for StyledRect.
  *
- * Instead of each StyledRect creating its own Canvas and ShaderEffectSource,
- * this singleton maintains a shared cache of gradient textures keyed by
- * configuration hash. This reduces GPU memory usage from O(n) to O(variants).
+ * Since Canvas and ShaderEffectSource must be in the same window, we can't share
+ * the actual Canvas objects. Instead, we cache the resolved color data so each
+ * StyledRect doesn't need to resolve colors on every repaint.
  *
- * Usage: GradientCache.getTexture(gradientStops) returns a ShaderEffectSource
+ * Usage: GradientCache.getResolvedStops(gradientStops) returns resolved color array
  */
 Singleton {
     id: root
 
-    // Internal cache storage - maps hash keys to texture objects
+    // Internal cache storage - maps hash keys to resolved gradient data
     property var _cache: ({})
 
-    // Container for dynamically created Canvas/ShaderEffectSource pairs
-    Item {
-        id: textureContainer
-        visible: false
-    }
+    // Version counter - incremented when colors change to invalidate caches
+    property int version: 0
 
     /**
-     * Generate a stable hash key from gradient stops array.
-     * Format: "color1@pos1,color2@pos2,..."
+     * Generate a stable hash key from gradient stops array (unresolved).
      */
     function _hashGradient(stops) {
         if (!stops || stops.length === 0)
@@ -37,85 +33,45 @@ Singleton {
         const parts = [];
         for (let i = 0; i < stops.length; i++) {
             const s = stops[i];
-            // Resolve color to ensure consistent keys
-            const resolvedColor = Config.resolveColor(s[0]);
-            parts.push(resolvedColor + "@" + s[1]);
+            parts.push(s[0] + "@" + s[1]);
         }
         return parts.join(",");
     }
 
     /**
-     * Get or create a gradient texture for the given stops.
-     * Returns a ShaderEffectSource ready to be used as a texture sampler.
+     * Get resolved gradient stops (with colors converted to actual color values).
+     * Returns array of [resolvedColor, position] pairs.
      */
-    function getTexture(gradientStops) {
-        const key = _hashGradient(gradientStops);
-
-        // Return cached texture if exists
-        if (key && root._cache[key]) {
-            return root._cache[key].source;
-        }
-
-        // Empty gradient - return null
-        if (!key || !gradientStops || gradientStops.length === 0) {
+    function getResolvedStops(gradientStops) {
+        if (!gradientStops || gradientStops.length === 0)
             return null;
+
+        const key = _hashGradient(gradientStops);
+        const cacheKey = key + "_v" + root.version;
+
+        // Return cached resolved stops if exists
+        if (root._cache[cacheKey]) {
+            return root._cache[cacheKey];
         }
 
-        // Create new Canvas + ShaderEffectSource pair
-        const entry = _createTextureEntry(gradientStops, key);
-        root._cache[key] = entry;
+        // Resolve colors
+        const resolved = [];
+        for (let i = 0; i < gradientStops.length; i++) {
+            const s = gradientStops[i];
+            resolved.push([Config.resolveColor(s[0]), s[1]]);
+        }
 
-        return entry.source;
+        root._cache[cacheKey] = resolved;
+        return resolved;
     }
 
     /**
-     * Create a Canvas and ShaderEffectSource pair for the gradient.
-     */
-    function _createTextureEntry(stops, key) {
-        // Create Canvas
-        const canvasComponent = Qt.createComponent("GradientCanvas.qml");
-        if (canvasComponent.status !== Component.Ready) {
-            console.error("GradientCache: Failed to create GradientCanvas:", canvasComponent.errorString());
-            return { source: null, canvas: null, key: key };
-        }
-
-        const canvas = canvasComponent.createObject(textureContainer, {
-            gradientStops: stops
-        });
-
-        // Create ShaderEffectSource
-        const sourceComponent = Qt.createQmlObject(`
-            import QtQuick
-            ShaderEffectSource {
-                sourceItem: null
-                hideSource: true
-                smooth: true
-                wrapMode: ShaderEffectSource.ClampToEdge
-                visible: false
-            }
-        `, textureContainer, "GradientCacheSource");
-
-        sourceComponent.sourceItem = canvas;
-
-        return {
-            source: sourceComponent,
-            canvas: canvas,
-            key: key
-        };
-    }
-
-    /**
-     * Invalidate all cached textures and rebuild them.
-     * Called when theme colors change.
+     * Invalidate cache when theme colors change.
      */
     function invalidateAll() {
-        // Repaint all cached canvases
-        for (const key in root._cache) {
-            const entry = root._cache[key];
-            if (entry.canvas) {
-                entry.canvas.requestPaint();
-            }
-        }
+        root.version++;
+        // Clear old cache entries to free memory
+        root._cache = {};
     }
 
     // Listen for color theme changes

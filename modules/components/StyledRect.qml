@@ -55,9 +55,8 @@ ClippingRectangle {
 
     readonly property real rectOpacity: backgroundOpacity >= 0 ? backgroundOpacity : variantConfig.opacity
 
-    // Use cached gradient texture instead of creating one per instance
+    // Check if this variant needs a gradient texture
     readonly property bool needsGradientTexture: gradientType === "linear" || gradientType === "radial"
-    readonly property var cachedGradientTexture: needsGradientTexture ? GradientCache.getTexture(gradientStops) : null
 
     radius: variantConfig.radius !== undefined ? variantConfig.radius : Styling.radius(0)
     color: (hasSolidColor && gradientType !== "linear" && gradientType !== "radial" && gradientType !== "halftone") ? solidColor : "transparent"
@@ -69,10 +68,66 @@ ClippingRectangle {
         }
     }
 
-    // Linear gradient - uses cached texture
+    // Local gradient texture - only created when needed (lazy loading)
+    Loader {
+        id: gradientTextureLoader
+        active: root.needsGradientTexture
+        visible: false
+
+        sourceComponent: Item {
+            id: textureContainer
+
+            // Track cache version to know when to repaint
+            property int cacheVersion: GradientCache.version
+
+            Canvas {
+                id: gradientCanvas
+                width: 256
+                height: 32
+                visible: false
+
+                onPaint: {
+                    const ctx = getContext("2d");
+                    ctx.clearRect(0, 0, width, height);
+
+                    const stops = GradientCache.getResolvedStops(root.gradientStops);
+                    if (!stops || stops.length === 0)
+                        return;
+
+                    const grad = ctx.createLinearGradient(0, 0, width, 0);
+                    for (let i = 0; i < stops.length; i++) {
+                        const s = stops[i];
+                        grad.addColorStop(s[1], s[0]);
+                    }
+
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, width, height);
+                }
+
+                Component.onCompleted: requestPaint()
+            }
+
+            ShaderEffectSource {
+                id: gradientSource
+                sourceItem: gradientCanvas
+                hideSource: true
+                smooth: true
+                wrapMode: ShaderEffectSource.ClampToEdge
+                visible: false
+            }
+
+            // Repaint when cache version changes (theme colors changed)
+            onCacheVersionChanged: gradientCanvas.requestPaint()
+
+            // Expose the source for shaders
+            property alias source: gradientSource
+        }
+    }
+
+    // Linear gradient shader
     Loader {
         anchors.fill: parent
-        active: root.gradientType === "linear" && root.cachedGradientTexture !== null
+        active: root.gradientType === "linear" && gradientTextureLoader.item !== null
 
         sourceComponent: ShaderEffect {
             opacity: root.rectOpacity
@@ -80,17 +135,17 @@ ClippingRectangle {
             property real angle: root.gradientAngle
             property real canvasWidth: width
             property real canvasHeight: height
-            property var gradTex: root.cachedGradientTexture
+            property var gradTex: gradientTextureLoader.item?.source ?? null
 
             vertexShader: "linear_gradient.vert.qsb"
             fragmentShader: "linear_gradient.frag.qsb"
         }
     }
 
-    // Radial gradient - uses cached texture
+    // Radial gradient shader
     Loader {
         anchors.fill: parent
-        active: root.gradientType === "radial" && root.cachedGradientTexture !== null
+        active: root.gradientType === "radial" && gradientTextureLoader.item !== null
 
         sourceComponent: ShaderEffect {
             opacity: root.rectOpacity
@@ -99,7 +154,7 @@ ClippingRectangle {
             property real centerY: root.gradientCenterY
             property real canvasWidth: width
             property real canvasHeight: height
-            property var gradTex: root.cachedGradientTexture
+            property var gradTex: gradientTextureLoader.item?.source ?? null
 
             vertexShader: "radial_gradient.vert.qsb"
             fragmentShader: "radial_gradient.frag.qsb"
