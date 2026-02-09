@@ -268,14 +268,14 @@ StyledRect {
                     }
                 }
 
-                // RotationAnimator runs on render thread - much more GPU efficient
-                RotationAnimator on rotation {
+                // Run on Main Thread (CPU) to reduce GPU load/usage
+                NumberAnimation on rotation {
                     id: rotateAnim
                     from: 0
                     to: 360
                     duration: 8000
                     loops: Animation.Infinite
-                    running: false // Controlled manually to avoid flicker
+                    running: false
                 }
 
                 // Standalone spring animation for inertia (can be stopped)
