@@ -69,11 +69,26 @@ Item {
     readonly property real cycleLength: baseDashLength + targetSpacing
     
     NumberAnimation on phase {
-        running: root.dashedActive && root.visible
+        running: (root.dashedActive || root.wavy) && root.visible
         from: 0
         to: -root.cycleLength // Move forward along path
         duration: 1000 // Adjust speed
         loops: Animation.Infinite
+    }
+
+    // Wave Animation
+    property real wavePhase: 0
+    
+    // Animate phase using a Timer to control framerate (30 FPS) for performance
+    // Full 60 FPS shape regeneration can be too heavy
+    Timer {
+        id: waveTimer
+        interval: 32 // ~30 FPS
+        running: root.wavy && root.visible && (root.value > 0 || root.isDragging)
+        repeat: true
+        onTriggered: {
+            root.wavePhase = (root.wavePhase + 0.1) % (Math.PI * 2)
+        }
     }
 
     // Geometry Helpers
@@ -81,16 +96,49 @@ Item {
     readonly property real effectiveValue: isDragging ? dragValue : value
     
     // Handle Position & Gaps
-    property real handleSpacing: 10 // Gap in pixels around handle
+    property real handleSpacing: 10 
     
-    // Convert pixel gap to angle
     readonly property real gapAngleRad: (handleSpacing / 2) / Math.max(1, radius)
     readonly property real gapAngleDeg: gapAngleRad * 180 / Math.PI
     
-    // Current Angle (for Handle)
     readonly property real currentAngleRad: (startAngleDeg + (spanAngleDeg * effectiveValue)) * Math.PI / 180
 
+    // Wavy Radius at Handle - Simplified for static wave
+    // Handle stays on track, does not follow wave
+    readonly property real waveOffsetAtHandle: 0 
+    readonly property real effectiveRadiusAtHandle: root.radius
+
+    // Generate Wavy Arc Points
+    function generateWavyArcPoints(startDeg, endDeg, phase) {
+        if (phase === undefined) phase = 0;
+        
+        if (startDeg >= endDeg - 0.1) return []; // Too small or invalid
+
+        let points = [];
+        let step = 0.5; // Smooth enough for static
+        
+        let centerX = root.width / 2;
+        let centerY = root.height / 2;
+        let baseR = root.radius;
+        let waveFreq = root.waveFrequency;
+        let waveAmp = root.waveAmplitude;
+
+        for (let angleDeg = startDeg; angleDeg <= endDeg + 0.001; angleDeg += step) {
+             let clampedDeg = Math.min(angleDeg, endDeg);
+             let angleRad = clampedDeg * Math.PI / 180;
+             
+             let waveOffset = Math.sin((angleRad * waveFreq) + phase) * waveAmp;
+             let r = baseR + waveOffset;
+             
+             points.push(Qt.point(centerX + r * Math.cos(angleRad), centerY + r * Math.sin(angleRad)));
+             
+             if (clampedDeg >= endDeg) break;
+        }
+        return points;
+    }
+
     // =========================================================================
+
     // Input Handling
     // =========================================================================
 
@@ -150,6 +198,7 @@ Item {
         }
     }
 
+
     // =========================================================================
     // Rendering (QtQuick.Shapes)
     // =========================================================================
@@ -157,20 +206,17 @@ Item {
     Shape {
         id: shapeRenderer
         anchors.fill: parent
-        // layer.enabled removed to prevent rasterization pixelation
         preferredRendererType: Shape.CurveRenderer
 
-        // 1. Progress Arc (Dashed or Solid)
-        // From start to (current - gap)
+        // 1. Progress Arc (Dashed or Solid) - NORMAL
         ShapePath {
-            strokeColor: root.accentColor
+            strokeColor: (!root.wavy) ? root.accentColor : "transparent"
             strokeWidth: root.lineWidth
             
             strokeStyle: root.dashed ? ShapePath.DashLine : ShapePath.SolidLine
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
             
-            // Dash Logic
             dashPattern: [
                 Math.max(0.001, root.currentDashLen / root.lineWidth),
                 Math.max(0.001, root.currentGapLen / root.lineWidth)
@@ -184,21 +230,44 @@ Item {
                 centerY: root.height / 2
                 radiusX: root.radius
                 radiusY: root.radius
-                
                 startAngle: root.startAngleDeg
-                
-                // Sweep up to handle gap
-                // Total span done: span * value
-                // Subtract gap
-                // If result is negative, arc is invisible
                 sweepAngle: Math.max(0, (root.spanAngleDeg * root.effectiveValue) - root.gapAngleDeg)
             }
         }
 
-        // 2. Track (Background) - Always Solid
-        // From (current + gap) to end
+        // 1b. Progress Arc - WAVY
         ShapePath {
-            strokeColor: root.trackColor
+            strokeColor: root.wavy ? root.accentColor : "transparent"
+            strokeWidth: root.lineWidth
+            
+            strokeStyle: root.dashed ? ShapePath.DashLine : ShapePath.SolidLine
+            capStyle: ShapePath.RoundCap
+            joinStyle: ShapePath.RoundJoin
+            
+            dashPattern: [
+                Math.max(0.001, root.currentDashLen / root.lineWidth),
+                Math.max(0.001, root.currentGapLen / root.lineWidth)
+            ]
+            dashOffset: root.phase / root.lineWidth
+            
+            fillColor: "transparent"
+            
+            startX: wavyProgressPoly.path.length > 0 ? wavyProgressPoly.path[0].x : 0
+            startY: wavyProgressPoly.path.length > 0 ? wavyProgressPoly.path[0].y : 0
+
+            PathPolyline {
+                id: wavyProgressPoly
+                path: root.generateWavyArcPoints(
+                    root.startAngleDeg, 
+                    root.startAngleDeg + Math.max(0, (root.spanAngleDeg * root.effectiveValue) - root.gapAngleDeg),
+                    root.wavePhase // Force dependency
+                )
+            }
+        }
+
+        // 2. Track (Background) - NORMAL
+        ShapePath {
+            strokeColor: (!root.wavy) ? root.trackColor : "transparent"
             strokeWidth: root.lineWidth
             strokeStyle: ShapePath.SolidLine
             capStyle: ShapePath.RoundCap
@@ -210,13 +279,27 @@ Item {
                 centerY: root.height / 2
                 radiusX: root.radius
                 radiusY: root.radius
-                
-                // Start after handle gap
                 startAngle: root.startAngleDeg + (root.spanAngleDeg * root.effectiveValue) + root.gapAngleDeg
-                
-                // Sweep remainder
-                // Total span remaining: span * (1 - value)
-                // Subtract gap
+                sweepAngle: Math.max(0, (root.spanAngleDeg * (1.0 - root.effectiveValue)) - root.gapAngleDeg)
+            }
+        }
+
+        // 2b. Track (Background) - WAVY
+        ShapePath {
+            // Reverted to flat background per request
+            strokeColor: root.wavy ? root.trackColor : "transparent"
+            strokeWidth: root.lineWidth
+            strokeStyle: ShapePath.SolidLine
+            capStyle: ShapePath.RoundCap
+            
+            fillColor: "transparent"
+
+            PathAngleArc {
+                centerX: root.width / 2
+                centerY: root.height / 2
+                radiusX: root.radius
+                radiusY: root.radius
+                startAngle: root.startAngleDeg + (root.spanAngleDeg * root.effectiveValue) + root.gapAngleDeg
                 sweepAngle: Math.max(0, (root.spanAngleDeg * (1.0 - root.effectiveValue)) - root.gapAngleDeg)
             }
         }
@@ -234,12 +317,12 @@ Item {
             // Start: radius - offset
             // End: radius + offset
             
-            startX: (root.width / 2) + (root.radius - root.animatedHandleOffset) * Math.cos(root.currentAngleRad)
-            startY: (root.height / 2) + (root.radius - root.animatedHandleOffset) * Math.sin(root.currentAngleRad)
+            startX: (root.width / 2) + (root.effectiveRadiusAtHandle - root.animatedHandleOffset) * Math.cos(root.currentAngleRad)
+            startY: (root.height / 2) + (root.effectiveRadiusAtHandle - root.animatedHandleOffset) * Math.sin(root.currentAngleRad)
             
             PathLine {
-                x: (root.width / 2) + (root.radius + root.animatedHandleOffset) * Math.cos(root.currentAngleRad)
-                y: (root.height / 2) + (root.radius + root.animatedHandleOffset) * Math.sin(root.currentAngleRad)
+                x: (root.width / 2) + (root.effectiveRadiusAtHandle + root.animatedHandleOffset) * Math.cos(root.currentAngleRad)
+                y: (root.height / 2) + (root.effectiveRadiusAtHandle + root.animatedHandleOffset) * Math.sin(root.currentAngleRad)
             }
         }
     }

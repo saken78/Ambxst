@@ -1,89 +1,119 @@
 import QtQuick
+import QtQuick.Shapes
 import qs.config
 import qs.modules.theme
 
 Item {
     id: root
-    property real amplitudeMultiplier: 0.5
-    property real frequency: 6
+
+    // =========================================================================
+    // API Properties
+    // =========================================================================
     property color color: Styling.srItem("overprimary")
-    property real lineWidth: 4
+    property real lineWidth: 2
+    property real frequency: 2
+    property real amplitude: 4
+    property real speed: 5
+    property bool running: true
+
+    // Compatibility properties
+    property real amplitudeMultiplier: 1.0 // Legacy support
     property real fullLength: width
-    property real speed: 2.4
-
-    // Factor de supersampling optimizado
-    readonly property real supersampleFactor: 1.0
-
-    // Control for animations - can be disabled from parent to save GPU
     property bool animationsEnabled: true
+    
+    // Enable clipping on the root item to hide the scrolling part
+    clip: true
 
-    // Contenedor para el shader renderizado a mayor resolución
-    Item {
-        id: shaderContainer
-        anchors.fill: parent
-        visible: Config.performance.wavyLine
+    // =========================================================================
+    // Internal Logic
+    // =========================================================================
 
-        ShaderEffect {
-            id: wavyShader
-            // Renderizar a 4x la resolución
-            width: root.width * root.supersampleFactor
-            height: root.height * root.supersampleFactor
+    property real actualAmplitude: amplitude * amplitudeMultiplier
+    
+    // Calculate cycle length in pixels: width / frequency
+    // If frequency is 0, avoid division by zero
+    readonly property real cyclePx: (frequency > 0 && width > 0) ? (width / frequency) : width
 
-            // Escalar hacia abajo al tamaño original
-            scale: 1.0 / root.supersampleFactor
-            transformOrigin: Item.TopLeft
+    // Animation Phase (Translation)
+    // We animate 't' from 0 to 1 over the duration of one cycle
+    property real t: 0
+    
+    NumberAnimation on t {
+        running: root.running && root.visible && root.animationsEnabled && root.width > 0
+        from: 0
+        to: 1
+        duration: 1000
+        loops: Animation.Infinite
+    }
 
-            property real phase: 0
-            property real amplitude: root.lineWidth * root.amplitudeMultiplier * root.supersampleFactor
-            property real frequency: root.frequency
-            property vector4d shaderColor: Qt.vector4d(root.color.r, root.color.g, root.color.b, root.color.a)
-            property real lineWidth: root.lineWidth * root.supersampleFactor
-            property real canvasWidth: root.width * root.supersampleFactor
-            property real canvasHeight: root.height * root.supersampleFactor
-            property real fullLength: root.fullLength * root.supersampleFactor
+    // Static Path Generation
+    property var staticPoints: []
 
-            vertexShader: Qt.resolvedUrl("wavyline.vert.qsb")
-            fragmentShader: Qt.resolvedUrl("wavyline.frag.qsb")
+    function updateStaticPath() {
+        if (root.width <= 0) return;
+        
+        let points = [];
+        let w = root.width;
+        let h = root.height;
+        let centerY = h / 2;
+        let freq = root.frequency > 0 ? root.frequency : 1;
+        let amp = root.actualAmplitude;
+        
+        // Cycle length in pixels
+        let cyclePx = w / freq;
+        
+        // Step size: 1px for smoothness
+        let step = 1; 
+        
+        // Generate points for Width + 1 Cycle
+        let totalWidth = w + cyclePx;
 
-            smooth: true
-            antialiasing: true
-            blending: true  // Habilitar blending para mejor antialiasing
+        for (let x = 0; x <= totalWidth + step; x += step) {
+            // Angle: Map x to angle where w = freq * 2PI
+            let angle = (x / w) * freq * 2 * Math.PI;
+            
+            let yOffset = Math.sin(angle) * amp;
+            points.push(Qt.point(x, centerY + yOffset));
+        }
+        root.staticPoints = points;
+    }
 
-            // Layer con MSAA y tamaño completo
-            layer.enabled: true
-            layer.smooth: true
-            layer.samples: 4  // Multisampling antialiasing
-            layer.textureSize: Qt.size(width, height)
-            layer.mipmap: true
+    onWidthChanged: updateStaticPath()
+    onHeightChanged: updateStaticPath()
+    onFrequencyChanged: updateStaticPath()
+    onActualAmplitudeChanged: updateStaticPath()
+    Component.onCompleted: updateStaticPath()
 
-            Component.onCompleted: {
-                if (Config.performance.wavyLine) {
-                    animationFrameAnimation.start();
-                }
-            }
+    Shape {
+        id: shape
+        // Don't fill parent directly, let us control size
+        width: root.width + root.cyclePx
+        height: root.height
+        
+        // Animate X position of the whole Shape
+        x: -root.t * root.cyclePx
+        
+        // Use preferredRendererType: Shape.CurveRenderer for smooth lines
+        preferredRendererType: Shape.CurveRenderer
+        
+        // Disable internal clip of Shape if needed, but we clip at root
+        // clip: false 
 
-            FrameAnimation {
-                id: animationFrameAnimation
-                running: Config.performance.wavyLine && wavyShader.visible && root.visible && root.animationsEnabled
-                onTriggered: {
-                    var deltaTime = 0.016; // ~60fps default
-                    wavyShader.phase += root.speed * deltaTime;
-                }
+        ShapePath {
+            strokeColor: root.color
+            strokeWidth: root.lineWidth
+            fillColor: "transparent"
+            capStyle: ShapePath.RoundCap
+            joinStyle: ShapePath.RoundJoin
+            
+            // Start at 0 relative to Shape
+            startX: polyline.path.length > 0 ? polyline.path[0].x : 0
+            startY: polyline.path.length > 0 ? polyline.path[0].y : root.height / 2
+
+            PathPolyline {
+                id: polyline
+                path: root.staticPoints
             }
         }
-    }
-
-    Rectangle {
-        id: simpleRect
-        anchors.verticalCenter: parent.verticalCenter
-        width: parent.width
-        height: 4
-        visible: !Config.performance.wavyLine
-        color: root.color
-        radius: 2
-    }
-
-    function requestPaint() {
-    // Mantenido por compatibilidad
     }
 }

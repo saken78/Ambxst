@@ -201,11 +201,10 @@ StyledRect {
                 accentColor: Colors.primary
                 trackColor: Colors.outline
                 lineWidth: 6
-                dashed: true
-                dashedActive: player.isPlaying
-                targetSpacing: 12
+                wavy: true
+                waveAmplitude: player.isPlaying ? 3 : 0
+                waveFrequency: 24
                 handleSpacing: 20
-
 
                 startAngleDeg: 180
                 spanAngleDeg: 180
@@ -247,11 +246,21 @@ StyledRect {
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
 
-                        // Placeholder (sin WavyLine)
+                        // Placeholder (with WavyLine)
                         Rectangle {
                             anchors.fill: parent
                             color: Colors.surface
                             visible: !player.hasArtwork && player.wallpaperPath === ""
+
+                            WavyLine {
+                                anchors.centerIn: parent
+                                width: parent.width * 0.6
+                                height: 20
+                                color: Colors.primary
+                                frequency: 2
+                                amplitudeMultiplier: 2
+                                visible: true
+                            }
                         }
                     }
                 }
