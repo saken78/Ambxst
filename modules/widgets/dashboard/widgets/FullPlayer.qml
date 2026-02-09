@@ -291,17 +291,25 @@ StyledRect {
                         if (player.isPlaying && player.visible) {
                             // Stop spring animation immediately and capture current position
                             springAnim.stop();
+                            
+                            // Normalize current rotation to 0-360 range to keep values sane
                             let currentRotation = coverDiscContainer.rotation % 360;
                             if (currentRotation < 0) currentRotation += 360;
+                            coverDiscContainer.rotation = currentRotation;
+
                             rotateAnim.from = currentRotation;
                             rotateAnim.to = currentRotation + 360;
                             rotateAnim.restart();
                         } else {
                             // Stop continuous rotation
                             rotateAnim.stop();
-                            // Animate to nearest rest position with inertia
+                            
+                            // Normalize before snapping to ensure we snap to 0 or 360 of the CURRENT loop
                             let currentRotation = coverDiscContainer.rotation % 360;
                             if (currentRotation < 0) currentRotation += 360;
+                            coverDiscContainer.rotation = currentRotation;
+
+                            // Animate to nearest rest position (0 or 360) with inertia
                             springAnim.to = currentRotation > 180 ? 360 : 0;
                             springAnim.start();
                         }
@@ -315,6 +323,8 @@ StyledRect {
                             springAnim.stop();
                             let currentRotation = coverDiscContainer.rotation % 360;
                             if (currentRotation < 0) currentRotation += 360;
+                            coverDiscContainer.rotation = currentRotation;
+
                             rotateAnim.from = currentRotation;
                             rotateAnim.to = currentRotation + 360;
                             rotateAnim.restart();
