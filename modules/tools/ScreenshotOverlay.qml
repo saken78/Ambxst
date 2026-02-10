@@ -34,6 +34,14 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
+    property Process copyOverlayProcess: Process {
+        id: copyOverlayProcess
+        command: ["bash", "-c", "cat \"" + root.imagePath + "\" | wl-copy --type image/png"]
+        onExited: exitCode => {
+            if (exitCode !== 0) console.warn("Overlay Copy Failed (Exit code: " + exitCode + ")")
+        }
+    }
+
     // Timer to auto-hide after 5 seconds
     Timer {
         id: hideTimer
@@ -189,9 +197,7 @@ PanelWindow {
             ActionButton {
                 icon: Icons.copy
                 onTriggered: {
-                    var proc = Qt.createQmlObject('import Quickshell; import Quickshell.Io; Process { }', root);
-                    proc.command = ["bash", "-c", "wl-copy --type image/png < \"" + root.imagePath + "\""];
-                    proc.running = true;
+                    copyOverlayProcess.running = true
                 }
 
                 StyledToolTip {
