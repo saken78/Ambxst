@@ -327,7 +327,7 @@ Item {
                         }
 
                         StyledToolTip {
-                            visible: profileButton.buttonHovered
+                            show: profileButton.buttonHovered
                             tooltipText: PowerProfile.getProfileDisplayName(profileButton.modelData)
                         }
                     }
