@@ -26,12 +26,19 @@ MouseArea {
             item.activate();
             break;
         case Qt.RightButton:
-            if (item.hasMenu && Visibilities.contextMenu) {
-                Visibilities.contextMenu.openMenu(item.menu);
+            if (item.hasMenu) {
+                systrayMenu.open();
             }
             break;
         }
         event.accepted = true;
+    }
+
+    SystrayMenu {
+        id: systrayMenu
+        item: root.item
+        bar: root.bar
+        anchorItem: root
     }
 
     IconImage {
