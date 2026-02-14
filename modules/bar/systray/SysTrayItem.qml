@@ -48,7 +48,8 @@ MouseArea {
         contentHeight: Math.min(itemsColumn.implicitHeight + 16, 400)
         
         popupPadding: 8
-        visualMargin: 8
+        // 8px standard margin + 8px SysTray container padding to ensure correct offset from the main bar
+        visualMargin: 16
 
         // Using QsMenuOpener to access menu items
         QsMenuOpener {
